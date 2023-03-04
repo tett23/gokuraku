@@ -1,21 +1,11 @@
 [package]
-name = "cli"
+name = "build_adapter"
 version = "0.1.0"
 edition = "2021"
 
-[[bin]]
-name = "gokuraku"
-path = "src/main.rs"
-test = false
-bench = false
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-prose_down = { path = "../prose-down" }
 prose_ir = { path = "../prose-ir" }
 gokuraku_config = { path = "../config" }
-build_adapter = { path = "../build-adapter" }
-build_adapter_txt = { path = "../build-adapter-txt" }
-clap = { version = "4.1.8", features = ["derive", "env"] }
 anyhow = { workspace = true }
 thiserror = { workspace = true }

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -8,6 +8,13 @@ pub struct GokurakuConfig {
     pub index: IndexTree,
     pub formats: Option<Vec<String>>,
     pub output: Option<PathBuf>,
+    pub adapters: Vec<BuildAdapterConfig>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BuildAdapterConfig {
+    pub name: String,
+    pub options: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,6 +41,10 @@ impl Default for GokurakuConfig {
             index: IndexTree::Root(Vec::new()),
             formats: None,
             output: None,
+            adapters: vec![BuildAdapterConfig {
+                name: "txt".to_string(),
+                options: None,
+            }],
         }
     }
 }
@@ -44,6 +55,19 @@ pub struct GokurakuConfigInstance {
     pub index: IndexTree,
     pub formats: Vec<String>,
     pub output: Option<PathBuf>,
+    pub input: Option<IndexTree>,
+    pub adapters: Vec<BuildAdapterConfig>,
+}
+
+impl GokurakuConfigInstance {
+    pub fn index(&self) -> &IndexTree {
+        match self {
+            Self {
+                input: Some(input), ..
+            } => input,
+            Self { index, .. } => index,
+        }
+    }
 }
 
 impl TryFrom<GokurakuConfig> for GokurakuConfigInstance {
@@ -55,6 +79,8 @@ impl TryFrom<GokurakuConfig> for GokurakuConfigInstance {
             index: conf.index,
             formats: conf.formats.unwrap_or(Vec::new()),
             output: conf.output,
+            input: None,
+            adapters: conf.adapters,
         })
     }
 }
@@ -63,6 +89,7 @@ pub struct CLIArgs {
     pub env: String,
     pub output: Option<PathBuf>,
     pub formats: Option<Vec<String>>,
+    pub input: Option<String>,
 }
 
 impl TryFrom<(GokurakuConfig, CLIArgs)> for GokurakuConfigInstance {
@@ -78,21 +105,11 @@ impl TryFrom<(GokurakuConfig, CLIArgs)> for GokurakuConfigInstance {
                 .last()
                 .unwrap_or(Vec::new()),
             output: [conf.output, args.output].into_iter().flatten().last(),
+            input: args.input.map(IndexTree::Leaf),
+            adapters: vec![BuildAdapterConfig {
+                name: "txt".to_string(),
+                options: None,
+            }],
         })
-    }
-}
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
     }
 }

@@ -39,6 +39,7 @@ impl From<&Args> for gokuraku_config::CLIArgs {
             env: value.env.clone(),
             output: value.output.clone(),
             formats: value.format.clone(),
+            input: value.input.clone(),
         }
     }
 }

@@ -15,6 +15,8 @@ pub(crate) struct Args {
     pub(crate) output: Option<PathBuf>,
     #[clap(short, long)]
     pub(crate) format: Option<Vec<String>>,
+    #[clap(short, long)]
+    pub(crate) input: Option<String>,
 }
 
 #[derive(Debug, Subcommand)]

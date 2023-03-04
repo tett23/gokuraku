@@ -1,0 +1,5 @@
+formats = ["txt"]
+index = ["./fixtures/body.pd"]
+
+[[adapters]]
+name = "txt"
