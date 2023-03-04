@@ -1,2 +1,6 @@
 [workspace]
 members = ["packages/*"]
+
+[workspace.dependencies]
+anyhow = { version = "1.0.69", features = ["backtrace"] }
+thiserror = "1.0.38"

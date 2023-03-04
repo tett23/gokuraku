@@ -1,8 +1,12 @@
 [package]
-name = "prose-down"
+name = "prose_down"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+pest = "2.5.4"
+pest_derive = "2.5.4"
+prose_ir = { path = "../prose-ir" }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
