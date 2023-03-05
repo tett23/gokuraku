@@ -8,7 +8,7 @@ inline = _{ inlineExpr | number | text }
   number = { numberSeparator ~ numberValue ~ numberSeparator }
     numberSeparator = _{ "##" }
     numberValue = { (!"#" ~ ANY)+ }
-  text = { ((!paragraphEOL ~ ANY) | (ANY ~ PUSH(textNewLine) )) }
+  text = { !paragraphEOL ~ ANY }
     textNewLine = _{ NEWLINE | EOI }
 
 
@@ -16,7 +16,7 @@ blocks = _{ block* }
 block = { themanticBreak | paragraph | emptyLine }
   emptyLine = { NEWLINE }
   themanticBreak = { NEWLINE ~ "---" ~ paragraphEOL }
-  paragraph = { (inline)+ ~ DROP? }
+  paragraph = { (inline)+ ~ paragraphEOL }
     paragraphEOL = _{ (NEWLINE | EOI) }
 
 prose = _{ SOI ~ blocks ~ EOI }

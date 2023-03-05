@@ -60,6 +60,6 @@ mod tests {
     #[test]
     fn a() {
         let doc = parse("aa\nb\n---\n\nc\n{a}, ##aa##\n");
-        assert!(doc.is_ok())
+        assert!(doc.is_ok());
     }
 }

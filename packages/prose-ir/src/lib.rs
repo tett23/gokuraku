@@ -27,7 +27,7 @@ impl Debug for Block {
                 write!(f, "\n)")
             }
             Self::ThemanticBreak => write!(f, "ThemanticBreak"),
-            Self::EmptyLine => writeln!(f),
+            Self::EmptyLine => write!(f, "EmptyLine"),
         }
     }
 }
