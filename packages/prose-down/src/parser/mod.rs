@@ -17,6 +17,7 @@ pub fn parse(input: &str) -> anyhow::Result<Document> {
 
 fn block(pair: Pair<Rule>) -> prose_ir::Block {
     match pair.as_rule() {
+        Rule::pdsScript => prose_ir::Block::PdsScript(pair.into_inner().as_str().to_string()),
         Rule::paragraph => prose_ir::Block::Paragraph(pair.into_inner().map(inline).collect()),
         Rule::themanticBreak => prose_ir::Block::ThemanticBreak,
         Rule::emptyLine => prose_ir::Block::EmptyLine,
@@ -39,7 +40,7 @@ mod tests {
 
     #[test]
     fn a() {
-        let doc = parse("aa\nb\n\n---\n\nc\n{a}, ##aa##\n");
+        let doc = parse("@{ a = 1 }\naa\nb\n\n---\n\nc\n{a}, ##aa##\n");
         assert!(doc.is_ok());
     }
 }

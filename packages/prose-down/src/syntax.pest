@@ -11,12 +11,14 @@ inline = _{ inlineExpr | number | text }
   text = { !paragraphEOL ~ ANY }
     textNewLine = _{ br | EOI }
 
-
 blocks = _{ block* }
-block = _{ themanticBreak | paragraph | emptyLine }
+block = _{ pdsScript | themanticBreak | emptyLine | paragraph }
+  pdsScript = ${ "@{" ~ pdsScriptBody ~ "}" ~ ws* ~ (br | &EOI) }
+    pdsScriptBody = { (!"}" ~ ANY)* }
   emptyLine = { br }
   themanticBreak = { br ~ "---" ~ ((br ~ paragraphEOL) | br) }
   paragraph = { (inline)+ ~ paragraphEOL }
-    paragraphEOL = _{ (br | EOI) }
+    paragraphEOL = _{ br | EOI }
+  blockTerminal = { br | &EOI }
 
 prose = _{ SOI ~ blocks ~ &EOI }
