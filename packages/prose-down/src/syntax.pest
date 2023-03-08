@@ -1,22 +1,22 @@
-e = { !EOI }
+e = _{ &!EOI }
+ws = _{ " " | "\t"}
+br = _{"\r\n" | "\r" | "\n" }
 
 inline = _{ inlineExpr | number | text }
-  inlineExpr = { inlinExprBegin ~ inlineExprExpr ~ inlinExprEnd }
-    inlinExprBegin = _{ "{" }
-    inlinExprEnd = _{ "}" }
+  inlineExpr = ${ "{" ~ ws* ~ inlineExprExpr ~ ws* ~ "}" }
     inlineExprExpr = { (!"}" ~ ANY)+ }
   number = { numberSeparator ~ numberValue ~ numberSeparator }
     numberSeparator = _{ "##" }
     numberValue = { (!"#" ~ ANY)+ }
   text = { !paragraphEOL ~ ANY }
-    textNewLine = _{ NEWLINE | EOI }
+    textNewLine = _{ br | EOI }
 
 
 blocks = _{ block* }
-block = { themanticBreak | paragraph | emptyLine }
-  emptyLine = { NEWLINE }
-  themanticBreak = { NEWLINE ~ "---" ~ paragraphEOL }
+block = _{ themanticBreak | paragraph | emptyLine }
+  emptyLine = { br }
+  themanticBreak = { br ~ "---" ~ ((br ~ paragraphEOL) | br) }
   paragraph = { (inline)+ ~ paragraphEOL }
-    paragraphEOL = _{ (NEWLINE | EOI) }
+    paragraphEOL = _{ (br | EOI) }
 
-prose = _{ SOI ~ blocks ~ EOI }
+prose = _{ SOI ~ blocks ~ &EOI }
