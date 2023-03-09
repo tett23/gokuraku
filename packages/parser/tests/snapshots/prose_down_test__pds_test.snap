@@ -1,0 +1,12 @@
+---
+source: packages/parser/tests/prose_down_test.rs
+expression: ast
+input_file: packages/parser/fixtures/pds/1.pds
+---
+Document {
+    blocks: [
+        Paragraph(
+        	main = "test"
+        ),
+    ],
+}

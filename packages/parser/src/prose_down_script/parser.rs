@@ -18,11 +18,7 @@ pub fn parse(input: &str) -> anyhow::Result<Pds> {
 
 fn tokenize_pds(pair: Pair<Rule>) -> Pds {
     match pair.as_rule() {
-        Rule::pds => Pds(pair
-            .into_inner()
-            .filter(|item| item.as_rule() != Rule::EOI)
-            .map(tokenize_assign)
-            .collect::<Vec<_>>()),
+        Rule::pds => Pds(pair.into_inner().map(tokenize_assign).collect::<Vec<_>>()),
         _ => panic!("{pair}"),
     }
 }
