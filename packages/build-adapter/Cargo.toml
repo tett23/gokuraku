@@ -5,7 +5,7 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-prose_ir = { path = "../prose-ir" }
+parser = { path = "../parser" }
 gokuraku_config = { path = "../config" }
 anyhow = { workspace = true }
 thiserror = { workspace = true }

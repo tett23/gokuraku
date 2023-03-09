@@ -11,8 +11,7 @@ bench = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-prose_down = { path = "../prose-down" }
-prose_ir = { path = "../prose-ir" }
+parser = { path = "../parser" }
 gokuraku_config = { path = "../config" }
 build_adapter = { path = "../build-adapter" }
 build_adapter_txt = { path = "../build-adapter-txt" }

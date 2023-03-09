@@ -1,5 +1,5 @@
 use build_adapter::{BuildAdapter, BuildAdapterInitializable, BuildArtifact};
-use prose_ir::{Block, Block::*, Document, Inline, Inline::*};
+use parser::ast::{Block, Block::*, Document, Inline, Inline::*};
 
 #[derive(Debug, Default)]
 pub struct BuildAdapterTxt();
@@ -12,7 +12,7 @@ impl BuildAdapter for BuildAdapterTxt {
     fn build(
         &self,
         _config: &gokuraku_config::GokurakuConfigInstance,
-        documents: &[(String, prose_ir::Document)],
+        documents: &[(String, Document)],
     ) -> anyhow::Result<build_adapter::BuildArtifact> {
         let content = documents
             .iter()
@@ -45,6 +45,7 @@ fn format_block(block: &Block) -> String {
         EmptyLine => "\n".to_string(),
         Paragraph(inlines) => inlines.iter().map(format_inline).collect::<String>() + "\n",
         ThemanticBreak => "\n---\n".to_string(),
+        PdsScript(value) => format!("@{{{value}}}") + "\n",
     }
 }
 

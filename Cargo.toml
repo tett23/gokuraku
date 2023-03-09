@@ -6,3 +6,5 @@ anyhow = { version = "1.0.69", features = ["backtrace"] }
 thiserror = "1.0.38"
 serde = { version = "1.0.152", features = ["derive"] }
 toml = "0.7.2"
+pest = "2.5.4"
+pest_derive = "2.5.4"

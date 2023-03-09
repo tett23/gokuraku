@@ -5,14 +5,15 @@ pub struct Document {
     pub blocks: Vec<Block>,
 }
 
-#[derive(Debug)]
-pub enum ProseIR {
-    Document(Document),
-    Block(Block),
-    Inline(Inline),
-}
+// #[derive(Debug)]
+// pub enum ProseIR {
+//     Document(Document),
+//     Block(Block),
+//     Inline(Inline),
+// }
 
 pub enum Block {
+    PdsScript(String),
     Paragraph(Vec<Inline>),
     EmptyLine,
     ThemanticBreak,
@@ -21,6 +22,7 @@ pub enum Block {
 impl Debug for Block {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::PdsScript(value) => write!(f, "PdsScript({value})"),
             Self::Paragraph(value) => {
                 write!(f, "Paragraph(\n\t")?;
                 value.iter().try_for_each(|item| item.fmt(f))?;

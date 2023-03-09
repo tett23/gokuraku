@@ -1,6 +1,6 @@
 use anyhow::Result;
 use gokuraku_config::GokurakuConfigInstance;
-use prose_ir::Document;
+use parser::ast::Document;
 
 pub struct BuildArtifact {
     pub name: String,

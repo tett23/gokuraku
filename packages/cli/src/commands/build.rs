@@ -2,6 +2,7 @@ use anyhow::{anyhow, Result};
 use build_adapter::{BuildAdapter, BuildAdapterInitializable};
 use build_adapter_txt::BuildAdapterTxt;
 use gokuraku_config::{GokurakuConfigInstance, IndexTree, IndexTree::*};
+use parser::ast;
 use std::fs;
 
 pub fn build(conf: &GokurakuConfigInstance) -> Result<()> {
@@ -42,7 +43,7 @@ fn adapters(conf: &GokurakuConfigInstance) -> Result<Vec<Box<dyn BuildAdapter>>>
     Ok(ret)
 }
 
-fn parse_index_tree(tree: &IndexTree) -> Result<Vec<(String, prose_ir::Document)>> {
+fn parse_index_tree(tree: &IndexTree) -> Result<Vec<(String, ast::Document)>> {
     match tree {
         Root(nodes) => Ok(nodes
             .iter()
@@ -66,6 +67,6 @@ fn parse_index_tree(tree: &IndexTree) -> Result<Vec<(String, prose_ir::Document)
     }
 }
 
-fn read_and_parse(path: &str) -> Result<prose_ir::Document> {
-    prose_down::parse(&fs::read_to_string(path)?)
+fn read_and_parse(path: &str) -> Result<ast::Document> {
+    parser::parse(&fs::read_to_string(path)?)
 }
