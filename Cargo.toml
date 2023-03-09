@@ -1,5 +1,6 @@
 [workspace]
 members = ["packages/*"]
+exclude = ["packages/pd-interpreter"]
 
 [workspace.dependencies]
 anyhow = { version = "1.0.69", features = ["backtrace"] }
