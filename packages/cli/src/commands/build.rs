@@ -68,5 +68,5 @@ fn parse_index_tree(tree: &IndexTree) -> Result<Vec<(String, ast::Document)>> {
 }
 
 fn read_and_parse(path: &str) -> Result<ast::Document> {
-    parser::parse(&fs::read_to_string(path)?)
+    parser::prose_down_parse(&fs::read_to_string(path)?)
 }

@@ -1,0 +1,21 @@
+ws = _{ " " | "\t" }
+br = _{ NEWLINE }
+
+ident = { ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
+assign = { ws* ~ ident ~ (ws+ ~ ident)* ~ ws* ~ "=" ~ ws* ~ expr }
+infixOperator = @{ operator | infixIdent }
+  operator = { operatorChar ~ (operatorChar | "=")* }
+    operatorChar = { "." | "+" | "*" | "-" | "/" | "&" | "|" | ">" | "<" | "^" | "#" | "@" | "$" | "%" }
+  infixIdent = { infixIdentSeparator ~ (!infixIdentSeparator ~ ident) ~ infixIdentSeparator }
+    infixIdentSeparator = { "`" }
+expr = { exprInfix | apply | withParen | assign | ident | literal }
+  literal = { textLiteral | intLiteral }
+    textLiteral = { textSeparator ~ (!textSeparator ~ ANY) ~ textSeparator}
+      textSeparator = _{ "\"" }
+    intLiteral = { ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* }
+  exprInfix = { term ~ ws* ~ infixOperator ~ ws* ~ expr }
+  term = _{ withParen | ident | literal }
+  withParen = _{ "(" ~ ws* ~ expr ~ ws* ~ ")" }
+  apply = { (ident | operator) ~ applyArgs }
+    applyArgs = { (ws+ ~ (exprInfix | withParen | assign | ident | literal))* }
+pds = { assign? ~ (br* ~ assign)* ~ ws* ~ (br | EOI)}
