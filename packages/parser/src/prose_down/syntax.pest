@@ -7,7 +7,7 @@ inline = _{ inlineExpr | number | text }
   text = { !paragraphEOL ~ ANY }
     textNewLine = _{ br | EOI }
 
-blocks = _{ block* }
+blocks = _{ &EOI | block* }
 block = _{ pdsScript | themanticBreak | emptyLine | paragraph }
   pdsScript = ${ "@{" ~ pdsScriptBody ~ "}" ~ ws* ~ (br | &EOI) }
     pdsScriptBody = { (!"}" ~ ANY)* }
