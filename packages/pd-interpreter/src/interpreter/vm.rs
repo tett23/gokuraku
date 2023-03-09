@@ -5,13 +5,18 @@ use crate::ast::{Expr, Literal, Value};
 
 #[derive(Debug, Clone, Default)]
 pub struct Vm {
-    stack: Vec<Expr>,
-    context_stack: Vec<EvalContext>,
+    pub stack: Vec<Value>,
+    pub context_stack: Vec<EvalContext>,
 }
 
 impl Vm {
-    pub fn push(&mut self, value: Expr) {
-        self.stack.push(value);
+    pub fn push(&mut self, value: Value) {
+        todo!()
+        // match value {
+        //     // Value::Function() => {}
+        //     value => self.stack.push(value),
+        // }
+        // self.stack.push(value);
     }
 
     pub fn ret(mut self) -> Value {
@@ -19,6 +24,6 @@ impl Vm {
             panic!("{}", anyhow!("stack error"));
         }
 
-        self.stack.pop().unwrap().eval()
+        self.stack.pop().unwrap()
     }
 }

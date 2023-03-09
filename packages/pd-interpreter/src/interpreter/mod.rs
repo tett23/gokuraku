@@ -1,18 +1,29 @@
 mod eval_context;
+mod ident;
+mod local_context;
 mod vm;
 
-use crate::ast::Expr;
+pub(crate) use eval_context::EvalContext;
+pub(crate) use ident::Ident;
+pub(crate) use vm::Vm;
 
-use self::vm::Vm;
+use crate::{
+    ast::{Expr, Literal, Value},
+    prelude::prelude_context,
+};
 
-pub fn eval() {
+pub fn eval() -> Value {
     let mut state = Vm::default();
-    state.push(Expr::Literal(crate::ast::Literal::Text(
-        "value".to_string(),
-    )));
-    let ret = state.ret();
+    state.context_stack.push(prelude_context());
+    state.context_stack.push(EvalContext::new_local_context());
 
-    dbg!(ret);
+    {
+        state.push(Value::Literal(Literal::Int(1)));
+        state.push(Value::Literal(Literal::Int(2)));
+        // state.push(Value::FunctionName("+".to_string()));
+    }
+
+    state.ret()
 }
 
 #[cfg(test)]
@@ -21,7 +32,7 @@ mod tests {
 
     #[test]
     pub fn a() {
-        eval();
+        dbg!(eval());
         assert!(false);
     }
 }
