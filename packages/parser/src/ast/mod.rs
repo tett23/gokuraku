@@ -1,38 +1,34 @@
 use std::fmt::Debug;
 
-#[derive(Debug)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Document {
     pub blocks: Vec<Block>,
 }
 
-// #[derive(Debug)]
-// pub enum ProseIR {
-//     Document(Document),
-//     Block(Block),
-//     Inline(Inline),
-// }
-
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Pds(pub Vec<Assign>);
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Expr {
     Assign(Ident, Vec<Ident>, Box<Expr>),
     Literal(Literal),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Assign(pub Ident, pub Vec<Ident>, pub Box<Expr>);
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Ident(pub String);
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Literal {
     Text(String),
     Int(isize),
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum Block {
     PdsScript(String),
     Paragraph(Vec<Inline>),
@@ -55,6 +51,7 @@ impl Debug for Block {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum Inline {
     Text(String),
     Number(String),

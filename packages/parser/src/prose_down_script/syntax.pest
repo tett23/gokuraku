@@ -18,4 +18,4 @@ expr = { exprInfix | apply | withParen | assign | ident | literal }
   withParen = _{ "(" ~ ws* ~ expr ~ ws* ~ ")" }
   apply = { (ident | operator) ~ applyArgs }
     applyArgs = { (ws+ ~ (exprInfix | withParen | assign | ident | literal))* }
-pds = { assign? ~ (br* ~ assign)* ~ ws* ~ (br | EOI)}
+pds = { assign? ~ (br* ~ assign)* ~ ws* ~ (br | &EOI)}
