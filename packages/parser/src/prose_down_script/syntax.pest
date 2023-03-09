@@ -1,6 +1,3 @@
-ws = _{ " " | "\t" }
-br = _{ NEWLINE }
-
 ident = { ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
 assign = { ws* ~ ident ~ (ws+ ~ ident)* ~ ws* ~ "=" ~ ws* ~ expr }
 infixOperator = @{ operator | infixIdent }

@@ -6,6 +6,7 @@ use pest_derive::Parser;
 use crate::ast::{Assign, Expr, Ident, Literal, Pds};
 
 #[derive(Parser)]
+#[grammar = "core.pest"]
 #[grammar = "prose_down_script/syntax.pest"]
 pub struct PdsParser;
 

@@ -1,7 +1,3 @@
-e = _{ &!EOI }
-ws = _{ " " | "\t"}
-br = _{"\r\n" | "\r" | "\n" }
-
 inline = _{ inlineExpr | number | text }
   inlineExpr = ${ "{" ~ ws* ~ inlineExprExpr ~ ws* ~ "}" }
     inlineExprExpr = { (!"}" ~ ANY)+ }
