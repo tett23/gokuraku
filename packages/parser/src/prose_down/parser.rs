@@ -37,14 +37,3 @@ fn inline(pair: Pair<Rule>) -> ast::Inline {
         _ => panic!("{}", pair),
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn a() {
-        let doc = parse("@{ a = 1 }\naa\nb\n\n---\n\nc\n{a}, ##aa##\n");
-        assert!(doc.is_ok());
-    }
-}

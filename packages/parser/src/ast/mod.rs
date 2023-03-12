@@ -8,7 +8,14 @@ pub struct Document {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Pds(pub Vec<Assign>);
+pub struct Pds(pub Vec<TopLevel>);
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum TopLevel {
+    Assign(Assign),
+    AssignAnnotation(AssignAnnotation),
+    LineComment(LineComment),
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Expr {
@@ -17,13 +24,56 @@ pub enum Expr {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Assign(pub Ident, pub Vec<Ident>, pub Box<Expr>);
+pub enum TypeExpr {
+    Assign(Ident, Vec<Ident>, Box<Expr>),
+    Literal(Literal),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Assign(pub Ident, pub AssignArgs, pub Expr);
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AssignArgs {
+    pub patterns: Vec<PatternExpr>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum PatternExpr {
+    Bind(Ident),
+    TypeBind(TypeIdent),
+    Literal(Literal),
+    // SplitList
+    Any,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AssignAnnotation {
+    pub ident: Ident,
+    pub conditions: Vec<ParameterCondition>,
+    pub expr: TypeExpr,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LineComment(pub String);
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ParameterCondition {
+    type_class: TypeClass,
+    ident: Ident,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TypeClass {}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Ident(pub String);
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct TypeIdent(pub String);
+
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Literal {
+    Char(char),
     Text(String),
     Int(isize),
 }

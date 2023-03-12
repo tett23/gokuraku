@@ -1,18 +1,69 @@
-ident = { ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
-assign = { ws* ~ ident ~ (ws+ ~ ident)* ~ ws* ~ "=" ~ ws* ~ expr }
+keywords = { "eff" | "handle" | "trait" | "impl" }
+lineComment = { "//" ~ (!br ~ ANY)* ~ (&EOI | br) }
+ident = { namedIdent | opIdent }
+  namedIdent = _{ !(&keywords) ~ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
+  opIdent = _{ "(" ~ operator ~ ")" }
+typeIdent = { ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
+variable = { ident | variableSelf | variableN | variable3 | variable2 | variable1 }
+  variable1 = _{ "#" }
+  variable2 = _{ "##" }
+  variable3 = _{ "###" }
+  variableSelf = _{ "#%" }
+  variableN = _{ "#" ~ ASCII_DIGIT+ }
+typeAssign = { typeIdent ~ typeAssignArgs ~ ws* ~ "=" ~ ws* ~ typeExpr }
+  typeAssignArgs = {(ws+ ~ (ident | typeIdent))*}
+assign = { ident ~ assignArgs ~ ws* ~ "=" ~ ws* ~ expr }
+  assignArgs = { (ws+ ~ pattern)* }
+assignAnnotation = { handlerEnvironment? ~ ws* ~ ident ~ ws* ~ "::" ~ parameterCondition ~ typeExpr }
+  handlerEnvironment = { "<" ~ ws* ~ (handlerEnvironmentExpr ~ (ws* ~ "," ~ ws* ~handlerEnvironmentExpr)* ~ ","?) ~ ws* ~ ">"}
+    handlerEnvironmentExpr = { ident ~ ws* ~ ":" ~ ws* ~ typeExpr }
+  parameterCondition = { (ws* ~ parameterConditionExpr ~ ws* ~ "=>") | e }
+    parameterConditionExpr = { typeIdent ~ ws+ ~ ident }
+  typeExprValue = { typeExprContext | typeExprUnit | typeIdent | ident | typeExprGroup | typeExprTuple | typeExprList | typeExprList }
+  typeExpr = _{ ws* ~ typeExprFunction }
+    typeExprContext = { (typeIdent | typeExprUnit | typeExprGroup | ident) ~ (ws+ ~ typeExprValue)* }
+    typeExprFunction = { (typeExprContext ~ (ws* ~ "->" ~ ws* ~ typeExpr)) | typeExprContext }
+    typeExprGroup = { "(" ~ ws* ~ typeExpr ~ ws* ~ ")" }
+    typeExprUnit = { "(" ~ ws* ~ ")" }
+    typeExprTuple = { "(" ~ ws* ~ (typeExprTupleN | typeExprTuple1) ~ ws* ~ ")" }
+      typeExprTuple1 = _{ typeExpr ~ ws* ~ "," }
+      typeExprTupleN = _{ typeExpr ~ (ws* ~ "," ~ ws* ~ typeExpr)+ ~ ws* ~ ","? }
+    typeExprList = { "[" ~ ws* ~ typeExpr ~ ws* ~ "]" }
+traitAssign = { "trait" ~ ws* ~ typeIdent ~ traitArgs ~ ws* ~ "=" ~ ws* ~ traitExpr ~ ws* }
+  traitArgs = { (ws+ ~ (ident | typeIdent))* }
+  traitValue = _{ pdsBlock | typeIdent }
+  traitExpr = { ws* ~ ((traitValue ~ ws* ~ traitOp ~ ws* ~ traitValue ~ ws*)+ | traitValue) ~ ws* }
+  traitOp = { traitOpAnd | traitOpOr }
+    traitOpAnd = { "&" }
+    traitOpOr = { "|" }
+// TODO: prefixOperator
+// TODO: postfixOperator
 infixOperator = @{ operator | infixIdent }
-  operator = { operatorChar ~ (operatorChar | "=")* }
-    operatorChar = { "." | "+" | "*" | "-" | "/" | "&" | "|" | ">" | "<" | "^" | "#" | "@" | "$" | "%" }
+  operator = { operatorChar ~ (operatorChar | "=" | "#" | "@")* }
+    operatorChar = _{ "." | "+" | "*" | "-" | "/" | "&" | "|" | ">" | "<" | "^" | "$" | "%" | ":" }
   infixIdent = { infixIdentSeparator ~ (!infixIdentSeparator ~ ident) ~ infixIdentSeparator }
     infixIdentSeparator = { "`" }
-expr = { exprInfix | apply | withParen | assign | ident | literal }
-  literal = { textLiteral | intLiteral }
+expr = { exprInfix | effApply | apply | withParen | assign | variable | ident | literal }
+  literal = { listLiteral | charLiteral | textLiteral | intLiteral }
     textLiteral = { "\"" ~ textChar* ~ "\"" }
-      textChar = { !"\"" ~ ANY }
-    intLiteral = { ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* }
+      textChar = { !"\"" ~ (textEscapedChar | ANY) }
+      textEscapedChar = _{ "\\" ~ ANY }
+    intLiteral = { ASCII_DIGIT+ }
+    charLiteral = { "'" ~ (("\\" ~ ANY) | ANY) ~ "'" }
+    listLiteral = { "[" ~ expr* ~ "]"}
   exprInfix = { term ~ ws* ~ infixOperator ~ ws* ~ expr }
-  term = _{ withParen | ident | literal }
+  term = _{ withParen | variable | ident | literal }
   withParen = _{ "(" ~ ws* ~ expr ~ ws* ~ ")" }
   apply = { (ident | operator) ~ applyArgs }
     applyArgs = { (ws+ ~ (exprInfix | withParen | assign | ident | literal))* }
-pds = { assign? ~ (br* ~ assign)* ~ ws* ~ (br | &EOI)}
+  effApply = { "eff" ~ ws+ ~ ident ~ applyArgs }
+pattern = { patternAny | patternSplitList | patternIdent | typeIdent | patternLiteral }
+  patternLiteral = _{ literal }
+  patternType = _{ typeIdent }
+  patternIdent = _{ ident }
+  patternSplitList = _{"[" ~ ws* ~ ident ~ ws* ~ ":" ~ ws* ~ ident ~ ws* ~ "]"}
+  patternAny = _{ "_" }
+pdsBlock = { "{" ~ pds ~ br* ~ "}" ~ ws* }
+topLevel = _{ ws* ~ (lineComment | traitAssign | assign | assignAnnotation | typeAssign) ~ ws*}
+pds = _{ ws* ~ topLevel? ~ (br* ~ topLevel)* ~ ws* }
+root = _{ pds? ~ br* ~ &EOI}
