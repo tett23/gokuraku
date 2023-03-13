@@ -39,12 +39,22 @@ fn unary(pair: Pair<Rule>) -> Pair<Rule> {
     pair.into_inner().next().unwrap()
 }
 
+fn binary(pair: Pair<Rule>) -> (Pair<Rule>, Pair<Rule>) {
+    let mut pairs = pair.into_inner();
+
+    (pairs.next().unwrap(), pairs.next().unwrap())
+}
+
 fn tokenize_expr(pair: Pair<Rule>) -> Expr {
     match pair.as_rule() {
         Rule::expr => {
             let token = unary(pair);
             match token.as_rule() {
                 Rule::literal => Expr::Literal(tokenize_literal(unary(token))),
+                Rule::embeddedApply => {
+                    let (ident, expr) = binary(token);
+                    Expr::EmbeddedApply(tokenize_ident(ident), Box::new(tokenize_expr(expr)))
+                }
                 _ => unreachable!("{token}"),
             }
         }

@@ -43,7 +43,7 @@ infixOperator = @{ operator | infixIdent }
     operatorChar = _{ "." | "+" | "*" | "-" | "/" | "&" | "|" | ">" | "<" | "^" | "$" | "%" | ":" }
   infixIdent = { infixIdentSeparator ~ (!infixIdentSeparator ~ ident) ~ infixIdentSeparator }
     infixIdentSeparator = { "`" }
-expr = { (exprInfix | literal | effApply | apply | withParen | assign | variable | ident) ~ ws* ~ expr? }
+expr = { (embeddedApply | exprInfix | literal | effApply | apply | withParen | assign | variable | ident) ~ ws* ~ expr? }
   literal = { listLiteral | charLiteral | textLiteral | intLiteral }
     textLiteral = { "\"" ~ textChar* ~ "\"" }
       textChar = { !"\"" ~ (textEscapedChar | ANY) }
@@ -60,6 +60,7 @@ expr = { (exprInfix | literal | effApply | apply | withParen | assign | variable
     // TODO: applyPostfix
     applyArgs = { (ws+ ~ (exprInfix | withParen | assign | ident | literal))* }
   effApply = { "eff" ~ ws+ ~ ident ~ expr }
+  embeddedApply = { "@" ~ ident ~ ws+ ~ expr }
 pattern = { patternAny | patternSplitList | patternIdent | typeIdent | patternLiteral }
   patternLiteral = _{ literal }
   patternType = _{ typeIdent }

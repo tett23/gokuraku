@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{fmt::Display, rc::Rc};
 
 use serde::{Deserialize, Serialize};
 use {
@@ -84,6 +84,7 @@ impl From<&str> for Ident {
 pub enum Expr {
     Literal(Literal),
     Apply(Box<(Function, Vec<Expr>)>),
+    ApplyEmbedded(Ident, Rc<Expr>),
 }
 
 impl From<ast::Expr> for Expr {
@@ -93,15 +94,29 @@ impl From<ast::Expr> for Expr {
                 todo!()
             }
             ast::Expr::Literal(value) => Self::Literal(value.into()),
+            ast::Expr::EmbeddedApply(ident, expr) => {
+                Self::ApplyEmbedded(ident.into(), Rc::new((*expr).into()))
+            }
         }
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl Expr {
+    pub fn literal_value(&self) -> Literal {
+        match self {
+            Expr::Literal(v) => v.clone(),
+            Expr::Apply(_) => panic!(),
+            Expr::ApplyEmbedded(_, _) => panic!(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Literal {
     Char(char),
     Text(String),
     Int(isize),
+    Unit,
 }
 
 impl From<ast::Literal> for Literal {
@@ -110,6 +125,18 @@ impl From<ast::Literal> for Literal {
             ast::Literal::Char(value) => Self::Char(value),
             ast::Literal::Text(value) => Self::Text(value),
             ast::Literal::Int(value) => Self::Int(value),
+            ast::Literal::Unit => Self::Unit,
+        }
+    }
+}
+
+impl Display for Literal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Literal::Char(value) => write!(f, "{value}"),
+            Literal::Text(value) => write!(f, "{value}"),
+            Literal::Int(value) => write!(f, "{value}"),
+            Literal::Unit => write!(f, "()"),
         }
     }
 }

@@ -21,6 +21,7 @@ pub enum TopLevel {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Expr {
     Apply(Ident, Box<Expr>),
+    EmbeddedApply(Ident, Box<Expr>),
     Literal(Literal),
 }
 
@@ -81,6 +82,7 @@ pub enum Literal {
     Char(char),
     Text(String),
     Int(isize),
+    Unit,
 }
 
 #[derive(Serialize, Deserialize)]

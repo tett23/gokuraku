@@ -1,7 +1,7 @@
 extern crate parser;
 
 use insta::{assert_debug_snapshot, glob};
-use parser::{ir::Module, vm::Vm};
+use parser::vm::Vm;
 use std::fs;
 
 #[test]

@@ -1,14 +1,49 @@
 use anyhow::anyhow;
-use std::{collections::BTreeMap, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::BTreeMap,
+    fmt::Debug,
+    io::{stdout, Write},
+    ops::DerefMut,
+    rc::Rc,
+};
+
+use crate::ir::Literal;
 use {
     crate::ir,
     ir::{Expr, Function, Ident, Module},
 };
 
-#[derive(Debug, Default)]
 pub struct Vm {
     stack: Vec<Rc<Expr>>,
     environment: Environment,
+    embedded: EmbeddedEnvironment,
+    stdout: Box<RefCell<dyn Write>>,
+}
+
+impl Default for Vm {
+    fn default() -> Self {
+        Vm {
+            stack: Vec::new(),
+            environment: Environment::default(),
+            embedded: EmbeddedEnvironment(),
+            stdout: Box::new(RefCell::new(stdout())),
+        }
+    }
+}
+
+impl Debug for Vm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "")
+    }
+}
+
+#[derive(Default)]
+pub struct EmbeddedEnvironment();
+impl EmbeddedEnvironment {
+    pub fn write(&self, mut out: impl Write, value: &str) {
+        write!(out, "{value}");
+    }
 }
 
 #[derive(Debug, Default)]
@@ -26,6 +61,13 @@ impl Vm {
     pub fn push(&mut self, value: Rc<Expr>) {
         match value {
             value => self.stack.push(value),
+        }
+    }
+
+    pub fn pop(&mut self) -> Rc<Expr> {
+        match self.stack.pop() {
+            Some(v) => v,
+            None => panic!("{}", anyhow!("empty stack")),
         }
     }
 
@@ -47,6 +89,17 @@ impl Vm {
             Expr::Apply(_v) => {
                 todo!()
             }
+            Expr::ApplyEmbedded(ident, expr) if ident.ident == "write" => {
+                self.push(expr.clone());
+                self.call_top();
+                let expr = self.pop();
+
+                self.embedded
+                    .write(self.stdout.get_mut(), &expr.literal_value().to_string());
+
+                self.push(Rc::new(Expr::Literal(Literal::Unit)))
+            }
+            Expr::ApplyEmbedded(_, _) => panic!("{}", anyhow!("undefined embedded")),
             Expr::Literal(_) => self.push(inst),
         }
     }

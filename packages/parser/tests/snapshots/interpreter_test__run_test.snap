@@ -1,10 +1,8 @@
 ---
 source: packages/parser/tests/interpreter_test.rs
 expression: value
-input_file: packages/parser/fixtures/pds/5.pds
+input_file: packages/parser/fixtures/pds/6.pds
 ---
 Literal(
-    Text(
-        "Hello world",
-    ),
+    Unit,
 )
