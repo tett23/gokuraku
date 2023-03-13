@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use serde::{Deserialize, Serialize};
 use {
     crate::ast,
@@ -6,17 +8,19 @@ use {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Module {
-    pub values: Vec<Value>,
+    pub values: Vec<Function>,
     pub types: Vec<Type>,
     pub handlers: Vec<Handler>,
 }
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Value {}
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Value {
-    ident: Ident,
-    ident_name: Ident,
-    arity: usize,
-    expr: Box<Expr>,
+pub struct Function {
+    pub ident: Ident,
+    pub ident_name: Ident,
+    pub arity: usize,
+    pub expr: Rc<Expr>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -31,7 +35,7 @@ impl From<Pds> for Module {
             match item {
                 TopLevel::Assign(assign) => acc.values.push(assign.into()),
                 TopLevel::AssignAnnotation(_) => {}
-                TopLevel::LineComment(_) => todo!(),
+                TopLevel::LineComment(_) => {}
                 TopLevel::Environment() => todo!(),
             };
 
@@ -40,18 +44,18 @@ impl From<Pds> for Module {
     }
 }
 
-impl From<Assign> for Value {
+impl From<Assign> for Function {
     fn from(value: Assign) -> Self {
         Self {
             ident: format!("{}_{}", value.ident.0, seq_gen()).into(),
             ident_name: value.ident.into(),
             arity: value.args.patterns.len(),
-            expr: Box::new(value.expr.into()),
+            expr: Rc::new(value.expr.into()),
         }
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, PartialOrd, Eq, Ord, Clone, Serialize, Deserialize)]
 pub struct Ident {
     pub ident: String,
 }
@@ -68,10 +72,18 @@ impl From<String> for Ident {
     }
 }
 
+impl From<&str> for Ident {
+    fn from(value: &str) -> Self {
+        Self {
+            ident: value.to_string().into(),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Expr {
     Literal(Literal),
-    Apply(Value, Vec<Expr>),
+    Apply(Box<(Function, Vec<Expr>)>),
 }
 
 impl From<ast::Expr> for Expr {
