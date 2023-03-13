@@ -4,7 +4,6 @@ use std::{
     collections::BTreeMap,
     fmt::Debug,
     io::{stdout, Write},
-    ops::DerefMut,
     rc::Rc,
 };
 
@@ -17,7 +16,6 @@ use {
 pub struct Vm {
     stack: Vec<Rc<Expr>>,
     environment: Environment,
-    embedded: EmbeddedEnvironment,
     stdout: Box<RefCell<dyn Write>>,
 }
 
@@ -26,7 +24,6 @@ impl Default for Vm {
         Vm {
             stack: Vec::new(),
             environment: Environment::default(),
-            embedded: EmbeddedEnvironment(),
             stdout: Box::new(RefCell::new(stdout())),
         }
     }
@@ -41,8 +38,26 @@ impl Debug for Vm {
 #[derive(Default)]
 pub struct EmbeddedEnvironment();
 impl EmbeddedEnvironment {
-    pub fn write(&self, mut out: impl Write, value: &str) {
-        write!(out, "{value}");
+    pub fn write(vm: &mut Vm, expr: Rc<Expr>) {
+        vm.push(expr.clone());
+        vm.call_top();
+        let expr = vm.pop();
+        let value = expr.literal_value().to_string();
+
+        let result = write!(vm.stdout.get_mut(), "{value}");
+        match result {
+            Ok(_) => {}
+            Err(e) => panic!("{e}"),
+        }
+
+        vm.push(Rc::new(Expr::Literal(Literal::Unit)))
+    }
+
+    pub fn exec(vm: &mut Vm, ident: &Ident, expr: Rc<Expr>) {
+        match ident.ident.as_str() {
+            "write" => EmbeddedEnvironment::write(vm, expr),
+            _ => panic!(),
+        }
     }
 }
 
@@ -89,17 +104,9 @@ impl Vm {
             Expr::Apply(_v) => {
                 todo!()
             }
-            Expr::ApplyEmbedded(ident, expr) if ident.ident == "write" => {
-                self.push(expr.clone());
-                self.call_top();
-                let expr = self.pop();
-
-                self.embedded
-                    .write(self.stdout.get_mut(), &expr.literal_value().to_string());
-
-                self.push(Rc::new(Expr::Literal(Literal::Unit)))
+            Expr::ApplyEmbedded(ident, expr) => {
+                EmbeddedEnvironment::exec(self, ident, expr.clone());
             }
-            Expr::ApplyEmbedded(_, _) => panic!("{}", anyhow!("undefined embedded")),
             Expr::Literal(_) => self.push(inst),
         }
     }
