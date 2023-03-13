@@ -1,0 +1,8 @@
+(|) :: a -> (a -> b) -> b
+(|) f g = g f
+
+echo :: Show a => a -> IO ()
+echo a = write a
+
+main :: IO ()
+main = "text" | echo

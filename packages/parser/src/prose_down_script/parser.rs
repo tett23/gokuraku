@@ -18,7 +18,6 @@ pub fn parse(input: &str) -> anyhow::Result<Pds> {
         .context("")?
         .map(tokenize_top_level)
         .collect::<Vec<_>>();
-    dbg!(&top_level);
 
     Ok(Pds(top_level))
 }
@@ -73,7 +72,7 @@ fn tokenize_assign(pair: Pair<Rule>) -> Assign {
     let args = tokenize_assign_args(pairs.next().unwrap());
     let expr = tokenize_expr(pairs.next().unwrap());
 
-    Assign(ident, args, expr)
+    Assign { ident, args, expr }
 }
 
 fn tokenize_assign_args(pair: Pair<Rule>) -> AssignArgs {
@@ -83,7 +82,6 @@ fn tokenize_assign_args(pair: Pair<Rule>) -> AssignArgs {
 }
 
 fn tokenize_pattern(pair: Pair<Rule>) -> PatternExpr {
-    dbg!(&pair);
     match pair.as_rule() {
         _ => unreachable!("{pair}"),
     }

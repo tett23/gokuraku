@@ -15,11 +15,12 @@ pub enum TopLevel {
     Assign(Assign),
     AssignAnnotation(AssignAnnotation),
     LineComment(LineComment),
+    Environment(),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Expr {
-    Assign(Ident, Vec<Ident>, Box<Expr>),
+    Apply(Ident, Box<Expr>),
     Literal(Literal),
 }
 
@@ -30,7 +31,11 @@ pub enum TypeExpr {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Assign(pub Ident, pub AssignArgs, pub Expr);
+pub struct Assign {
+    pub ident: Ident,
+    pub args: AssignArgs,
+    pub expr: Expr,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AssignArgs {

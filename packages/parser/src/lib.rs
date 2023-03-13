@@ -1,4 +1,7 @@
+#![feature(generators, generator_trait)]
+
 pub mod ast;
+pub mod ir;
 mod prose_down;
 mod prose_down_script;
 
