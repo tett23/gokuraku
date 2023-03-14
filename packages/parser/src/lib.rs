@@ -8,3 +8,4 @@ pub mod vm;
 
 pub use self::prose_down::parse as prose_down_parse;
 pub use self::prose_down_script::parse as prose_down_script_parse;
+pub use self::prose_down_script::run as prose_down_script_run;

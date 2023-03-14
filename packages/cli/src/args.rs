@@ -22,10 +22,17 @@ pub(crate) struct Args {
 #[derive(Debug, Subcommand)]
 pub(crate) enum Commands {
     Build(Build),
+    Run(Run),
 }
 
 #[derive(Debug, clap::Args)]
 pub(crate) struct Build {}
+
+#[derive(Debug, clap::Args)]
+pub(crate) struct Run {
+    #[clap()]
+    pub(crate) file: PathBuf,
+}
 
 pub(crate) fn parse() -> Args {
     Args::parse()

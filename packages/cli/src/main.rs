@@ -18,6 +18,7 @@ fn main() {
 
     match args.command {
         Commands::Build(_) => commands::build(&config),
+        Commands::Run(options) => commands::run(&config, &options),
     }
     .unwrap();
 }
