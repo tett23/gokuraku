@@ -38,9 +38,10 @@ impl Debug for Vm {
 #[derive(Default)]
 pub struct EmbeddedEnvironment();
 impl EmbeddedEnvironment {
-    pub fn write(vm: &mut Vm, expr: Rc<Expr>) {
+    fn write(vm: &mut Vm, expr: Rc<Expr>) {
         vm.push(expr.clone());
         vm.call_top();
+
         let expr = vm.pop();
         let value = expr.literal_value().to_string();
 
