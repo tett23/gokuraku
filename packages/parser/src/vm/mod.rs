@@ -6,16 +6,15 @@ use std::{
     io::{stdout, Write},
     rc::Rc,
 };
-
-use crate::ir::Literal;
 use {
     crate::ir,
-    ir::{Expr, Function, Ident, Module},
+    ir::{Apply, ApplyEmbedded, Assign, Expr, Ident, Literal, Module},
 };
 
 pub struct Vm {
     stack: Vec<Rc<Expr>>,
     environment: Environment,
+    gamma_environment: GammaEnvironment,
     stdout: Box<RefCell<dyn Write>>,
 }
 
@@ -24,6 +23,7 @@ impl Default for Vm {
         Vm {
             stack: Vec::new(),
             environment: Environment::default(),
+            gamma_environment: GammaEnvironment::default(),
             stdout: Box::new(RefCell::new(stdout())),
         }
     }
@@ -43,7 +43,7 @@ impl EmbeddedEnvironment {
         vm.call_top();
 
         let expr = vm.pop();
-        let value = expr.literal_value().to_string();
+        let value = expr.as_literal().to_string();
 
         let result = write!(vm.stdout.get_mut(), "{value}");
         match result {
@@ -63,15 +63,24 @@ impl EmbeddedEnvironment {
 }
 
 #[derive(Debug, Default)]
-struct Environment(BTreeMap<Ident, Rc<Function>>);
+struct Environment(BTreeMap<Ident, Rc<Assign>>);
 
 impl Environment {
-    fn find_by_name(&self, ident: &Ident) -> Option<Rc<ir::Expr>> {
-        let idents = self.0.values().find(|f| &f.ident_name == ident);
+    fn find_by_name(&self, ident: &Ident) -> Option<Rc<Assign>> {
+        self.0.values().find(|f| &f.ident_name == ident).cloned()
+    }
 
-        idents.map(|f| f.as_ref().expr.clone())
+    fn push(&mut self, ident: Ident, f: Rc<Assign>) {
+        self.0.insert(ident, f);
+    }
+
+    fn find(&self, ident: &Ident) -> Option<Rc<Assign>> {
+        self.0.get(ident).cloned()
     }
 }
+
+#[derive(Debug, Default)]
+struct GammaEnvironment(BTreeMap<Ident, TypeExpr>);
 
 impl Vm {
     pub fn push(&mut self, value: Rc<Expr>) {
@@ -89,6 +98,7 @@ impl Vm {
 
     pub fn ret(&mut self) -> Rc<Expr> {
         if self.stack.len() != 1 {
+            dbg!(&self.stack);
             panic!("{}", anyhow!("stack error"));
         }
 
@@ -102,18 +112,32 @@ impl Vm {
         };
 
         match inst.as_ref() {
-            Expr::Apply(_v) => {
-                todo!()
+            Expr::Apply(Apply { ident, expr }) => {
+                dbg!(ident, expr);
+                let f = self.environment.find(ident).unwrap();
+                let f = f.apply(expr.clone());
+                let ident = f.ident.clone();
+
+                self.environment.push(ident.clone(), Rc::new(f));
+                self.push(Rc::new(Expr::Reference(ident)));
+                self.call_top();
             }
-            Expr::ApplyEmbedded(ident, expr) => {
+            Expr::ApplyEmbedded(ApplyEmbedded { ident, expr }) => {
                 EmbeddedEnvironment::exec(self, ident, expr.clone());
             }
             Expr::Literal(_) => self.push(inst),
+            Expr::Reference(ident) => match self.environment.find(ident) {
+                Some(value) => {
+                    self.push(value.expr.clone());
+                }
+                None => panic!("{}", anyhow!("undefined reference")),
+            },
         }
     }
 
     pub fn load_module(&mut self, module: Module) {
         module.values.into_iter().for_each(|f| {
+            dbg!(&f.ident);
             self.environment.0.insert(f.ident.clone(), Rc::new(f));
         })
     }
@@ -122,7 +146,7 @@ impl Vm {
         self.load_module(module);
         let e = self.environment.find_by_name(&"main".into());
 
-        self.push(e.unwrap());
+        self.push(e.unwrap().expr.clone());
         self.call_top();
         self.ret()
     }

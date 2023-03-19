@@ -1,41 +1,66 @@
-keywords = { "eff" | "handle" | "trait" | "impl" }
+keywords = { "eff" | "handle" | "trait" | "impl" | "where" | "data" }
 lineComment = { "//" ~ (!br ~ ANY)* ~ (&EOI | br) }
-ident = { namedIdent | opIdent }
-  namedIdent = _{ !(&keywords) ~ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
+
+// idents
+ident = { varIdent | opIdent }
   opIdent = _{ "(" ~ operator ~ ")" }
+varIdent = { !(&keywords) ~ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
 typeIdent = { ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
-variable = { ident | referenceSelf | variableN | variable3 | variable2 | variable1 }
-  variable1 = _{ "#" }
-  variable2 = _{ "##" }
-  variable3 = _{ "###" }
-  variableN = _{ "#" ~ ASCII_DIGIT+ }
-  referenceSelf= _{ "#%" }
-typeAssign = { typeIdent ~ typeAssignArgs ~ ws* ~ "=" ~ ws* ~ typeExpr }
-  typeAssignArgs = {(ws+ ~ (ident | typeIdent))*}
-assign = { ident ~ assignArgs ~ ws* ~ "=" ~ ws* ~ expr }
-  assignArgs = { (ws+ ~ pattern)* }
-assignAnnotation = { handlerEnvironment? ~ ws* ~ ident ~ ws* ~ "::" ~ parameterCondition ~ typeExpr }
-  handlerEnvironment = { "<" ~ ws* ~ (handlerEnvironmentExpr ~ (ws* ~ "," ~ ws* ~handlerEnvironmentExpr)* ~ ","?) ~ ws* ~ ">"}
-    handlerEnvironmentExpr = { ident ~ ws* ~ ":" ~ ws* ~ typeExpr }
-  parameterCondition = { (ws* ~ parameterConditionExpr ~ ws* ~ "=>") | e }
-    parameterConditionExpr = { typeIdent ~ ws+ ~ ident }
-  typeExprValue = { typeExprContext | typeExprUnit | typeIdent | ident | typeExprGroup | typeExprTuple | typeExprList | typeExprList }
-  typeExpr = _{ ws* ~ typeExprFunction }
-    typeExprContext = { (typeIdent | typeExprUnit | typeExprGroup | ident) ~ (ws+ ~ typeExprValue)* }
-    typeExprFunction = { (typeExprContext ~ (ws* ~ "->" ~ ws* ~ typeExpr)) | typeExprContext }
-    typeExprGroup = { "(" ~ ws* ~ typeExpr ~ ws* ~ ")" }
-    typeExprUnit = { "(" ~ ws* ~ ")" }
-    typeExprTuple = { "(" ~ ws* ~ (typeExprTupleN | typeExprTuple1) ~ ws* ~ ")" }
-      typeExprTuple1 = _{ typeExpr ~ ws* ~ "," }
-      typeExprTupleN = _{ typeExpr ~ (ws* ~ "," ~ ws* ~ typeExpr)+ ~ ws* ~ ","? }
-    typeExprList = { "[" ~ ws* ~ typeExpr ~ ws* ~ "]" }
-traitAssign = { "trait" ~ ws* ~ typeIdent ~ traitArgs ~ ws* ~ "=" ~ ws* ~ traitExpr ~ ws* }
+instIdent = { "@" ~ varIdent }
+handlerIdent = { "*" ~ varIdent }
+
+//
+defOp = _{ ws* ~ "::" ~ ws* }
+assignOp = _{ ws* ~ "=" ~ ws* }
+assignArgs = { (ws+ ~ pattern)* }
+whereClause = { (ws* ~ "where" ~ ws* ~ stmtsBlock)? }
+etaEnvs = { ws* ~ ("<" ~ ws* ~ etaEnvN ~ ws* ~ ","? ~ ">")? }
+  etaEnv = { ws* ~ varIdent ~ ws* ~ ":" ~ ws* ~ handlerTypeExpr }
+  etaEnvN = _{ etaEnv ~ ws* ~ ("," ~ ws* ~ etaEnv)* }
+
+// stmts
+stmt = { ws* ~ (instructionTypeAssign | handlerTypeAssign | typeAssign | assignDef | traitDef | handlerAssign | assign) ~ ws* }
+instructionTypeAssign = {instIdent ~ assignArgs ~ defOp ~ typeExpr }
+handlerTypeAssign = { handlerIdent ~ assignArgs ~ defOp ~ traitConstraintExprs ~ ws* ~ handlerTypeExpr ~ abstructionTypeExpr? }
+assignDef = { ws* ~ etaEnvs ~ ws* ~ ident ~ assignArgs ~ defOp ~ traitConstraintExprs ~ abstructionTypeExpr }
+traitDef = { "trait" ~ ws* ~ typeIdent ~ traitArgs ~ whereClause }
   traitArgs = { (ws+ ~ (ident | typeIdent))* }
-  traitValue = _{ pdsBlock | typeIdent }
+  traitValue = _{ stmtsBlock | typeIdent }
   traitExpr = { ws* ~ ((traitValue ~ ws* ~ traitOp ~ ws* ~ traitValue ~ ws*)+ | traitValue) ~ ws* }
   traitOp = { traitOpAnd | traitOpOr }
     traitOpAnd = { "&" }
     traitOpOr = { "|" }
+// TODO: implAssign
+// TODO: dataAssign
+handlerAssign = { ws* ~ handlerIdent ~ assignArgs ~ assignOp ~ expr ~ whereClause? }
+typeAssign = { handlerTypeExpr ~ ws* ~ typeIdent ~ typeAssignArgs ~ assignOp ~ abstructionTypeExpr }
+  typeAssignArgs = {(ws+ ~ (ident | typeIdent))*}
+assign = { ws* ~ ident ~ assignArgs ~ assignOp ~ expr ~ whereClause }
+
+// type exprs
+typeExpr = { traitConstraintExprs ~ handlerTypeExpr ~ abstructionTypeExpr }
+embeddedTypeExpr = { abstructionTypeExpr }
+traitConstraintExprs = { (ws* ~ (traitConstraintGroup | traitConstraintExprN) ~ ws* ~ "=>" ~ ws*)? }
+  traitConstraintExpr = { typeIdent ~ ws+ ~ varIdent }
+  // TODO
+  traitConstraintExprN = _{ traitConstraintExpr ~ ws* ~ ("," ~ ws* ~ traitConstraintExpr)* }
+  traitConstraintGroup = _{ "(" ~ ws* ~ traitConstraintExprN ~ ws* ~ ")" }
+handlerTypeExpr = { ws* ~ handlerTypeExpr1? }
+  handlerTypeExpr1 = _{ "<" ~ ws* ~ abstructionTypeExpr ~ ws* ~ "," ~ ws* ~ abstructionTypeExpr ~ ws* ~ ">" }
+abstructionTypeExpr = { ws* ~ (typeExprArrow | typeExprContext | typeExprLiteral) }
+typeExprArrow = { typeExprLiteral ~ ws* ~ "->" ~ ws* ~ abstructionTypeExpr }
+typeExprContext = { typeIdent ~ (ws+ ~ abstructionTypeExpr) }
+typeExprLiteral = { typeExprUnit | typeExprTuple | typeExprGroup | typeExprList | typeExprDivergent | typeIdent | varIdent }
+  typeExprUnit = { "(" ~ ws* ~ ")" }
+  typeExprGroup = { "(" ~ ws* ~ abstructionTypeExpr ~ ws* ~ ")" }
+  typeExprTuple = { "(" ~ ws* ~ (typeExprTupleN | typeExprTuple1) ~ ws* ~ ")" }
+    typeExprTuple1 = _{ abstructionTypeExpr ~ ws* ~ "," }
+    typeExprTupleN = _{ abstructionTypeExpr ~ (ws* ~ "," ~ ws* ~ abstructionTypeExpr)+ ~ ws* ~ ","? }
+  typeExprList = { "[" ~ ws* ~ abstructionTypeExpr ~ ws* ~ "]" }
+  typeExprDivergent = { "!" }
+
+// exprs
+expr = { (embeddedApply | exprInfix | literal | effApply | apply | withParen | assign | variable | instIdent | ident) ~ ws* ~ expr? }
 // TODO: prefixOperator
 // TODO: postfixOperator
 infixOperator = @{ operator | infixIdent }
@@ -43,31 +68,47 @@ infixOperator = @{ operator | infixIdent }
     operatorChar = _{ "." | "+" | "*" | "-" | "/" | "&" | "|" | ">" | "<" | "^" | "$" | "%" | ":" }
   infixIdent = { infixIdentSeparator ~ (!infixIdentSeparator ~ ident) ~ infixIdentSeparator }
     infixIdentSeparator = { "`" }
-expr = { (embeddedApply | exprInfix | literal | effApply | apply | withParen | assign | variable | ident) ~ ws* ~ expr? }
-  literal = { listLiteral | charLiteral | textLiteral | intLiteral }
+  literal = { listLiteral | charLiteral | textLiteral | intLiteral | unitLiteral }
     textLiteral = { "\"" ~ textChar* ~ "\"" }
-      textChar = { !"\"" ~ (textEscapedChar | ANY) }
-      textEscapedChar = _{ "\\" ~ ANY }
+      textChar = { !"\"" ~ textCharChar }
+      textCharChar = _{ (textEscapedChar | ANY) }
+        textEscapedChar = _{ "\\" ~ ANY }
     intLiteral = { "0" | (("+" | "-")?  ~ ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*) }
     charLiteral = { "'" ~ (("\\" ~ ANY) | ANY) ~ "'" }
     listLiteral = { "[" ~ expr* ~ "]"}
+    unitLiteral = { "(" ~ ws* ~ ")" }
   exprInfix = { term ~ ws* ~ infixOperator ~ ws* ~ expr }
   term = _{ withParen | variable | ident | literal }
   withParen = _{ "(" ~ ws* ~ expr ~ ws* ~ ")" }
   apply = { applyInfix | applyPrefix }
-    applyPrefix = { ident ~ ws* ~ expr? }
+    applyPrefix = { ident ~ ws+ ~ expr }
     applyInfix = { exprInfix }
     // TODO: applyPostfix
     applyArgs = { (ws+ ~ (exprInfix | withParen | assign | ident | literal))* }
-  effApply = { "eff" ~ ws+ ~ ident ~ expr }
-  embeddedApply = { "@" ~ ident ~ ws+ ~ expr }
-pattern = { patternAny | patternSplitList | patternIdent | typeIdent | patternLiteral }
-  patternLiteral = _{ literal }
-  patternType = _{ typeIdent }
-  patternIdent = _{ ident }
-  patternSplitList = _{"[" ~ ws* ~ ident ~ ws* ~ ":" ~ ws* ~ ident ~ ws* ~ "]"}
-  patternAny = _{ "_" }
-pdsBlock = { "{" ~ pds ~ br* ~ "}" ~ ws* }
-topLevel = _{ ws* ~ (lineComment | traitAssign | assign | assignAnnotation | typeAssign) ~ ws*}
-pds = _{ ws* ~ topLevel? ~ (br* ~ topLevel)* ~ ws* }
+  effApply = { "eff" ~ ws+ ~ handlerIdent ~ expr? }
+  embeddedApply = { instIdent ~ ws+ ~ expr }
+
+// patterns
+pattern = { patternOr | patternValue }
+  patternValue = { patternAny | patternListHead | patternIdent | patternLiteral | patternTuple }
+    patternLiteral = { literal }
+    patternIdent = { varIdent }
+    patternListHead = { "[" ~ ws* ~ patternValue ~ ws* ~ ":" ~ ws* ~ pattern ~ ws* ~ "]" }
+    patternAny = { "_" ~ varIdent? }
+    patternTuple = { "(" ~ ws* ~ patternValue ~ ("," ~ ws* ~ pattern) ~ ws* ~ ")"}
+    // TODO: patternData
+  patternOr = { patternValue ~ ws* ~ "|" ~ ws* ~ pattern }
+
+// terms
+variable = { ident | referenceSelf | variableN | variable3 | variable2 | variable1 }
+  variable1 = _{ "#" }
+  variable2 = _{ "##" }
+  variable3 = _{ "###" }
+  variableN = _{ "#" ~ ASCII_DIGIT+ }
+  referenceSelf= _{ "#%" }
+
+stmtsBlock = { ws* ~ "{" ~ ws* ~ stmts ~ ws* ~ "}" ~ ws* }
+stmtSep = _{ ";" }
+stmts = _{ ws* ~ (stmt | (ws* ~ br) | lineComment | stmtSep)* ~ ws*}
+pds = _{ ws* ~ stmts ~ ws* }
 root = _{ pds? ~ br* ~ &EOI}

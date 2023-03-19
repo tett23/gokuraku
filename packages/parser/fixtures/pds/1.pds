@@ -1,2 +1,8 @@
-main = "test"
+*write :: Text -> <(), IO ()>
+*write s = @write s
 
+echo s = await write s
+ where write = eff write
+
+<write: Text -> <(), IO ()>> main :: IO ()
+main = echo "Hello world"

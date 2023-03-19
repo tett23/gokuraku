@@ -1,8 +1,17 @@
 ---
 source: packages/parser/tests/interpreter_test.rs
 expression: value
-input_file: packages/parser/fixtures/pds/6.pds
+input_file: packages/parser/fixtures/pds/7.pds
 ---
-Literal(
-    Unit,
+ApplyEmbedded(
+    ApplyEmbedded {
+        ident: Ident {
+            ident: "@write",
+        },
+        expr: Reference(
+            Ident {
+                ident: "s",
+            },
+        ),
+    },
 )

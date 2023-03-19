@@ -37,7 +37,7 @@ impl BuildAdapterInitializable for BuildAdapterTxt {
 }
 
 fn format_document(doc: &Document) -> String {
-    doc.blocks.iter().map(format_block).collect::<String>()
+    doc.0.iter().map(format_block).collect::<String>()
 }
 
 fn format_block(block: &Block) -> String {

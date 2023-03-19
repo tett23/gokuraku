@@ -1,0 +1,4 @@
+echo s = @write s
+
+<write: Text -> IO ()> main :: IO ()
+main = echo "Hello world"

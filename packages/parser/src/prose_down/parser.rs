@@ -1,6 +1,4 @@
-// use crate::ast::Document;
 use crate::ast;
-use crate::ast::*;
 use anyhow::Context;
 use pest::iterators::Pair;
 use pest::Parser;
@@ -12,11 +10,11 @@ use pest_derive::Parser;
 #[grammar = "prose_down/syntax.pest"]
 pub struct ProseParser;
 
-pub fn parse(input: &str) -> anyhow::Result<Document> {
+pub fn parse(input: &str) -> anyhow::Result<ast::Document> {
     let prose = ProseParser::parse(Rule::prose, input).context("parse error")?;
-    let blocks = prose.into_iter().map(block).collect();
+    let blocks = prose.into_iter().map(block).collect::<Vec<_>>();
 
-    Ok(Document { blocks })
+    Ok(ast::Document(blocks))
 }
 
 fn block(pair: Pair<Rule>) -> ast::Block {

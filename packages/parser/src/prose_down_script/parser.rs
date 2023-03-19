@@ -4,8 +4,8 @@ use pest::Parser;
 use pest_derive::Parser;
 
 use crate::ast::{
-    Assign, AssignAnnotation, AssignArgs, Expr, Ident, LineComment, Literal, ParameterCondition,
-    PatternExpr, Pds, TopLevel, TypeExpr,
+    Apply, ApplyEmbedded, Assign, AssignAnnotation, AssignArgs, Expr, Ident, LineComment, Literal,
+    Module, ParameterCondition, PatternExpr, Statement, TypeExpr, TypeIdent,
 };
 
 #[derive(Parser)]
@@ -13,20 +13,20 @@ use crate::ast::{
 #[grammar = "prose_down_script/syntax.pest"]
 pub struct PdsParser;
 
-pub fn parse(input: &str) -> anyhow::Result<Pds> {
-    let top_level = PdsParser::parse(Rule::pds, input)
+pub fn parse(input: &str) -> anyhow::Result<Module> {
+    let module = PdsParser::parse(Rule::pds, input)
         .context("")?
         .map(tokenize_top_level)
         .collect::<Vec<_>>();
 
-    Ok(Pds(top_level))
+    Ok(Module { statements: module })
 }
 
-fn tokenize_top_level(pair: Pair<Rule>) -> TopLevel {
+fn tokenize_top_level(pair: Pair<Rule>) -> Statement {
     match pair.as_rule() {
-        Rule::assign => TopLevel::Assign(tokenize_assign(pair)),
-        Rule::assignAnnotation => TopLevel::AssignAnnotation(tokenize_assign_annotation(pair)),
-        Rule::lineComment => TopLevel::LineComment(tokenize_line_comment(pair)),
+        Rule::assign => Statement::Assign(tokenize_assign(pair)),
+        Rule::typeAssign => Statement::AssignAnnotation(tokenize_assign_annotation(pair)),
+        Rule::lineComment => Statement::LineComment(tokenize_line_comment(pair)),
         _ => panic!("{pair}"),
     }
 }
@@ -45,20 +45,50 @@ fn binary(pair: Pair<Rule>) -> (Pair<Rule>, Pair<Rule>) {
     (pairs.next().unwrap(), pairs.next().unwrap())
 }
 
+fn _unary_or_binary(pair: Pair<Rule>) -> (Pair<Rule>, Option<Pair<Rule>>) {
+    let mut pairs = pair.into_inner();
+
+    (pairs.next().unwrap(), pairs.next())
+}
+
 fn tokenize_expr(pair: Pair<Rule>) -> Expr {
     match pair.as_rule() {
         Rule::expr => {
             let token = unary(pair);
             match token.as_rule() {
                 Rule::literal => Expr::Literal(tokenize_literal(unary(token))),
-                Rule::embeddedApply => {
-                    let (ident, expr) = binary(token);
-                    Expr::EmbeddedApply(tokenize_ident(ident), Box::new(tokenize_expr(expr)))
-                }
+                Rule::embeddedApply => Expr::ApplyEmbedded(tokenize_embedded_apply(token)),
+                Rule::apply => Expr::Apply(tokenize_apply(token)),
+                Rule::variable => Expr::Ident(tokenize_ident(unary(token))),
                 _ => unreachable!("{token}"),
             }
         }
         _ => unreachable!("{pair}"),
+    }
+}
+
+fn tokenize_apply(pair: Pair<Rule>) -> Apply {
+    let pair = unary(pair);
+    match pair.as_rule() {
+        Rule::applyPrefix | Rule::applyInfix => {
+            let (ident, expr) = binary(pair);
+            Apply {
+                ident: tokenize_ident(ident),
+                expr: Box::new(tokenize_expr(expr)),
+            }
+        }
+        _ => unreachable!("{pair}"),
+    }
+    // let (ident, expr) = binary(unary(token));
+    // Expr::Apply(tokenize_ident(ident), Box::new(tokenize_expr(expr)))
+}
+
+fn tokenize_embedded_apply(pair: Pair<Rule>) -> ApplyEmbedded {
+    let (ident, expr) = binary(pair);
+
+    ApplyEmbedded {
+        ident: tokenize_ident(ident),
+        expr: Box::new(tokenize_expr(expr)),
     }
 }
 
@@ -82,7 +112,12 @@ fn tokenize_assign(pair: Pair<Rule>) -> Assign {
     let args = tokenize_assign_args(pairs.next().unwrap());
     let expr = tokenize_expr(pairs.next().unwrap());
 
-    Assign { ident, args, expr }
+    Assign {
+        ident,
+        args,
+        expr,
+        where_clause: None,
+    }
 }
 
 fn tokenize_assign_args(pair: Pair<Rule>) -> AssignArgs {
@@ -92,7 +127,14 @@ fn tokenize_assign_args(pair: Pair<Rule>) -> AssignArgs {
 }
 
 fn tokenize_pattern(pair: Pair<Rule>) -> PatternExpr {
+    let pair = unary(pair);
     match pair.as_rule() {
+        Rule::patternLiteral => PatternExpr::Literal(tokenize_literal(unary(pair))),
+        Rule::patternIdent => PatternExpr::Bind(tokenize_ident(unary(pair))),
+        Rule::patternListHead => {
+            todo!()
+        }
+        Rule::patternAny => PatternExpr::Any,
         _ => unreachable!("{pair}"),
     }
 }
@@ -124,7 +166,14 @@ fn tokenize_type_expr(pair: Pair<Rule>) -> TypeExpr {
 
 fn tokenize_ident(pair: Pair<Rule>) -> Ident {
     match pair.as_rule() {
-        Rule::ident => Ident(pair.as_str().to_string()),
+        Rule::ident | Rule::varIdent => Ident(pair.as_str().to_string()),
+        _ => panic!("{pair}"),
+    }
+}
+
+fn tokenize_type_ident(pair: Pair<Rule>) -> TypeIdent {
+    match pair.as_rule() {
+        Rule::typeIdent => TypeIdent(pair.as_str().to_string()),
         _ => panic!("{pair}"),
     }
 }

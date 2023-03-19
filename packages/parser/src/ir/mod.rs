@@ -1,63 +1,137 @@
-use std::{fmt::Display, rc::Rc};
-
-use serde::{Deserialize, Serialize};
-use {
-    crate::ast,
-    ast::{Assign, Pds, TopLevel},
+use std::{
+    collections::{HashMap, VecDeque},
+    fmt::Display,
+    ops::Deref,
+    rc::Rc,
 };
+
+use crate::ast::{self};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Module {
-    pub values: Vec<Function>,
-    pub types: Vec<Type>,
+    pub values: Vec<Assign>,
+    pub types: Vec<(Ident, TypeExpr)>,
     pub handlers: Vec<Handler>,
+    pub insts: Vec<(Ident, TypeExpr)>,
 }
 #[derive(Debug, Serialize, Deserialize)]
-pub enum Value {}
+pub enum Value {
+    Expr(Rc<Expr>),
+    Function(Rc<Assign>),
+}
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Function {
+pub struct Assign {
     pub ident: Ident,
     pub ident_name: Ident,
-    pub arity: usize,
     pub expr: Rc<Expr>,
+    pub where_clause: Option<Box<Module>>,
+    pub pat: Option<Rc<PatternExpr>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Type {}
+pub struct Abstruction {
+    pub ident: Ident,
+    pub expr: Rc<Expr>,
+    pub context: Rc<ContextStack>,
+}
+
+impl Abstruction {
+    pub fn apply(&self, expr: Rc<Expr>) -> Assign {
+        todo!()
+        // let mut applied = self.applied.clone();
+        // applied.push(expr.clone());
+
+        // Self {
+        //     ident: self.ident.apply_new(),
+        //     ident_name: self.ident_name.clone(),
+        //     expr: self.expr.clone(),
+        //     applied,
+        // }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TypeExpr {
+    constraints: Vec<(Ident, TraitConstraint)>,
+    handlers: Vec<HandlerTypeExpr>,
+    type_abstruction: TypeAbstruction,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TraitConstraint {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct HandlerTypeExpr {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TypeAbstruction {}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Handler {}
 
-impl From<Pds> for Module {
-    fn from(Pds(pds): Pds) -> Self {
-        pds.into_iter().fold(Module::default(), |mut acc, item| {
-            match item {
-                TopLevel::Assign(assign) => acc.values.push(assign.into()),
-                TopLevel::AssignAnnotation(_) => {}
-                TopLevel::LineComment(_) => {}
-                TopLevel::Environment() => todo!(),
-            };
+impl From<ast::Module> for Module {
+    fn from(value: ast::Module) -> Self {
+        value
+            .statements
+            .into_iter()
+            .fold(Self::default(), |mut acc, item| {
+                match item {
+                    ast::Statement::Assign(assign) => acc.values.push(assign.into()),
+                    ast::Statement::AssignAnnotation(_) => {}
+                    ast::Statement::LineComment(_) => {}
+                    ast::Statement::HandlerAssign() => {}
+                };
 
-            acc
-        })
+                acc
+            })
     }
 }
 
-impl From<Assign> for Function {
-    fn from(value: Assign) -> Self {
+impl From<ast::Assign> for Assign {
+    fn from(value: ast::Assign) -> Self {
+        let is_normal_form = value.args.patterns.len() == 0;
+        let mut args = value.args.patterns;
+        let pat = args.pop();
+
         Self {
             ident: format!("{}_{}", value.ident.0, seq_gen()).into(),
             ident_name: value.ident.into(),
-            arity: value.args.patterns.len(),
             expr: Rc::new(value.expr.into()),
+            pat: match is_normal_form {
+                true => None,
+                false => pat.map(|v| v.into()).map(Rc::new),
+            },
+            where_clause: value.where_clause.map(|v| (*v).into()).map(Box::new),
         }
     }
 }
 
-#[derive(Debug, PartialEq, PartialOrd, Eq, Ord, Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PatternExpr {}
+
+impl From<ast::PatternExpr> for PatternExpr {
+    fn from(value: ast::PatternExpr) -> Self {
+        match value {
+            ast::PatternExpr::Bind(_) => todo!(),
+            ast::PatternExpr::TypeBind(_) => todo!(),
+            ast::PatternExpr::Literal(_) => todo!(),
+            ast::PatternExpr::SplitList() => todo!(),
+            ast::PatternExpr::Any => todo!(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, PartialOrd, Eq, Ord, Clone, Serialize, Deserialize, Hash)]
 pub struct Ident {
     pub ident: String,
+}
+
+impl Ident {
+    pub fn apply_new(&self) -> Ident {
+        format!("{}__{}", &self.ident, seq_gen()).into()
+    }
 }
 
 impl From<ast::Ident> for Ident {
@@ -80,33 +154,123 @@ impl From<&str> for Ident {
     }
 }
 
+impl Display for Ident {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.ident)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Expr {
     Literal(Literal),
-    Apply(Box<(Function, Vec<Expr>)>),
-    ApplyEmbedded(Ident, Rc<Expr>),
+    Apply(Apply),
+    ApplyEmbedded(ApplyEmbedded),
+    Reference(Ident),
+    Pattern(Pattern),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Context {
+    pub values: HashMap<Ident, Rc<Expr>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ContextStack(VecDeque<Context>);
+
+impl Deref for Context {
+    type Target = HashMap<Ident, Rc<Expr>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.values
+    }
+}
+
+impl Expr {
+    fn is_normal_form(&self, context: &Context) -> bool {
+        match self {
+            Expr::Literal(_) => true,
+            Expr::ApplyEmbedded(_) => false,
+            Expr::Apply(_) => false,
+            Expr::Reference(ident) => {
+                let value = context.get(ident).unwrap();
+                value.is_normal_form(context)
+            }
+            Expr::Pattern(_) => false,
+        }
+    }
+
+    fn eval(&self, context: &Context) -> Rc<Expr> {
+        match self {
+            Expr::Literal(value) => Rc::new(Expr::Literal(value.clone())),
+            Expr::Apply(_) => todo!(),
+            Expr::ApplyEmbedded(_) => todo!(),
+            Expr::Reference(ident) => context
+                .get(ident)
+                .map(|item| match Self::is_normal_form(item, context) {
+                    true => item.clone(),
+                    false => self.eval(context),
+                })
+                .unwrap(),
+            Expr::Pattern(_) => todo!(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Pattern {
+    pub expr: Rc<Expr>,
+    pub cases: Vec<Rc<Expr>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Apply {
+    pub ident: Ident,
+    pub expr: Rc<Expr>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ApplyEmbedded {
+    pub ident: Ident,
+    pub expr: Rc<Expr>,
 }
 
 impl From<ast::Expr> for Expr {
     fn from(value: ast::Expr) -> Self {
         match value {
-            ast::Expr::Apply(_ident, _expr) => {
-                todo!()
-            }
             ast::Expr::Literal(value) => Self::Literal(value.into()),
-            ast::Expr::EmbeddedApply(ident, expr) => {
-                Self::ApplyEmbedded(ident.into(), Rc::new((*expr).into()))
-            }
+            ast::Expr::Apply(value) => Self::Apply(value.into()),
+            ast::Expr::ApplyEmbedded(value) => Self::ApplyEmbedded(value.into()),
+            ast::Expr::Ident(value) => Self::Reference(value.into()),
+        }
+    }
+}
+
+impl From<ast::Apply> for Apply {
+    fn from(value: ast::Apply) -> Self {
+        Self {
+            ident: value.ident.into(),
+            expr: Rc::new((*value.expr).into()),
+        }
+    }
+}
+
+impl From<ast::ApplyEmbedded> for ApplyEmbedded {
+    fn from(value: ast::ApplyEmbedded) -> Self {
+        Self {
+            ident: value.ident.into(),
+            expr: Rc::new((*value.expr).into()),
         }
     }
 }
 
 impl Expr {
-    pub fn literal_value(&self) -> Literal {
+    pub fn as_literal(&self) -> Literal {
         match self {
             Expr::Literal(v) => v.clone(),
             Expr::Apply(_) => panic!(),
-            Expr::ApplyEmbedded(_, _) => panic!(),
+            Expr::ApplyEmbedded(_) => panic!(),
+            Expr::Reference(_) => panic!(),
+            Expr::Pattern(_) => todo!(),
         }
     }
 }
@@ -116,7 +280,8 @@ pub enum Literal {
     Char(char),
     Text(String),
     Int(isize),
-    Unit,
+    Tuple(usize, Box<[Rc<Expr>]>),
+    List(Vec<Rc<Expr>>),
 }
 
 impl From<ast::Literal> for Literal {
@@ -125,7 +290,9 @@ impl From<ast::Literal> for Literal {
             ast::Literal::Char(value) => Self::Char(value),
             ast::Literal::Text(value) => Self::Text(value),
             ast::Literal::Int(value) => Self::Int(value),
-            ast::Literal::Unit => Self::Unit,
+            ast::Literal::Unit => Self::Tuple(0, Box::new([])),
+            ast::Literal::List(_) => todo!(),
+            ast::Literal::Tuple(_) => todo!(),
         }
     }
 }
@@ -136,7 +303,8 @@ impl Display for Literal {
             Literal::Char(value) => write!(f, "{value}"),
             Literal::Text(value) => write!(f, "{value}"),
             Literal::Int(value) => write!(f, "{value}"),
-            Literal::Unit => write!(f, "()"),
+            Literal::Tuple(_, _) => todo!(),
+            Literal::List(_) => todo!(),
         }
     }
 }

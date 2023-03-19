@@ -1,0 +1,6 @@
+---
+source: packages/parser/tests/interpreter_test.rs
+expression: value
+input_file: packages/parser/fixtures/pds/1.pds
+---
+()

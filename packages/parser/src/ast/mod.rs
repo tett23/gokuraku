@@ -1,34 +1,52 @@
+mod prose_down;
+
+pub use self::prose_down::*;
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
-use serde::{Deserialize, Serialize};
-
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Document {
-    pub blocks: Vec<Block>,
+pub struct Module {
+    pub statements: Vec<Statement>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Pds(pub Vec<TopLevel>);
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum TopLevel {
+pub enum Statement {
     Assign(Assign),
     AssignAnnotation(AssignAnnotation),
+    HandlerAssign(),
     LineComment(LineComment),
-    Environment(),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Expr {
-    Apply(Ident, Box<Expr>),
-    EmbeddedApply(Ident, Box<Expr>),
+    Apply(Apply),
+    ApplyEmbedded(ApplyEmbedded),
+    Ident(Ident),
     Literal(Literal),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct Apply {
+    pub ident: Ident,
+    pub expr: Box<Expr>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ApplyEmbedded {
+    pub ident: Ident,
+    pub expr: Box<Expr>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub enum TypeExpr {
-    Assign(Ident, Vec<Ident>, Box<Expr>),
-    Literal(Literal),
+    TypeAbstruction(TypeIdent, Box<TypeExpr>),
+    Literal(TypeLiteral),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TypeLiteral {
+    pub type_class: TypeClass,
+    pub ident: Ident,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -36,6 +54,7 @@ pub struct Assign {
     pub ident: Ident,
     pub args: AssignArgs,
     pub expr: Expr,
+    pub where_clause: Option<Box<Module>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -48,7 +67,7 @@ pub enum PatternExpr {
     Bind(Ident),
     TypeBind(TypeIdent),
     Literal(Literal),
-    // SplitList
+    SplitList(),
     Any,
 }
 
@@ -83,47 +102,12 @@ pub enum Literal {
     Text(String),
     Int(isize),
     Unit,
+    List(Vec<Expr>),
+    Tuple(Vec<Expr>),
 }
 
-#[derive(Serialize, Deserialize)]
-pub enum Block {
-    PdsScript(String),
-    Paragraph(Vec<Inline>),
-    EmptyLine,
-    ThemanticBreak,
-}
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Abstruction(Ident, Expr);
 
-impl Debug for Block {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::PdsScript(value) => write!(f, "PdsScript({value})"),
-            Self::Paragraph(value) => {
-                write!(f, "Paragraph(\n\t")?;
-                value.iter().try_for_each(|item| item.fmt(f))?;
-                write!(f, "\n)")
-            }
-            Self::ThemanticBreak => write!(f, "ThemanticBreak"),
-            Self::EmptyLine => write!(f, "EmptyLine"),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub enum Inline {
-    Text(String),
-    Number(String),
-    Expr(String),
-}
-
-impl Debug for Inline {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Text(value) if matches!(value.as_str(), "\r\n" | "\n" | "\r") => {
-                write!(f, "")
-            }
-            Self::Text(value) => write!(f, "{value}"),
-            Self::Number(value) => write!(f, "Number(##{value}##)"),
-            Self::Expr(value) => write!(f, "Expr({{{value}}})"),
-        }
-    }
-}
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TypeAbstruction(TypeIdent, TypeExpr);
