@@ -1,4 +1,4 @@
-keywords = { "eff" | "handle" | "trait" | "impl" | "where" | "data" }
+keywords = { "eff" | "handle" | "trait" | "impl" | "where" | "data" | "fix" | "const" }
 lineComment = { "//" ~ (!br ~ ANY)* ~ (&EOI | br) }
 
 // idents
@@ -19,21 +19,21 @@ etaEnvs = { ws* ~ ("<" ~ ws* ~ etaEnvN ~ ws* ~ ","? ~ ">")? }
   etaEnvN = _{ etaEnv ~ ws* ~ ("," ~ ws* ~ etaEnv)* }
 
 // stmts
-stmt = { ws* ~ (instTypeDef | handlerTypeDef | assignTypeDef | traitDef | handlerAssign | assign) ~ ws* }
+stmt = { ws* ~ (instTypeDef | handlerTypeDef | assignTypeDef | traitDef | handlerAssign | implAssign | assign) ~ ws* }
 instTypeDef = { instIdent ~ defOp ~ typeExpr }
 handlerTypeDef = { etaEnvs ~ ws* ~ handlerIdent ~ defOp ~ handlerDefTypeExpr }
 assignTypeDef = { etaEnvs ~ ws* ~ ident ~ defOp ~ (typeExpr | coroutineTypeExpr) }
-traitDef = { "trait" ~ ws* ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ whereClause }
+traitDef = { "trait" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ whereClause }
   traitArgs = { (ws+ ~ (varIdent | typeIdent))* }
   traitValue = _{ stmtsBlock | typeIdent }
   traitExpr = { ws* ~ ((traitValue ~ ws* ~ traitOp ~ ws* ~ traitValue ~ ws*)+ | traitValue) ~ ws* }
   traitOp = { traitOpAnd | traitOpOr }
     traitOpAnd = { "&" }
     traitOpOr = { "|" }
-// TODO: implAssign
+implAssign = { "impl" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ whereClause }
 // TODO: dataAssign
-handlerAssign = { ws* ~ handlerIdent ~ assignArgs ~ assignOp ~ expr ~ whereClause? }
-assign = { ws* ~ ident ~ assignArgs ~ assignOp ~ expr ~ whereClause }
+handlerAssign = { handlerIdent ~ assignArgs ~ assignOp ~ expr ~ whereClause? }
+assign = { ident ~ assignArgs ~ assignOp ~ expr ~ whereClause }
 
 // type exprs
 typeExpr = { traitConstraintExprs ~ abstructionTypeExpr }
@@ -64,8 +64,8 @@ expr = { (instApply | effApply | apply | withParen | variable | instIdent | iden
 // TODO: prefixOperator
 // TODO: postfixOperator
 infixOperator = { operator | infixIdent }
-  operator = { operatorChar ~ (operatorChar | "=" | "#" | "@")* }
-    operatorChar = _{ "." | "+" | "*" | "-" | "/" | "&" | "|" | ">" | "<" | "^" | "$" | "%" | ":" }
+  operator = { operatorChar ~ (operatorChar | "#" | "@")* }
+    operatorChar = _{ "." | "+" | "*" | "-" | "/" | "&" | "|" | ">" | "<" | "^" | "$" | "%" | ":" | "=" | "!" }
   infixIdent = { infixIdentSeparator ~ (!infixIdentSeparator ~ ident) ~ infixIdentSeparator }
     infixIdentSeparator = { "`" }
   literal = { arrayLiteral | tupleLiteral | charLiteral | textLiteral | intLiteral | unitLiteral }
