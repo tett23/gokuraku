@@ -1,5 +1,5 @@
 keywords = { "eff" | "handle" | "trait" | "impl" | "where" | "data" | "fix" | "const" }
-lineComment = { "//" ~ (!br ~ ANY)* ~ (&EOI | br) }
+lineComment = { ws* ~ "//" ~ (!br ~ ANY)* ~ (&EOI | br) }
 
 // idents
 ident = { varIdent | opIdent }
@@ -19,7 +19,7 @@ etaEnvs = { ws* ~ ("<" ~ ws* ~ etaEnvN ~ ws* ~ ","? ~ ">")? }
   etaEnvN = _{ etaEnv ~ ws* ~ ("," ~ ws* ~ etaEnv)* }
 
 // stmts
-stmt = { ws* ~ (instTypeDef | handlerTypeDef | assignTypeDef | traitDef | handlerAssign | implAssign | assign) ~ ws* }
+stmt = { ws* ~ (instTypeDef | handlerTypeDef | assignTypeDef | traitDef | handlerAssign | implAssign | dataAssign | assign) ~ ws* }
 instTypeDef = { instIdent ~ defOp ~ typeExpr }
 handlerTypeDef = { etaEnvs ~ ws* ~ handlerIdent ~ defOp ~ handlerDefTypeExpr }
 assignTypeDef = { etaEnvs ~ ws* ~ ident ~ defOp ~ (typeExpr | coroutineTypeExpr) }
@@ -31,6 +31,13 @@ traitDef = { "trait" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ wher
     traitOpAnd = { "&" }
     traitOpOr = { "|" }
 implAssign = { "impl" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ whereClause }
+dataAssign = { "data" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ dataArgs ~ ws+ ~ "=" ~ ws* ~ dataExpr }
+  dataArgs = { (varIdent | typeIdent)* }
+  dataExpr = { dataExprOr | dataValue }
+    dataExprOr = { dataTerm ~ ws* ~ "|" ~ ws* ~ dataExpr }
+    dataTerm = _{ dataValue }
+    dataValue = { typeIdent }
+
 // TODO: dataAssign
 handlerAssign = { handlerIdent ~ assignArgs ~ assignOp ~ expr ~ whereClause? }
 assign = { ident ~ assignArgs ~ assignOp ~ expr ~ whereClause }
@@ -40,7 +47,7 @@ typeExpr = { traitConstraintExprs ~ abstructionTypeExpr }
 handlerDefTypeExpr = { traitConstraintExprs ~ handlerTypeExpr ~ abstructionTypeExpr }
 coroutineTypeExpr = { traitConstraintExprs ~ handlerTypeExpr }
 traitConstraintExprs = { (ws* ~ (traitConstraintGroup | traitConstraintExprN) ~ ws* ~ "=>" ~ ws*)? }
-  traitConstraintExpr = { typeIdent ~ ws+ ~ varIdent }
+  traitConstraintExpr = { typeIdent ~ (ws+ ~ (typeIdent | varIdent))* }
   // TODO
   traitConstraintExprN = _{ traitConstraintExpr ~ ws* ~ ("," ~ ws* ~ traitConstraintExpr)* }
   traitConstraintGroup = _{ "(" ~ ws* ~ traitConstraintExprN ~ ws* ~ ")" }
@@ -60,7 +67,7 @@ typeExprLiteral = { typeExprUnit | typeExprTuple | typeExprArray | typeExprDiver
   typeExprTop = { "_" }
 
 // exprs
-expr = { (instApply | effApply | apply | withParen | variable | instIdent | ident | literal) ~ ws* ~ expr? }
+expr = { (instApply | effApply | apply | withParen | variable | instIdent | ident | typeIdent | literal) ~ ws* ~ expr? }
 // TODO: prefixOperator
 // TODO: postfixOperator
 infixOperator = { operator | infixIdent }
@@ -82,9 +89,10 @@ infixOperator = { operator | infixIdent }
       tupleLiteralN = _{ expr ~ (ws* ~ "," ~ ws* ~ expr)+ ~ ws* ~ ","? }
   term = _{ withParen | variable | ident | literal }
   withParen = _{ "(" ~ ws* ~ expr ~ ws* ~ ")" }
-  apply = { applyInfix | applyPrefix }
+  apply = { applyInfix | applyPrefix | applyPrefixOp }
     applyPrefix = { ident ~ (ws+ ~ expr)? }
     applyInfix = { term ~ ws* ~ infixOperator ~ ws* ~ expr }
+    applyPrefixOp = { operator ~ expr }
       // TODO: applyInfixLeft
       // TODO: applyInfixRight
     // applyArgs = { (ws+ ~ (exprInfix | withParen | ident | literal))* }
@@ -95,7 +103,7 @@ infixOperator = { operator | infixIdent }
 pattern = { patternOr | patternValue }
   patternValue = _{ patternAny | patternListHead | patternIdent | patternLiteral | patternTuple }
     patternLiteral = { literal }
-    patternIdent = { varIdent }
+    patternIdent = { typeIdent | varIdent }
     patternListHead = { "[" ~ ws* ~ patternValue ~ ws* ~ ":" ~ ws* ~ pattern ~ ws* ~ "]" }
     patternAny = { "_" ~ varIdent? }
     patternTuple = { "(" ~ ws* ~ patternValue ~ ("," ~ ws* ~ pattern) ~ ws* ~ ")"}
