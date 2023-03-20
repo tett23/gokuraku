@@ -1,32 +1,31 @@
 f 1  2 = a * b
-trait Show a = {
- a = 1
- (++) = 1
-} & Show
-
-(++) = a
-trait Show = {a = 1}
-
-List a = [a]
-trait List a = {
-  id = []
-  (:) x [] = [x]
-  (:) a a = # : ## : id
-  (:) a [a] = # : ##
-} & Identity
-
-Text = List char
-
-trait Text = {
-  id = ""
-  (++) x y = x : y
-} & Identity
-
-trait Identity a = {
-  id :: a
+trait Show a where {
+ a :: Int
+ (++) = a -> a -> a
 }
 
-repeat :: Identity a => (a -> a) Nat
+(++) = a
+
+// List a :: [a]
+// trait List a = {
+//   id = []
+//   (:) x [] = [x]
+//   (:) a a = # : ## : id
+//   (:) a [a] = # : ##
+// } & Identity
+
+// type Text :: [Char]
+
+// trait Text where {
+//   id = ""
+//   (++) x y = x : y
+// } & Identity
+//
+// trait Identity a = {
+//   id :: a -> a
+// }
+
+repeat :: Identity a => (a -> a) -> Nat
 repeat f 0 = id
 repeat f n = f n ++ repeat f (n - 1)
 
@@ -41,17 +40,15 @@ hardbreak = hardbreakN 1
 (|) :: a -> (a -> b) -> b
 (|) f g = g f
 
-<write: Text -> IO (), read: IO Text, none: ()> main :: IO ()
-main = eff write "Hello world"
+<write: <Text -> IO (), IO ()>, read: <IO Char, IO ()>, none: <(), ()>> main :: IO ()
+main = eff *write "Hello world"
 
-handlers H = {
-  write s :: Text -> IO ()
-  write s = @write s
+// handlers H = {
+//   write s :: Text -> IO ()
+//   write s = @write s
+//
+//   <write: Text -> IO ()> writeLn s :: Text -> IO()
+//   writeLn s = eff write (s ++ "\n")
+// }
 
-  <write: Text -> IO ()> writeLn s :: Text -> IO()
-  writeLn s = eff write (s ++ "\n")
-}
-
-H<{
-  main = eff write "Hello world"
-}>
+main = eff *write "Hello world"

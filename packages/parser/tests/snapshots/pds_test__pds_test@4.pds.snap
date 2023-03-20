@@ -1,0 +1,96 @@
+---
+source: packages/parser/tests/pds_test.rs
+expression: ast
+input_file: packages/parser/fixtures/pds/4.pds
+---
+Module {
+    statements: [
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [
+                        EtaEnv {
+                            ident: HandlerIdent(
+                                "write",
+                            ),
+                            expr: HandlerTypeExpr {
+                                resume: Arrow(
+                                    Literal(
+                                        Ident(
+                                            TypeIdent(
+                                                "Text",
+                                            ),
+                                        ),
+                                    ),
+                                    Literal(
+                                        Context(
+                                            TypeIdent(
+                                                "IO",
+                                            ),
+                                            Literal(
+                                                Tuple(
+                                                    0,
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                                ret: Literal(
+                                    Context(
+                                        TypeIdent(
+                                            "IO",
+                                        ),
+                                        Literal(
+                                            Tuple(
+                                                0,
+                                                [],
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            },
+                        },
+                    ],
+                ),
+                ident: Ident(
+                    "main",
+                ),
+                expr: TypeExpr {
+                    constraints: [],
+                    expr: Literal(
+                        Context(
+                            TypeIdent(
+                                "IO",
+                            ),
+                            Literal(
+                                Tuple(
+                                    0,
+                                    [],
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "main",
+                ),
+                args: AssignArgs {
+                    patterns: [],
+                },
+                expr: Ident(
+                    Ident(
+                        "resume",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+    ],
+}

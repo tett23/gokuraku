@@ -1,2 +1,2 @@
-<write: Text -> IO ()> main :: IO ()
-main = eff write "Hello world"
+<write: <(Text -> IO ()), IO ()>> main :: IO ()
+main = resume (eff *write) "Hello world"

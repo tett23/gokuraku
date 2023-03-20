@@ -1,0 +1,213 @@
+---
+source: packages/parser/tests/pds_test.rs
+expression: ast
+input_file: packages/parser/fixtures/pds/3.pds
+---
+Module {
+    statements: [
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [],
+                ),
+                ident: Ident(
+                    "(|)",
+                ),
+                expr: TypeExpr {
+                    constraints: [],
+                    expr: Arrow(
+                        Literal(
+                            Ident(
+                                TypeIdent(
+                                    "a",
+                                ),
+                            ),
+                        ),
+                        Arrow(
+                            Arrow(
+                                Literal(
+                                    Ident(
+                                        TypeIdent(
+                                            "a",
+                                        ),
+                                    ),
+                                ),
+                                Literal(
+                                    Ident(
+                                        TypeIdent(
+                                            "b",
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            Literal(
+                                Ident(
+                                    TypeIdent(
+                                        "b",
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "(|)",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Bind(
+                            Ident(
+                                "f",
+                            ),
+                        ),
+                        Bind(
+                            Ident(
+                                "g",
+                            ),
+                        ),
+                    ],
+                },
+                expr: Ident(
+                    Ident(
+                        "g",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [],
+                ),
+                ident: Ident(
+                    "echo",
+                ),
+                expr: TypeExpr {
+                    constraints: [
+                        Constraint {
+                            ident: TypeIdent(
+                                "Show",
+                            ),
+                            args: [],
+                        },
+                    ],
+                    expr: Arrow(
+                        Literal(
+                            Ident(
+                                TypeIdent(
+                                    "a",
+                                ),
+                            ),
+                        ),
+                        Literal(
+                            Context(
+                                TypeIdent(
+                                    "IO",
+                                ),
+                                Literal(
+                                    Tuple(
+                                        0,
+                                        [],
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "echo",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Bind(
+                            Ident(
+                                "a",
+                            ),
+                        ),
+                    ],
+                },
+                expr: Ident(
+                    Ident(
+                        "write",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [],
+                ),
+                ident: Ident(
+                    "main",
+                ),
+                expr: TypeExpr {
+                    constraints: [],
+                    expr: Literal(
+                        Context(
+                            TypeIdent(
+                                "IO",
+                            ),
+                            Literal(
+                                Tuple(
+                                    0,
+                                    [],
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "main",
+                ),
+                args: AssignArgs {
+                    patterns: [],
+                },
+                expr: Abstruction(
+                    Abstruction {
+                        left: Abstruction(
+                            Abstruction {
+                                left: Ident(
+                                    Ident(
+                                        "|",
+                                    ),
+                                ),
+                                right: Literal(
+                                    Text(
+                                        "text",
+                                    ),
+                                ),
+                            },
+                        ),
+                        right: Ident(
+                            Ident(
+                                "echo",
+                            ),
+                        ),
+                    },
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+    ],
+}

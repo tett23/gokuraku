@@ -1,8 +1,24 @@
-*write :: Text -> <(), IO ()>
+a = (1, 2)
+f :: Int -> Int -> a
+f 1 | 2 = 1
+
+trait Show a where {
+  show :: a -> [Char]
+}
+
+// type Text = [Char]
+
+@write :: Show a => a -> IO ()
+
+*write :: Show a => <a -> (), IO ()> ()
 *write s = @write s
 
-echo s = await write s
- where write = eff write
+*read :: <IO Char, IO ()> ()
 
-<write: Text -> <(), IO ()>> main :: IO ()
+echo s = await (write s) where {
+  write :: Show a => <a -> IO (), IO ()>
+  write = eff *write ()
+}
+
+<write: <(), IO ()>, b: <(), IO ()>> main :: IO ()
 main = echo "Hello world"

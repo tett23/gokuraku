@@ -1,0 +1,749 @@
+---
+source: packages/parser/tests/pds_test.rs
+expression: ast
+input_file: packages/parser/fixtures/pds/2.pds
+---
+Module {
+    statements: [
+        Assign(
+            Assign {
+                ident: Ident(
+                    "f",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Literal(
+                            Int(
+                                1,
+                            ),
+                        ),
+                        Literal(
+                            Int(
+                                2,
+                            ),
+                        ),
+                    ],
+                },
+                expr: Abstruction(
+                    Abstruction {
+                        left: Abstruction(
+                            Abstruction {
+                                left: Ident(
+                                    Ident(
+                                        "*",
+                                    ),
+                                ),
+                                right: Ident(
+                                    Ident(
+                                        "a",
+                                    ),
+                                ),
+                            },
+                        ),
+                        right: Ident(
+                            Ident(
+                                "b",
+                            ),
+                        ),
+                    },
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        TraitDef(
+            TraitDef {
+                constraints: [],
+                ident: TypeIdent(
+                    "Show",
+                ),
+                args: [
+                    TypeIdent(
+                        "a",
+                    ),
+                ],
+                where_clause: Module {
+                    statements: [
+                        AssignDef(
+                            AssignDef {
+                                eta_envs: EtaEnvs(
+                                    [],
+                                ),
+                                ident: Ident(
+                                    "a",
+                                ),
+                                expr: TypeExpr {
+                                    constraints: [],
+                                    expr: Literal(
+                                        Ident(
+                                            TypeIdent(
+                                                "Int",
+                                            ),
+                                        ),
+                                    ),
+                                },
+                            },
+                        ),
+                        Assign(
+                            Assign {
+                                ident: Ident(
+                                    "(++)",
+                                ),
+                                args: AssignArgs {
+                                    patterns: [],
+                                },
+                                expr: Abstruction(
+                                    Abstruction {
+                                        left: Abstruction(
+                                            Abstruction {
+                                                left: Ident(
+                                                    Ident(
+                                                        "->",
+                                                    ),
+                                                ),
+                                                right: Ident(
+                                                    Ident(
+                                                        "a",
+                                                    ),
+                                                ),
+                                            },
+                                        ),
+                                        right: Abstruction(
+                                            Abstruction {
+                                                left: Abstruction(
+                                                    Abstruction {
+                                                        left: Ident(
+                                                            Ident(
+                                                                "->",
+                                                            ),
+                                                        ),
+                                                        right: Ident(
+                                                            Ident(
+                                                                "a",
+                                                            ),
+                                                        ),
+                                                    },
+                                                ),
+                                                right: Ident(
+                                                    Ident(
+                                                        "a",
+                                                    ),
+                                                ),
+                                            },
+                                        ),
+                                    },
+                                ),
+                                where_clause: Module {
+                                    statements: [],
+                                },
+                            },
+                        ),
+                    ],
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "(++)",
+                ),
+                args: AssignArgs {
+                    patterns: [],
+                },
+                expr: Ident(
+                    Ident(
+                        "a",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(79, 96)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(96, 116)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(116, 129)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(129, 149)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(149, 176)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(176, 200)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(200, 216)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(217, 240)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(241, 263)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(263, 276)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(276, 298)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(298, 314)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(314, 317)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(317, 341)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(341, 359)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(359, 364)",
+            ),
+        ),
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [],
+                ),
+                ident: Ident(
+                    "repeat",
+                ),
+                expr: TypeExpr {
+                    constraints: [
+                        Constraint {
+                            ident: TypeIdent(
+                                "Identity",
+                            ),
+                            args: [],
+                        },
+                    ],
+                    expr: Arrow(
+                        Arrow(
+                            Literal(
+                                Ident(
+                                    TypeIdent(
+                                        "a",
+                                    ),
+                                ),
+                            ),
+                            Literal(
+                                Ident(
+                                    TypeIdent(
+                                        "a",
+                                    ),
+                                ),
+                            ),
+                        ),
+                        Literal(
+                            Ident(
+                                TypeIdent(
+                                    "Nat",
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "repeat",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Bind(
+                            Ident(
+                                "f",
+                            ),
+                        ),
+                        Literal(
+                            Int(
+                                0,
+                            ),
+                        ),
+                    ],
+                },
+                expr: Ident(
+                    Ident(
+                        "id",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "repeat",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Bind(
+                            Ident(
+                                "f",
+                            ),
+                        ),
+                        Bind(
+                            Ident(
+                                "n",
+                            ),
+                        ),
+                    ],
+                },
+                expr: Ident(
+                    Ident(
+                        "f",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [],
+                ),
+                ident: Ident(
+                    "repeatText",
+                ),
+                expr: TypeExpr {
+                    constraints: [],
+                    expr: Literal(
+                        Context(
+                            TypeIdent(
+                                "Text",
+                            ),
+                            Literal(
+                                Ident(
+                                    TypeIdent(
+                                        "Nat",
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "repeatText",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Bind(
+                            Ident(
+                                "s",
+                            ),
+                        ),
+                        Bind(
+                            Ident(
+                                "n",
+                            ),
+                        ),
+                    ],
+                },
+                expr: Ident(
+                    Ident(
+                        "repeat",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [],
+                ),
+                ident: Ident(
+                    "hardbrakeN",
+                ),
+                expr: TypeExpr {
+                    constraints: [],
+                    expr: Literal(
+                        Ident(
+                            TypeIdent(
+                                "Nat",
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "hardbreakN",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Bind(
+                            Ident(
+                                "n",
+                            ),
+                        ),
+                    ],
+                },
+                expr: Ident(
+                    Ident(
+                        "repeatText",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "hardbreak",
+                ),
+                args: AssignArgs {
+                    patterns: [],
+                },
+                expr: Ident(
+                    Ident(
+                        "hardbreakN",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [],
+                ),
+                ident: Ident(
+                    "(|)",
+                ),
+                expr: TypeExpr {
+                    constraints: [],
+                    expr: Arrow(
+                        Literal(
+                            Ident(
+                                TypeIdent(
+                                    "a",
+                                ),
+                            ),
+                        ),
+                        Arrow(
+                            Arrow(
+                                Literal(
+                                    Ident(
+                                        TypeIdent(
+                                            "a",
+                                        ),
+                                    ),
+                                ),
+                                Literal(
+                                    Ident(
+                                        TypeIdent(
+                                            "b",
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            Literal(
+                                Ident(
+                                    TypeIdent(
+                                        "b",
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "(|)",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Bind(
+                            Ident(
+                                "f",
+                            ),
+                        ),
+                        Bind(
+                            Ident(
+                                "g",
+                            ),
+                        ),
+                    ],
+                },
+                expr: Ident(
+                    Ident(
+                        "g",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [
+                        EtaEnv {
+                            ident: HandlerIdent(
+                                "write",
+                            ),
+                            expr: HandlerTypeExpr {
+                                resume: Arrow(
+                                    Literal(
+                                        Ident(
+                                            TypeIdent(
+                                                "Text",
+                                            ),
+                                        ),
+                                    ),
+                                    Literal(
+                                        Context(
+                                            TypeIdent(
+                                                "IO",
+                                            ),
+                                            Literal(
+                                                Tuple(
+                                                    0,
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                                ret: Literal(
+                                    Context(
+                                        TypeIdent(
+                                            "IO",
+                                        ),
+                                        Literal(
+                                            Tuple(
+                                                0,
+                                                [],
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            },
+                        },
+                        EtaEnv {
+                            ident: HandlerIdent(
+                                "read",
+                            ),
+                            expr: HandlerTypeExpr {
+                                resume: Literal(
+                                    Context(
+                                        TypeIdent(
+                                            "IO",
+                                        ),
+                                        Literal(
+                                            Ident(
+                                                TypeIdent(
+                                                    "Char",
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                                ret: Literal(
+                                    Context(
+                                        TypeIdent(
+                                            "IO",
+                                        ),
+                                        Literal(
+                                            Tuple(
+                                                0,
+                                                [],
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            },
+                        },
+                        EtaEnv {
+                            ident: HandlerIdent(
+                                "none",
+                            ),
+                            expr: HandlerTypeExpr {
+                                resume: Literal(
+                                    Tuple(
+                                        0,
+                                        [],
+                                    ),
+                                ),
+                                ret: Literal(
+                                    Tuple(
+                                        0,
+                                        [],
+                                    ),
+                                ),
+                            },
+                        },
+                    ],
+                ),
+                ident: Ident(
+                    "main",
+                ),
+                expr: TypeExpr {
+                    constraints: [],
+                    expr: Literal(
+                        Context(
+                            TypeIdent(
+                                "IO",
+                            ),
+                            Literal(
+                                Tuple(
+                                    0,
+                                    [],
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "main",
+                ),
+                args: AssignArgs {
+                    patterns: [],
+                },
+                expr: ApplyEff(
+                    ApplyEff {
+                        ident: HandlerIdent(
+                            "*write",
+                        ),
+                        expr: Literal(
+                            Text(
+                                "Hello world",
+                            ),
+                        ),
+                    },
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(749, 767)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(767, 797)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(797, 821)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(821, 824)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(824, 878)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(878, 917)",
+            ),
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(917, 922)",
+            ),
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "main",
+                ),
+                args: AssignArgs {
+                    patterns: [],
+                },
+                expr: ApplyEff(
+                    ApplyEff {
+                        ident: HandlerIdent(
+                            "*write",
+                        ),
+                        expr: Literal(
+                            Text(
+                                "Hello world",
+                            ),
+                        ),
+                    },
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+    ],
+}

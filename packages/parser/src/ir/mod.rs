@@ -26,7 +26,7 @@ pub struct Assign {
     pub ident: Ident,
     pub ident_name: Ident,
     pub expr: Rc<Expr>,
-    pub where_clause: Option<Box<Module>>,
+    pub where_clause: Module,
     pub pat: Option<Rc<PatternExpr>>,
 }
 
@@ -79,9 +79,12 @@ impl From<ast::Module> for Module {
             .fold(Self::default(), |mut acc, item| {
                 match item {
                     ast::Statement::Assign(assign) => acc.values.push(assign.into()),
-                    ast::Statement::AssignAnnotation(_) => {}
+                    ast::Statement::TraitDef(_) => todo!(),
+                    ast::Statement::AssignDef(_) => todo!(),
+                    ast::Statement::InstDef(_) => todo!(),
+                    ast::Statement::HandlerDef(_) => todo!(),
+                    ast::Statement::HandlerAssign(_) => todo!(),
                     ast::Statement::LineComment(_) => {}
-                    ast::Statement::HandlerAssign() => {}
                 };
 
                 acc
@@ -103,7 +106,7 @@ impl From<ast::Assign> for Assign {
                 true => None,
                 false => pat.map(|v| v.into()).map(Rc::new),
             },
-            where_clause: value.where_clause.map(|v| (*v).into()).map(Box::new),
+            where_clause: value.where_clause.into(),
         }
     }
 }
@@ -114,10 +117,11 @@ pub struct PatternExpr {}
 impl From<ast::PatternExpr> for PatternExpr {
     fn from(value: ast::PatternExpr) -> Self {
         match value {
-            ast::PatternExpr::Bind(_) => todo!(),
-            ast::PatternExpr::TypeBind(_) => todo!(),
+            ast::PatternExpr::Or(_, _) => todo!(),
             ast::PatternExpr::Literal(_) => todo!(),
-            ast::PatternExpr::SplitList() => todo!(),
+            ast::PatternExpr::Bind(_) => todo!(),
+            ast::PatternExpr::ListHead() => todo!(),
+            ast::PatternExpr::Tuple(_, _) => todo!(),
             ast::PatternExpr::Any => todo!(),
         }
     }
@@ -136,6 +140,13 @@ impl Ident {
 
 impl From<ast::Ident> for Ident {
     fn from(value: ast::Ident) -> Self {
+        value.0.into()
+    }
+}
+
+// あやしい
+impl From<ast::InstIdent> for Ident {
+    fn from(value: ast::InstIdent) -> Self {
         value.0.into()
     }
 }
@@ -164,7 +175,7 @@ impl Display for Ident {
 pub enum Expr {
     Literal(Literal),
     Apply(Apply),
-    ApplyEmbedded(ApplyEmbedded),
+    ApplyEmbedded(ApplyInst),
     Reference(Ident),
     Pattern(Pattern),
 }
@@ -229,7 +240,7 @@ pub struct Apply {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ApplyEmbedded {
+pub struct ApplyInst {
     pub ident: Ident,
     pub expr: Rc<Expr>,
 }
@@ -239,8 +250,12 @@ impl From<ast::Expr> for Expr {
         match value {
             ast::Expr::Literal(value) => Self::Literal(value.into()),
             ast::Expr::Apply(value) => Self::Apply(value.into()),
-            ast::Expr::ApplyEmbedded(value) => Self::ApplyEmbedded(value.into()),
+            ast::Expr::ApplyInst(value) => Self::ApplyEmbedded(value.into()),
             ast::Expr::Ident(value) => Self::Reference(value.into()),
+            ast::Expr::ApplyEff(_) => todo!(),
+            ast::Expr::InstIdent(_) => todo!(),
+            ast::Expr::HandlerIdent(_) => todo!(),
+            ast::Expr::Abstruction(_) => todo!(),
         }
     }
 }
@@ -254,8 +269,8 @@ impl From<ast::Apply> for Apply {
     }
 }
 
-impl From<ast::ApplyEmbedded> for ApplyEmbedded {
-    fn from(value: ast::ApplyEmbedded) -> Self {
+impl From<ast::ApplyInst> for ApplyInst {
+    fn from(value: ast::ApplyInst) -> Self {
         Self {
             ident: value.ident.into(),
             expr: Rc::new((*value.expr).into()),
@@ -291,8 +306,8 @@ impl From<ast::Literal> for Literal {
             ast::Literal::Text(value) => Self::Text(value),
             ast::Literal::Int(value) => Self::Int(value),
             ast::Literal::Unit => Self::Tuple(0, Box::new([])),
-            ast::Literal::List(_) => todo!(),
-            ast::Literal::Tuple(_) => todo!(),
+            ast::Literal::Array(_) => todo!(),
+            ast::Literal::Tuple(_, _) => todo!(),
         }
     }
 }

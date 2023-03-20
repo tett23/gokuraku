@@ -19,12 +19,12 @@ etaEnvs = { ws* ~ ("<" ~ ws* ~ etaEnvN ~ ws* ~ ","? ~ ">")? }
   etaEnvN = _{ etaEnv ~ ws* ~ ("," ~ ws* ~ etaEnv)* }
 
 // stmts
-stmt = { ws* ~ (instructionTypeAssign | handlerTypeAssign | typeAssign | assignDef | traitDef | handlerAssign | assign) ~ ws* }
-instructionTypeAssign = {instIdent ~ assignArgs ~ defOp ~ typeExpr }
-handlerTypeAssign = { handlerIdent ~ assignArgs ~ defOp ~ traitConstraintExprs ~ ws* ~ handlerTypeExpr ~ abstructionTypeExpr? }
-assignDef = { ws* ~ etaEnvs ~ ws* ~ ident ~ assignArgs ~ defOp ~ traitConstraintExprs ~ abstructionTypeExpr }
-traitDef = { "trait" ~ ws* ~ typeIdent ~ traitArgs ~ whereClause }
-  traitArgs = { (ws+ ~ (ident | typeIdent))* }
+stmt = { ws* ~ (instTypeDef | handlerTypeDef | assignTypeDef | traitDef | handlerAssign | assign) ~ ws* }
+instTypeDef = { instIdent ~ defOp ~ typeExpr }
+handlerTypeDef = { etaEnvs ~ ws* ~ handlerIdent ~ defOp ~ handlerDefTypeExpr }
+assignTypeDef = { etaEnvs ~ ws* ~ ident ~ defOp ~ (typeExpr | coroutineTypeExpr) }
+traitDef = { "trait" ~ ws* ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ whereClause }
+  traitArgs = { (ws+ ~ (varIdent | typeIdent))* }
   traitValue = _{ stmtsBlock | typeIdent }
   traitExpr = { ws* ~ ((traitValue ~ ws* ~ traitOp ~ ws* ~ traitValue ~ ws*)+ | traitValue) ~ ws* }
   traitOp = { traitOpAnd | traitOpOr }
@@ -33,13 +33,12 @@ traitDef = { "trait" ~ ws* ~ typeIdent ~ traitArgs ~ whereClause }
 // TODO: implAssign
 // TODO: dataAssign
 handlerAssign = { ws* ~ handlerIdent ~ assignArgs ~ assignOp ~ expr ~ whereClause? }
-typeAssign = { handlerTypeExpr ~ ws* ~ typeIdent ~ typeAssignArgs ~ assignOp ~ abstructionTypeExpr }
-  typeAssignArgs = {(ws+ ~ (ident | typeIdent))*}
 assign = { ws* ~ ident ~ assignArgs ~ assignOp ~ expr ~ whereClause }
 
 // type exprs
-typeExpr = { traitConstraintExprs ~ handlerTypeExpr ~ abstructionTypeExpr }
-embeddedTypeExpr = { abstructionTypeExpr }
+typeExpr = { traitConstraintExprs ~ abstructionTypeExpr }
+handlerDefTypeExpr = { traitConstraintExprs ~ handlerTypeExpr ~ abstructionTypeExpr }
+coroutineTypeExpr = { traitConstraintExprs ~ handlerTypeExpr }
 traitConstraintExprs = { (ws* ~ (traitConstraintGroup | traitConstraintExprN) ~ ws* ~ "=>" ~ ws*)? }
   traitConstraintExpr = { typeIdent ~ ws+ ~ varIdent }
   // TODO
@@ -47,50 +46,54 @@ traitConstraintExprs = { (ws* ~ (traitConstraintGroup | traitConstraintExprN) ~ 
   traitConstraintGroup = _{ "(" ~ ws* ~ traitConstraintExprN ~ ws* ~ ")" }
 handlerTypeExpr = { ws* ~ handlerTypeExpr1? }
   handlerTypeExpr1 = _{ "<" ~ ws* ~ abstructionTypeExpr ~ ws* ~ "," ~ ws* ~ abstructionTypeExpr ~ ws* ~ ">" }
-abstructionTypeExpr = { ws* ~ (typeExprArrow | typeExprContext | typeExprLiteral) }
-typeExprArrow = { typeExprLiteral ~ ws* ~ "->" ~ ws* ~ abstructionTypeExpr }
+abstructionTypeExpr = { ws* ~ (typeExprArrow | typeExprContext | typeExprGroup | typeExprLiteral) }
+typeExprArrow = { (typeExprLiteral | typeExprGroup) ~ ws* ~ "->" ~ ws* ~ abstructionTypeExpr }
 typeExprContext = { typeIdent ~ (ws+ ~ abstructionTypeExpr) }
-typeExprLiteral = { typeExprUnit | typeExprTuple | typeExprGroup | typeExprList | typeExprDivergent | typeIdent | varIdent }
+typeExprGroup = { "(" ~ ws* ~ abstructionTypeExpr ~ ws* ~ ")" }
+typeExprLiteral = { typeExprUnit | typeExprTuple | typeExprArray | typeExprDivergent | typeExprTop | typeIdent | varIdent }
   typeExprUnit = { "(" ~ ws* ~ ")" }
-  typeExprGroup = { "(" ~ ws* ~ abstructionTypeExpr ~ ws* ~ ")" }
   typeExprTuple = { "(" ~ ws* ~ (typeExprTupleN | typeExprTuple1) ~ ws* ~ ")" }
     typeExprTuple1 = _{ abstructionTypeExpr ~ ws* ~ "," }
     typeExprTupleN = _{ abstructionTypeExpr ~ (ws* ~ "," ~ ws* ~ abstructionTypeExpr)+ ~ ws* ~ ","? }
-  typeExprList = { "[" ~ ws* ~ abstructionTypeExpr ~ ws* ~ "]" }
+  typeExprArray = { "[" ~ ws* ~ abstructionTypeExpr ~ ws* ~ "]" }
   typeExprDivergent = { "!" }
+  typeExprTop = { "_" }
 
 // exprs
-expr = { (embeddedApply | exprInfix | literal | effApply | apply | withParen | assign | variable | instIdent | ident) ~ ws* ~ expr? }
+expr = { (instApply | effApply | apply | withParen | variable | instIdent | ident | literal) ~ ws* ~ expr? }
 // TODO: prefixOperator
 // TODO: postfixOperator
-infixOperator = @{ operator | infixIdent }
+infixOperator = { operator | infixIdent }
   operator = { operatorChar ~ (operatorChar | "=" | "#" | "@")* }
     operatorChar = _{ "." | "+" | "*" | "-" | "/" | "&" | "|" | ">" | "<" | "^" | "$" | "%" | ":" }
   infixIdent = { infixIdentSeparator ~ (!infixIdentSeparator ~ ident) ~ infixIdentSeparator }
     infixIdentSeparator = { "`" }
-  literal = { listLiteral | charLiteral | textLiteral | intLiteral | unitLiteral }
+  literal = { arrayLiteral | tupleLiteral | charLiteral | textLiteral | intLiteral | unitLiteral }
     textLiteral = { "\"" ~ textChar* ~ "\"" }
       textChar = { !"\"" ~ textCharChar }
       textCharChar = _{ (textEscapedChar | ANY) }
         textEscapedChar = _{ "\\" ~ ANY }
     intLiteral = { "0" | (("+" | "-")?  ~ ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*) }
     charLiteral = { "'" ~ (("\\" ~ ANY) | ANY) ~ "'" }
-    listLiteral = { "[" ~ expr* ~ "]"}
-    unitLiteral = { "(" ~ ws* ~ ")" }
-  exprInfix = { term ~ ws* ~ infixOperator ~ ws* ~ expr }
+    arrayLiteral = { "[" ~ expr* ~ "]"}
+    unitLiteral = { "(" ~ ws* ~ ","? ~ ws* ~ ")" }
+    tupleLiteral = { "(" ~ ws* ~ (tupleLiteralN | tupleLiteral1) ~ ws* ~ ")" }
+      tupleLiteral1 = _{ expr ~ ws* ~ "," }
+      tupleLiteralN = _{ expr ~ (ws* ~ "," ~ ws* ~ expr)+ ~ ws* ~ ","? }
   term = _{ withParen | variable | ident | literal }
   withParen = _{ "(" ~ ws* ~ expr ~ ws* ~ ")" }
   apply = { applyInfix | applyPrefix }
-    applyPrefix = { ident ~ ws+ ~ expr }
-    applyInfix = { exprInfix }
-    // TODO: applyPostfix
-    applyArgs = { (ws+ ~ (exprInfix | withParen | assign | ident | literal))* }
-  effApply = { "eff" ~ ws+ ~ handlerIdent ~ expr? }
-  embeddedApply = { instIdent ~ ws+ ~ expr }
+    applyPrefix = { ident ~ (ws+ ~ expr)? }
+    applyInfix = { term ~ ws* ~ infixOperator ~ ws* ~ expr }
+      // TODO: applyInfixLeft
+      // TODO: applyInfixRight
+    // applyArgs = { (ws+ ~ (exprInfix | withParen | ident | literal))* }
+  effApply = { "eff" ~ ws+ ~ handlerIdent ~ (ws+ ~ expr)? }
+  instApply = { instIdent ~ (ws+ ~ expr)? }
 
 // patterns
 pattern = { patternOr | patternValue }
-  patternValue = { patternAny | patternListHead | patternIdent | patternLiteral | patternTuple }
+  patternValue = _{ patternAny | patternListHead | patternIdent | patternLiteral | patternTuple }
     patternLiteral = { literal }
     patternIdent = { varIdent }
     patternListHead = { "[" ~ ws* ~ patternValue ~ ws* ~ ":" ~ ws* ~ pattern ~ ws* ~ "]" }

@@ -1,0 +1,519 @@
+---
+source: packages/parser/tests/pds_test.rs
+expression: ast
+input_file: packages/parser/fixtures/pds/1.pds
+---
+Module {
+    statements: [
+        Assign(
+            Assign {
+                ident: Ident(
+                    "a",
+                ),
+                args: AssignArgs {
+                    patterns: [],
+                },
+                expr: Literal(
+                    Tuple(
+                        1,
+                        [
+                            Literal(
+                                Int(
+                                    1,
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [],
+                ),
+                ident: Ident(
+                    "f",
+                ),
+                expr: TypeExpr {
+                    constraints: [],
+                    expr: Arrow(
+                        Literal(
+                            Ident(
+                                TypeIdent(
+                                    "Int",
+                                ),
+                            ),
+                        ),
+                        Arrow(
+                            Literal(
+                                Ident(
+                                    TypeIdent(
+                                        "Int",
+                                    ),
+                                ),
+                            ),
+                            Literal(
+                                Ident(
+                                    TypeIdent(
+                                        "a",
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "f",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Or(
+                            Literal(
+                                Int(
+                                    1,
+                                ),
+                            ),
+                            Literal(
+                                Int(
+                                    2,
+                                ),
+                            ),
+                        ),
+                    ],
+                },
+                expr: Literal(
+                    Int(
+                        1,
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        TraitDef(
+            TraitDef {
+                constraints: [],
+                ident: TypeIdent(
+                    "Show",
+                ),
+                args: [
+                    TypeIdent(
+                        "a",
+                    ),
+                ],
+                where_clause: Module {
+                    statements: [
+                        AssignDef(
+                            AssignDef {
+                                eta_envs: EtaEnvs(
+                                    [],
+                                ),
+                                ident: Ident(
+                                    "show",
+                                ),
+                                expr: TypeExpr {
+                                    constraints: [],
+                                    expr: Arrow(
+                                        Literal(
+                                            Ident(
+                                                TypeIdent(
+                                                    "a",
+                                                ),
+                                            ),
+                                        ),
+                                        Literal(
+                                            Array(
+                                                Literal(
+                                                    Ident(
+                                                        TypeIdent(
+                                                            "Char",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                },
+                            },
+                        ),
+                    ],
+                },
+            },
+        ),
+        LineComment(
+            LineComment(
+                "lineComment(91, 113)",
+            ),
+        ),
+        InstDef(
+            InstDef {
+                ident: InstIdent(
+                    "@write",
+                ),
+                expr: TypeExpr {
+                    constraints: [
+                        Constraint {
+                            ident: TypeIdent(
+                                "Show",
+                            ),
+                            args: [],
+                        },
+                    ],
+                    expr: Arrow(
+                        Literal(
+                            Ident(
+                                TypeIdent(
+                                    "a",
+                                ),
+                            ),
+                        ),
+                        Literal(
+                            Context(
+                                TypeIdent(
+                                    "IO",
+                                ),
+                                Literal(
+                                    Tuple(
+                                        0,
+                                        [],
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        HandlerDef(
+            HandlerDef {
+                eta_envs: EtaEnvs(
+                    [],
+                ),
+                ident: HandlerIdent(
+                    "*write",
+                ),
+                expr: HandlerTypeDefExpr {
+                    constraints: [
+                        Constraint {
+                            ident: TypeIdent(
+                                "Show",
+                            ),
+                            args: [],
+                        },
+                    ],
+                    handler_expr: HandlerTypeExpr {
+                        resume: Arrow(
+                            Literal(
+                                Ident(
+                                    TypeIdent(
+                                        "a",
+                                    ),
+                                ),
+                            ),
+                            Literal(
+                                Tuple(
+                                    0,
+                                    [],
+                                ),
+                            ),
+                        ),
+                        ret: Literal(
+                            Context(
+                                TypeIdent(
+                                    "IO",
+                                ),
+                                Literal(
+                                    Tuple(
+                                        0,
+                                        [],
+                                    ),
+                                ),
+                            ),
+                        ),
+                    },
+                    expr: Literal(
+                        Tuple(
+                            0,
+                            [],
+                        ),
+                    ),
+                },
+            },
+        ),
+        HandlerAssign(
+            HandlerAssign {
+                ident: HandlerIdent(
+                    "*write",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Bind(
+                            Ident(
+                                "s",
+                            ),
+                        ),
+                    ],
+                },
+                expr: ApplyInst(
+                    ApplyInst {
+                        ident: InstIdent(
+                            "@write",
+                        ),
+                        expr: Ident(
+                            Ident(
+                                "s",
+                            ),
+                        ),
+                    },
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+        HandlerDef(
+            HandlerDef {
+                eta_envs: EtaEnvs(
+                    [],
+                ),
+                ident: HandlerIdent(
+                    "*read",
+                ),
+                expr: HandlerTypeDefExpr {
+                    constraints: [],
+                    handler_expr: HandlerTypeExpr {
+                        resume: Literal(
+                            Context(
+                                TypeIdent(
+                                    "IO",
+                                ),
+                                Literal(
+                                    Ident(
+                                        TypeIdent(
+                                            "Char",
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                        ret: Literal(
+                            Context(
+                                TypeIdent(
+                                    "IO",
+                                ),
+                                Literal(
+                                    Tuple(
+                                        0,
+                                        [],
+                                    ),
+                                ),
+                            ),
+                        ),
+                    },
+                    expr: Literal(
+                        Tuple(
+                            0,
+                            [],
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "echo",
+                ),
+                args: AssignArgs {
+                    patterns: [
+                        Bind(
+                            Ident(
+                                "s",
+                            ),
+                        ),
+                    ],
+                },
+                expr: Ident(
+                    Ident(
+                        "await",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [
+                        AssignDef(
+                            AssignDef {
+                                eta_envs: EtaEnvs(
+                                    [],
+                                ),
+                                ident: Ident(
+                                    "write",
+                                ),
+                                expr: TypeExpr {
+                                    constraints: [
+                                        Constraint {
+                                            ident: TypeIdent(
+                                                "Show",
+                                            ),
+                                            args: [],
+                                        },
+                                    ],
+                                    expr: Arrow(
+                                        Literal(
+                                            Ident(
+                                                TypeIdent(
+                                                    "a",
+                                                ),
+                                            ),
+                                        ),
+                                        Literal(
+                                            Context(
+                                                TypeIdent(
+                                                    "IO",
+                                                ),
+                                                Literal(
+                                                    Tuple(
+                                                        0,
+                                                        [],
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                },
+                            },
+                        ),
+                        Assign(
+                            Assign {
+                                ident: Ident(
+                                    "write",
+                                ),
+                                args: AssignArgs {
+                                    patterns: [],
+                                },
+                                expr: ApplyEff(
+                                    ApplyEff {
+                                        ident: HandlerIdent(
+                                            "*write",
+                                        ),
+                                        expr: Literal(
+                                            Unit,
+                                        ),
+                                    },
+                                ),
+                                where_clause: Module {
+                                    statements: [],
+                                },
+                            },
+                        ),
+                    ],
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                eta_envs: EtaEnvs(
+                    [
+                        EtaEnv {
+                            ident: HandlerIdent(
+                                "write",
+                            ),
+                            expr: HandlerTypeExpr {
+                                resume: Literal(
+                                    Tuple(
+                                        0,
+                                        [],
+                                    ),
+                                ),
+                                ret: Literal(
+                                    Context(
+                                        TypeIdent(
+                                            "IO",
+                                        ),
+                                        Literal(
+                                            Tuple(
+                                                0,
+                                                [],
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            },
+                        },
+                        EtaEnv {
+                            ident: HandlerIdent(
+                                "b",
+                            ),
+                            expr: HandlerTypeExpr {
+                                resume: Literal(
+                                    Tuple(
+                                        0,
+                                        [],
+                                    ),
+                                ),
+                                ret: Literal(
+                                    Context(
+                                        TypeIdent(
+                                            "IO",
+                                        ),
+                                        Literal(
+                                            Tuple(
+                                                0,
+                                                [],
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            },
+                        },
+                    ],
+                ),
+                ident: Ident(
+                    "main",
+                ),
+                expr: TypeExpr {
+                    constraints: [],
+                    expr: Literal(
+                        Context(
+                            TypeIdent(
+                                "IO",
+                            ),
+                            Literal(
+                                Tuple(
+                                    0,
+                                    [],
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        Assign(
+            Assign {
+                ident: Ident(
+                    "main",
+                ),
+                args: AssignArgs {
+                    patterns: [],
+                },
+                expr: Ident(
+                    Ident(
+                        "echo",
+                    ),
+                ),
+                where_clause: Module {
+                    statements: [],
+                },
+            },
+        ),
+    ],
+}

@@ -1,2 +1,0 @@
-// <write: Text -> IO ()> main :: IO ()
-main = @write "Hello world"
