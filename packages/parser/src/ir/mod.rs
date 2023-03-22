@@ -85,6 +85,8 @@ impl From<ast::Module> for Module {
                     ast::Statement::HandlerDef(_) => todo!(),
                     ast::Statement::HandlerAssign(_) => todo!(),
                     ast::Statement::LineComment(_) => {}
+                    ast::Statement::DataAssign(_) => todo!(),
+                    ast::Statement::ImplTrait(_) => todo!(),
                 };
 
                 acc
@@ -123,6 +125,7 @@ impl From<ast::PatternExpr> for PatternExpr {
             ast::PatternExpr::ListHead() => todo!(),
             ast::PatternExpr::Tuple(_, _) => todo!(),
             ast::PatternExpr::Any => todo!(),
+            ast::PatternExpr::TypeIdent(_) => todo!(),
         }
     }
 }

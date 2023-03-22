@@ -1,4 +1,4 @@
-keywords = { "eff" | "handle" | "trait" | "impl" | "where" | "data" | "fix" | "const" }
+keywords = { "eff" | "handle" | "trait" | "impl" | "where" | "data" | "fix" | "const" | "nominal" | "structual" }
 lineComment = { ws* ~ "//" ~ (!br ~ ANY)* ~ (&EOI | br) }
 
 // idents
@@ -31,12 +31,18 @@ traitDef = { "trait" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ wher
     traitOpAnd = { "&" }
     traitOpOr = { "|" }
 implAssign = { "impl" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ whereClause }
-dataAssign = { "data" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ dataArgs ~ ws+ ~ "=" ~ ws* ~ dataExpr }
-  dataArgs = { (varIdent | typeIdent)* }
+dataAssign = { dataModifier ~ "data" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ dataArgs ~ ws* ~ "=" ~ ws* ~ dataExpr }
+  dataModifier = { ((dataModifierNominal | dataModifierStructual) ~ ws+)* }
+    dataModifierNominal = { "nominal" }
+    dataModifierStructual = { "structual" }
+  dataArgs = { (ws+ ~ varIdent | typeIdent)* }
   dataExpr = { dataExprOr | dataValue }
     dataExprOr = { dataTerm ~ ws* ~ "|" ~ ws* ~ dataExpr }
     dataTerm = _{ dataValue }
-    dataValue = { typeIdent }
+    dataValueGroup = { "(" ~ ws* ~ dataExpr ~ ws* ~ ")" }
+    dataValue = { dataValueGroup | dataValueContext | dataValueUnit | typeIdent | varIdent }
+      dataValueContext = { (typeIdent | varIdent) ~ (ws+ ~ dataTerm)+ }
+      dataValueUnit = { "(" ~ ws* ~ ")" }
 
 // TODO: dataAssign
 handlerAssign = { handlerIdent ~ assignArgs ~ assignOp ~ expr ~ whereClause? }
@@ -101,9 +107,10 @@ infixOperator = { operator | infixIdent }
 
 // patterns
 pattern = { patternOr | patternValue }
-  patternValue = _{ patternAny | patternListHead | patternIdent | patternLiteral | patternTuple }
+  patternValue = _{ patternAny | patternListHead | patternTypeIdent | patternIdent | patternLiteral | patternTuple }
     patternLiteral = { literal }
-    patternIdent = { typeIdent | varIdent }
+    patternIdent = { varIdent }
+    patternTypeIdent = { typeIdent }
     patternListHead = { "[" ~ ws* ~ patternValue ~ ws* ~ ":" ~ ws* ~ pattern ~ ws* ~ "]" }
     patternAny = { "_" ~ varIdent? }
     patternTuple = { "(" ~ ws* ~ patternValue ~ ("," ~ ws* ~ pattern) ~ ws* ~ ")"}

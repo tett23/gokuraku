@@ -1,0 +1,52 @@
+@atomic :: ()
+@write :: Char -> IO ()
+@read :: () -> IO Char
+
+nominal data True = ()
+nominal data False = ()
+
+data Bool = True | False
+
+data Option a = (Some a) | Nil
+
+data Either a b = (Left a) | Right b
+
+data Result a b = (Ok a) | Err b
+
+trait Show a where {
+  show :: a -> Text
+}
+
+data Ordering = LT | EQ | GT
+
+trait PartialOrd a b where {
+  partialCmp :: a -> b -> Option Ordering
+  (<) :: a -> b -> Bool
+  (<=) :: a -> b -> Bool
+  (>) :: a -> b -> Bool
+  (>=) :: a -> b -> Bool
+}
+
+trait PartialEq a b where {
+  (==) :: a -> b -> Bool
+  (!=) :: a -> b -> Bool
+}
+
+trait PartialEq a a => Eq a where {}
+
+trait (PartialEq a a, Eq a) => Ord a where {
+  cmp :: a -> a -> Ordering
+  max :: a -> a -> a
+  min :: a -> a -> a
+  clamp :: a -> a -> a
+}
+
+impl Show Int where {
+  // TODO
+  show a = ""
+}
+
+impl Show Bool where {
+  show True = "True"
+  show False = "False"
+}

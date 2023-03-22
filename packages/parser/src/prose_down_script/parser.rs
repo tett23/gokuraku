@@ -4,10 +4,11 @@ use pest::Parser;
 use pest_derive::Parser;
 
 use crate::ast::{
-    Abstruction, Apply, ApplyEff, ApplyInst, Assign, AssignArgs, AssignDef, Constraint, EtaEnv,
-    EtaEnvs, Expr, HandlerAssign, HandlerDef, HandlerIdent, HandlerTypeDefExpr, HandlerTypeExpr,
-    Ident, InstDef, InstIdent, LineComment, Literal, Module, ParameterCondition, PatternExpr,
-    Statement, TraitDef, TypeAbstructionExpr, TypeExpr, TypeIdent, TypeLiteral,
+    Abstruction, Apply, ApplyEff, ApplyInst, Assign, AssignArgs, AssignDef, Constraint, DataAssign,
+    DataExpr, DataModifier, DataValue, EtaEnv, EtaEnvs, Expr, HandlerAssign, HandlerDef,
+    HandlerIdent, HandlerTypeDefExpr, HandlerTypeExpr, Ident, ImplTrait, InstDef, InstIdent,
+    LineComment, Literal, Module, PatternExpr, Statement, TraitDef, TypeAbstructionExpr, TypeExpr,
+    TypeIdent, TypeLiteral,
 };
 
 fn unary(pair: Pair<Rule>) -> Pair<Rule> {
@@ -53,6 +54,15 @@ fn unary_or_binary(pair: Pair<Rule>) -> (Pair<Rule>, Option<Pair<Rule>>) {
 pub struct PdsParser;
 
 pub fn parse(input: &str) -> anyhow::Result<Module> {
+    // let pratt = PrattParser::<Rule>::new().op(Op::infix(Rule::dataExprOr, Assoc::Left));
+    // let a = pratt
+    //     .map_primary(parse_stmt)
+    //     .map_infix(|lhs, op, rhs| {
+    //         dbg!(op);
+    //         todo!()
+    //     })
+    //     .parse(PdsParser::parse(Rule::root, input).unwrap());
+
     let stmts = PdsParser::parse(Rule::root, input)
         .context("parse error")?
         .map(parse_stmt)
@@ -72,11 +82,100 @@ fn parse_stmt(pair: Pair<Rule>) -> Statement {
         Rule::assignTypeDef => Statement::AssignDef(parse_assign_def(pair)),
         Rule::assign => Statement::Assign(parse_assign(pair)),
         Rule::traitDef => Statement::TraitDef(parse_trait_def(pair)),
+        Rule::implAssign => Statement::ImplTrait(parse_impl_trait(pair)),
         Rule::instTypeDef => Statement::InstDef(parse_inst_def(pair)),
         Rule::handlerTypeDef => Statement::HandlerDef(parse_handler_def(pair)),
         Rule::handlerAssign => Statement::HandlerAssign(parse_handler_assign(pair)),
+        Rule::dataAssign => Statement::DataAssign(parse_data_assign(pair)),
         Rule::lineComment => Statement::LineComment(parse_line_comment(pair)),
         Rule::stmt => parse_stmt(unary(pair)),
+        _ => panic!("{pair}"),
+    }
+}
+
+fn parse_impl_trait(pair: Pair<Rule>) -> ImplTrait {
+    let (constraints, ident, args, where_clause) = quadruple(pair);
+
+    ImplTrait {
+        constraints: constraints
+            .into_inner()
+            .map(parse_constraint)
+            .collect::<Vec<_>>(),
+        ident: parse_type_ident(ident),
+        args: args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
+        where_clause: parse_where_clause(where_clause),
+    }
+}
+
+fn parse_data_assign(pair: Pair<Rule>) -> DataAssign {
+    let (modifiers, constraints, ident, args, expr) = {
+        let mut pairs = pair.into_inner();
+
+        (
+            pairs.next().unwrap(),
+            pairs.next().unwrap(),
+            pairs.next().unwrap(),
+            pairs.next().unwrap(),
+            pairs.next().unwrap(),
+        )
+    };
+
+    DataAssign {
+        modifiers: modifiers
+            .into_inner()
+            .map(parse_data_modifier)
+            .collect::<Vec<_>>(),
+        constraints: constraints
+            .into_inner()
+            .map(parse_constraint)
+            .collect::<Vec<_>>(),
+        ident: parse_type_ident(ident),
+        args: args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
+        expr: parse_data_expr(expr),
+    }
+}
+
+fn parse_data_modifier(pair: Pair<Rule>) -> DataModifier {
+    match pair.as_rule() {
+        Rule::dataModifierNominal => DataModifier::Nominal,
+        Rule::dataModifierStructual => DataModifier::Structual,
+        _ => panic!("{pair}"),
+    }
+}
+
+fn parse_data_expr(pair: Pair<Rule>) -> DataExpr {
+    match pair.as_rule() {
+        Rule::dataExprOr => parse_data_expr_or(pair),
+        Rule::dataValue => parse_data_value(unary(pair)),
+        Rule::dataValueGroup => parse_data_expr(unary(pair)),
+        Rule::dataExpr => parse_data_expr(unary(pair)),
+        _ => panic!("{pair}"),
+    }
+}
+
+fn parse_data_expr_or(pair: Pair<Rule>) -> DataExpr {
+    let (lhs, rhs) = binary(pair);
+
+    DataExpr::Or(
+        Box::new(parse_data_expr(lhs)),
+        Box::new(parse_data_expr(rhs)),
+    )
+}
+
+fn parse_data_value(pair: Pair<Rule>) -> DataExpr {
+    match pair.as_rule() {
+        Rule::dataValueContext => {
+            let (ident, args) = binary(pair);
+            DataExpr::Value(DataValue::Context(
+                parse_type_ident(ident),
+                args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
+            ))
+        }
+        Rule::typeIdent => DataExpr::Value(DataValue::TypeIdent(parse_type_ident(pair))),
+        Rule::varIdent => DataExpr::Value(DataValue::TypeIdent(parse_type_ident(pair))),
+        Rule::dataValueUnit => DataExpr::Value(DataValue::Unit),
+        Rule::dataValueGroup => parse_data_expr(unary(pair)),
+        Rule::dataValue => parse_data_value(unary(pair)),
         _ => panic!("{pair}"),
     }
 }
@@ -304,6 +403,7 @@ fn parse_pattern(pair: Pair<Rule>) -> PatternExpr {
         }
         Rule::patternLiteral => PatternExpr::Literal(parse_literal(unary(pair))),
         Rule::patternIdent => PatternExpr::Bind(parse_ident(unary(pair))),
+        Rule::patternTypeIdent => PatternExpr::TypeIdent(parse_type_ident(unary(pair))),
         Rule::patternListHead => {
             todo!()
         }
@@ -320,12 +420,6 @@ fn parse_assign_def(pair: Pair<Rule>) -> AssignDef {
         eta_envs: parse_eta_envs(eta_envs),
         ident: parse_ident(ident),
         expr: parse_type_expr(type_expr),
-    }
-}
-
-fn parse_assign_annotation_condition(pair: Pair<Rule>) -> Vec<ParameterCondition> {
-    match pair.as_rule() {
-        _ => unreachable!("{pair}"),
     }
 }
 

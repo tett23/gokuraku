@@ -16,7 +16,9 @@ pub enum Statement {
     HandlerDef(HandlerDef),
     HandlerAssign(HandlerAssign),
     TraitDef(TraitDef),
+    ImplTrait(ImplTrait),
     InstDef(InstDef),
+    DataAssign(DataAssign),
     LineComment(LineComment),
 }
 
@@ -47,6 +49,14 @@ pub struct EtaEnvs(pub Vec<EtaEnv>);
 pub struct EtaEnv {
     pub ident: HandlerIdent,
     pub expr: HandlerTypeExpr,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ImplTrait {
+    pub constraints: Vec<Constraint>,
+    pub ident: TypeIdent,
+    pub args: Vec<TypeIdent>,
+    pub where_clause: Module,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -144,6 +154,34 @@ pub struct HandlerAssign {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct DataAssign {
+    pub modifiers: Vec<DataModifier>,
+    pub constraints: Vec<Constraint>,
+    pub ident: TypeIdent,
+    pub args: Vec<TypeIdent>,
+    pub expr: DataExpr,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum DataModifier {
+    Nominal,
+    Structual,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum DataExpr {
+    Or(Box<DataExpr>, Box<DataExpr>),
+    Value(DataValue),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum DataValue {
+    Context(TypeIdent, Vec<TypeIdent>),
+    TypeIdent(TypeIdent),
+    Unit,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AssignArgs {
     pub patterns: Vec<PatternExpr>,
 }
@@ -153,6 +191,7 @@ pub enum PatternExpr {
     Or(Box<PatternExpr>, Box<PatternExpr>),
     Literal(Literal),
     Bind(Ident),
+    TypeIdent(TypeIdent),
     ListHead(),
     Tuple(usize, Vec<PatternExpr>),
     Any,
