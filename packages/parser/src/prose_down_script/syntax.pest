@@ -1,13 +1,17 @@
-keywords = { "eff" | "handle" | "trait" | "impl" | "where" | "data" | "fix" | "const" | "nominal" | "structual" }
+keywords = { "eff" | "handle" | "trait" | "impl" | "where" | "data" | "fix" | "const" | "nominal" | "structual" | "forall" | "exists" }
 lineComment = { ws* ~ "//" ~ (!br ~ ANY)* ~ (&EOI | br) }
 
 // idents
+lowerIdent = _{ !(&keywords) ~ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
+upperIdent = _{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
 ident = { varIdent | opIdent }
   opIdent = _{ "(" ~ operator ~ ")" }
-varIdent = { !(&keywords) ~ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
-typeIdent = { ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
-instIdent = { "@" ~ varIdent }
-handlerIdent = { "*" ~ varIdent }
+  varIdent = { lowerIdent }
+typeIdent = { existsIdent | forallIdent }
+  existsIdent = { upperIdent }
+  forallIdent = { lowerIdent }
+handlerIdent = { "*" ~ lowerIdent }
+instIdent = { "@" ~ lowerIdent }
 
 //
 defOp = _{ ws* ~ "::" ~ ws* }
@@ -15,7 +19,8 @@ assignOp = _{ ws* ~ "=" ~ ws* }
 assignArgs = { (ws+ ~ pattern)* }
 whereClause = { (ws* ~ "where" ~ ws* ~ stmtsBlock)? }
 etaEnvs = { ws* ~ ("<" ~ ws* ~ etaEnvN ~ ws* ~ ","? ~ ">")? }
-  etaEnv = { ws* ~ varIdent ~ ws* ~ ":" ~ ws* ~ handlerTypeExpr }
+  etaEnv = { ws* ~ etaHandlerIdent ~ ws* ~ ":" ~ ws* ~ handlerTypeExpr }
+    etaHandlerIdent = { lowerIdent }
   etaEnvN = _{ etaEnv ~ ws* ~ ("," ~ ws* ~ etaEnv)* }
 
 // stmts
@@ -24,24 +29,24 @@ instTypeDef = { instIdent ~ defOp ~ typeExpr }
 handlerTypeDef = { etaEnvs ~ ws* ~ handlerIdent ~ defOp ~ handlerDefTypeExpr }
 assignTypeDef = { etaEnvs ~ ws* ~ ident ~ defOp ~ (typeExpr | coroutineTypeExpr) }
 traitDef = { "trait" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ whereClause }
-  traitArgs = { (ws+ ~ (varIdent | typeIdent))* }
+  traitArgs = { (ws+ ~ typeIdent)* }
   traitValue = _{ stmtsBlock | typeIdent }
   traitExpr = { ws* ~ ((traitValue ~ ws* ~ traitOp ~ ws* ~ traitValue ~ ws*)+ | traitValue) ~ ws* }
   traitOp = { traitOpAnd | traitOpOr }
     traitOpAnd = { "&" }
     traitOpOr = { "|" }
-implAssign = { "impl" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ whereClause }
-dataAssign = { dataModifier ~ "data" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ dataArgs ~ ws* ~ "=" ~ ws* ~ dataExpr }
+implAssign = { "impl" ~ ws+ ~ traitConstraintExprs ~ existsIdent ~ traitArgs ~ whereClause }
+dataAssign = { dataModifier ~ "data" ~ ws+ ~ traitConstraintExprs ~ existsIdent ~ dataArgs ~ ws* ~ "=" ~ ws* ~ dataExpr }
   dataModifier = { ((dataModifierNominal | dataModifierStructual) ~ ws+)* }
     dataModifierNominal = { "nominal" }
     dataModifierStructual = { "structual" }
-  dataArgs = { (ws+ ~ varIdent | typeIdent)* }
+  dataArgs = { (ws+ ~ typeIdent)* }
   dataExpr = { dataExprOr | dataValue }
     dataExprOr = { dataTerm ~ ws* ~ "|" ~ ws* ~ dataExpr }
     dataTerm = _{ dataValue }
     dataValueGroup = { "(" ~ ws* ~ dataExpr ~ ws* ~ ")" }
-    dataValue = { dataValueGroup | dataValueContext | dataValueUnit | typeIdent | varIdent }
-      dataValueContext = { (typeIdent | varIdent) ~ (ws+ ~ dataTerm)+ }
+    dataValue = { dataValueGroup | dataValueContext | dataValueUnit | typeIdent }
+      dataValueContext = { typeIdent ~ (ws+ ~ dataTerm)+ }
       dataValueUnit = { "(" ~ ws* ~ ")" }
 
 // TODO: dataAssign
@@ -53,7 +58,7 @@ typeExpr = { traitConstraintExprs ~ abstructionTypeExpr }
 handlerDefTypeExpr = { traitConstraintExprs ~ handlerTypeExpr ~ abstructionTypeExpr }
 coroutineTypeExpr = { traitConstraintExprs ~ handlerTypeExpr }
 traitConstraintExprs = { (ws* ~ (traitConstraintGroup | traitConstraintExprN) ~ ws* ~ "=>" ~ ws*)? }
-  traitConstraintExpr = { typeIdent ~ (ws+ ~ (typeIdent | varIdent))* }
+  traitConstraintExpr = { typeIdent ~ (ws+ ~ typeIdent)* }
   // TODO
   traitConstraintExprN = _{ traitConstraintExpr ~ ws* ~ ("," ~ ws* ~ traitConstraintExpr)* }
   traitConstraintGroup = _{ "(" ~ ws* ~ traitConstraintExprN ~ ws* ~ ")" }
@@ -107,12 +112,12 @@ infixOperator = { operator | infixIdent }
 
 // patterns
 pattern = { patternOr | patternValue }
-  patternValue = _{ patternAny | patternListHead | patternTypeIdent | patternIdent | patternLiteral | patternTuple }
+  patternValue = _{ patternAny | patternListHead | patternIdent | patternTypeIdent | patternLiteral | patternTuple }
     patternLiteral = { literal }
     patternIdent = { varIdent }
     patternTypeIdent = { typeIdent }
     patternListHead = { "[" ~ ws* ~ patternValue ~ ws* ~ ":" ~ ws* ~ pattern ~ ws* ~ "]" }
-    patternAny = { "_" ~ varIdent? }
+    patternAny = { "_" ~ lowerIdent? }
     patternTuple = { "(" ~ ws* ~ patternValue ~ ("," ~ ws* ~ pattern) ~ ws* ~ ")"}
     // TODO: patternData
   patternOr = { patternValue ~ ws* ~ "|" ~ ws* ~ pattern }

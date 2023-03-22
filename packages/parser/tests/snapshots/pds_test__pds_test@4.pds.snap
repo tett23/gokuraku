@@ -17,15 +17,19 @@ Module {
                                 resume: Arrow(
                                     Literal(
                                         Ident(
-                                            TypeIdent(
-                                                "Text",
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Text",
+                                                ),
                                             ),
                                         ),
                                     ),
                                     Literal(
                                         Context(
-                                            TypeIdent(
-                                                "IO",
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "IO",
+                                                ),
                                             ),
                                             Literal(
                                                 Tuple(
@@ -38,8 +42,10 @@ Module {
                                 ),
                                 ret: Literal(
                                     Context(
-                                        TypeIdent(
-                                            "IO",
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "IO",
+                                            ),
                                         ),
                                         Literal(
                                             Tuple(
@@ -60,8 +66,10 @@ Module {
                     constraints: [],
                     expr: Literal(
                         Context(
-                            TypeIdent(
-                                "IO",
+                            ExistsIdent(
+                                ExistsIdent(
+                                    "IO",
+                                ),
                             ),
                             Literal(
                                 Tuple(

@@ -7,7 +7,7 @@ nominal data False = ()
 
 data Bool = True | False
 
-data Option a = (Some a) | Nil
+data Option a = Some a | Nil
 
 data Either a b = (Left a) | Right b
 

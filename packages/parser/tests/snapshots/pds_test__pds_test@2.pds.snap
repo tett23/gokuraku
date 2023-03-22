@@ -55,12 +55,16 @@ Module {
         TraitDef(
             TraitDef {
                 constraints: [],
-                ident: TypeIdent(
-                    "Show",
+                ident: ExistsIdent(
+                    ExistsIdent(
+                        "Show",
+                    ),
                 ),
                 args: [
-                    TypeIdent(
-                        "a",
+                    ForallIdent(
+                        ForallIdent(
+                            "a",
+                        ),
                     ),
                 ],
                 where_clause: Module {
@@ -77,8 +81,10 @@ Module {
                                     constraints: [],
                                     expr: Literal(
                                         Ident(
-                                            TypeIdent(
-                                                "Int",
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
                                             ),
                                         ),
                                     ),
@@ -252,33 +258,47 @@ Module {
                 expr: TypeExpr {
                     constraints: [
                         Constraint {
-                            ident: TypeIdent(
-                                "Identity",
+                            ident: ExistsIdent(
+                                ExistsIdent(
+                                    "Identity",
+                                ),
                             ),
-                            args: [],
+                            args: [
+                                ForallIdent(
+                                    ForallIdent(
+                                        "a",
+                                    ),
+                                ),
+                            ],
                         },
                     ],
                     expr: Arrow(
                         Arrow(
                             Literal(
                                 Ident(
-                                    TypeIdent(
-                                        "a",
+                                    ForallIdent(
+                                        ForallIdent(
+                                            "a",
+                                        ),
                                     ),
                                 ),
                             ),
                             Literal(
                                 Ident(
-                                    TypeIdent(
-                                        "a",
+                                    ForallIdent(
+                                        ForallIdent(
+                                            "a",
+                                        ),
                                     ),
                                 ),
                             ),
                         ),
                         Literal(
                             Ident(
-                                TypeIdent(
-                                    "Nat",
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "Nat",
+                                    ),
                                 ),
                             ),
                         ),
@@ -356,13 +376,17 @@ Module {
                     constraints: [],
                     expr: Literal(
                         Context(
-                            TypeIdent(
-                                "Text",
+                            ExistsIdent(
+                                ExistsIdent(
+                                    "Text",
+                                ),
                             ),
                             Literal(
                                 Ident(
-                                    TypeIdent(
-                                        "Nat",
+                                    ExistsIdent(
+                                        ExistsIdent(
+                                            "Nat",
+                                        ),
                                     ),
                                 ),
                             ),
@@ -412,8 +436,10 @@ Module {
                     constraints: [],
                     expr: Literal(
                         Ident(
-                            TypeIdent(
-                                "Nat",
+                            ExistsIdent(
+                                ExistsIdent(
+                                    "Nat",
+                                ),
                             ),
                         ),
                     ),
@@ -475,8 +501,10 @@ Module {
                     expr: Arrow(
                         Literal(
                             Ident(
-                                TypeIdent(
-                                    "a",
+                                ForallIdent(
+                                    ForallIdent(
+                                        "a",
+                                    ),
                                 ),
                             ),
                         ),
@@ -484,23 +512,29 @@ Module {
                             Arrow(
                                 Literal(
                                     Ident(
-                                        TypeIdent(
-                                            "a",
+                                        ForallIdent(
+                                            ForallIdent(
+                                                "a",
+                                            ),
                                         ),
                                     ),
                                 ),
                                 Literal(
                                     Ident(
-                                        TypeIdent(
-                                            "b",
+                                        ForallIdent(
+                                            ForallIdent(
+                                                "b",
+                                            ),
                                         ),
                                     ),
                                 ),
                             ),
                             Literal(
                                 Ident(
-                                    TypeIdent(
-                                        "b",
+                                    ForallIdent(
+                                        ForallIdent(
+                                            "b",
+                                        ),
                                     ),
                                 ),
                             ),
@@ -550,15 +584,19 @@ Module {
                                 resume: Arrow(
                                     Literal(
                                         Ident(
-                                            TypeIdent(
-                                                "Text",
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Text",
+                                                ),
                                             ),
                                         ),
                                     ),
                                     Literal(
                                         Context(
-                                            TypeIdent(
-                                                "IO",
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "IO",
+                                                ),
                                             ),
                                             Literal(
                                                 Tuple(
@@ -571,8 +609,10 @@ Module {
                                 ),
                                 ret: Literal(
                                     Context(
-                                        TypeIdent(
-                                            "IO",
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "IO",
+                                            ),
                                         ),
                                         Literal(
                                             Tuple(
@@ -591,13 +631,17 @@ Module {
                             expr: HandlerTypeExpr {
                                 resume: Literal(
                                     Context(
-                                        TypeIdent(
-                                            "IO",
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "IO",
+                                            ),
                                         ),
                                         Literal(
                                             Ident(
-                                                TypeIdent(
-                                                    "Char",
+                                                ExistsIdent(
+                                                    ExistsIdent(
+                                                        "Char",
+                                                    ),
                                                 ),
                                             ),
                                         ),
@@ -605,8 +649,10 @@ Module {
                                 ),
                                 ret: Literal(
                                     Context(
-                                        TypeIdent(
-                                            "IO",
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "IO",
+                                            ),
                                         ),
                                         Literal(
                                             Tuple(
@@ -646,8 +692,10 @@ Module {
                     constraints: [],
                     expr: Literal(
                         Context(
-                            TypeIdent(
-                                "IO",
+                            ExistsIdent(
+                                ExistsIdent(
+                                    "IO",
+                                ),
                             ),
                             Literal(
                                 Tuple(

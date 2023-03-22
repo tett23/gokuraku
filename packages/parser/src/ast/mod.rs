@@ -220,7 +220,16 @@ pub struct TypeClass {}
 pub struct Ident(pub String);
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct TypeIdent(pub String);
+pub enum TypeIdent {
+    ForallIdent(ForallIdent),
+    ExistsIdent(ExistsIdent),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ForallIdent(pub String);
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ExistsIdent(pub String);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HandlerIdent(pub String);

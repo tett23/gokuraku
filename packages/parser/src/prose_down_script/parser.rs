@@ -5,10 +5,10 @@ use pest_derive::Parser;
 
 use crate::ast::{
     Abstruction, Apply, ApplyEff, ApplyInst, Assign, AssignArgs, AssignDef, Constraint, DataAssign,
-    DataExpr, DataModifier, DataValue, EtaEnv, EtaEnvs, Expr, HandlerAssign, HandlerDef,
-    HandlerIdent, HandlerTypeDefExpr, HandlerTypeExpr, Ident, ImplTrait, InstDef, InstIdent,
-    LineComment, Literal, Module, PatternExpr, Statement, TraitDef, TypeAbstructionExpr, TypeExpr,
-    TypeIdent, TypeLiteral,
+    DataExpr, DataModifier, DataValue, EtaEnv, EtaEnvs, ExistsIdent, Expr, ForallIdent,
+    HandlerAssign, HandlerDef, HandlerIdent, HandlerTypeDefExpr, HandlerTypeExpr, Ident, ImplTrait,
+    InstDef, InstIdent, LineComment, Literal, Module, PatternExpr, Statement, TraitDef,
+    TypeAbstructionExpr, TypeExpr, TypeIdent, TypeLiteral,
 };
 
 fn unary(pair: Pair<Rule>) -> Pair<Rule> {
@@ -474,7 +474,7 @@ fn parse_type_literal(pair: Pair<Rule>) -> TypeLiteral {
             )
         }
         Rule::typeExprTop => TypeLiteral::Top,
-        Rule::typeIdent | Rule::varIdent => TypeLiteral::Ident(parse_type_ident(pair)),
+        Rule::typeIdent => TypeLiteral::Ident(parse_type_ident(pair)),
         _ => unreachable!("{pair}"),
     }
 }
@@ -491,8 +491,9 @@ fn parse_ident(pair: Pair<Rule>) -> Ident {
 
 fn parse_type_ident(pair: Pair<Rule>) -> TypeIdent {
     match pair.as_rule() {
-        Rule::typeIdent => TypeIdent(pair.as_str().to_string()),
-        Rule::varIdent => TypeIdent(pair.as_str().to_string()),
+        Rule::forallIdent => TypeIdent::ForallIdent(ForallIdent(pair.as_str().to_string())),
+        Rule::existsIdent => TypeIdent::ExistsIdent(ExistsIdent(pair.as_str().to_string())),
+        Rule::typeIdent => parse_type_ident(unary(pair)),
         _ => panic!("{pair}"),
     }
 }
@@ -500,7 +501,7 @@ fn parse_type_ident(pair: Pair<Rule>) -> TypeIdent {
 fn parse_handler_ident(pair: Pair<Rule>) -> HandlerIdent {
     match pair.as_rule() {
         Rule::handlerIdent => HandlerIdent(pair.as_str().to_string()),
-        Rule::varIdent => HandlerIdent(pair.as_str().to_string()),
+        Rule::etaHandlerIdent => HandlerIdent(pair.as_str().to_string()),
         _ => panic!("{pair}"),
     }
 }
@@ -508,7 +509,6 @@ fn parse_handler_ident(pair: Pair<Rule>) -> HandlerIdent {
 fn parse_inst_ident(pair: Pair<Rule>) -> InstIdent {
     match pair.as_rule() {
         Rule::instIdent => InstIdent(pair.as_str().to_string()),
-        Rule::varIdent => InstIdent(pair.as_str().to_string()),
         _ => panic!("{pair}"),
     }
 }
