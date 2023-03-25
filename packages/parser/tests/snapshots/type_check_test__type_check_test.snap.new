@@ -1,23 +1,12 @@
 ---
 source: packages/parser/tests/type_check_test.rs
+assertion_line: 13
 expression: ir
 input_file: packages/parser/fixtures/pds/6.pds
 ---
 Ok(
     SymbolTable {
         type_symbols: {
-            Ident(
-                "unary",
-            ): TypeAbstruction {
-                arg: Some(
-                    Value(
-                        Bottom,
-                    ),
-                ),
-                expr: Value(
-                    Bottom,
-                ),
-            },
             Ident(
                 "binary",
             ): TypeAbstruction {
@@ -43,6 +32,18 @@ Ok(
                 "id",
             ): TypeAbstruction {
                 arg: None,
+                expr: Value(
+                    Bottom,
+                ),
+            },
+            Ident(
+                "unary",
+            ): TypeAbstruction {
+                arg: Some(
+                    Value(
+                        Bottom,
+                    ),
+                ),
                 expr: Value(
                     Bottom,
                 ),
