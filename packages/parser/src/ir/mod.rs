@@ -1,3 +1,7 @@
+pub mod ir1;
+
+use crate::ast::{self};
+use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, VecDeque},
     fmt::Display,
@@ -5,16 +9,20 @@ use std::{
     rc::Rc,
 };
 
-use crate::ast::{self};
-use serde::{Deserialize, Serialize};
-
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Module {
-    pub values: Vec<Assign>,
+    pub assigns: Vec<Assign>,
     pub types: Vec<(Ident, TypeExpr)>,
     pub handlers: Vec<Handler>,
     pub insts: Vec<(Ident, TypeExpr)>,
+    pub symbol_table: SymbolTable,
 }
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct SymbolTable {
+    pub abs: HashMap<Ident, Assign>,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Value {
     Expr(Rc<Expr>),
@@ -78,7 +86,7 @@ impl From<ast::Module> for Module {
             .into_iter()
             .fold(Self::default(), |mut acc, item| {
                 match item {
-                    ast::Statement::Assign(assign) => acc.values.push(assign.into()),
+                    ast::Statement::Assign(assign) => acc.assigns.push(assign.into()),
                     ast::Statement::TraitDef(_) => todo!(),
                     ast::Statement::AssignDef(_) => todo!(),
                     ast::Statement::InstDef(_) => todo!(),
@@ -96,20 +104,21 @@ impl From<ast::Module> for Module {
 
 impl From<ast::Assign> for Assign {
     fn from(value: ast::Assign) -> Self {
-        let is_normal_form = value.args.patterns.len() == 0;
-        let mut args = value.args.patterns;
-        let pat = args.pop();
+        // let is_normal_form = value.args.patterns.len() == 0;
+        // let mut args = value.args.patterns;
+        // let pat = args.pop();
 
-        Self {
-            ident: format!("{}_{}", value.ident.0, seq_gen()).into(),
-            ident_name: value.ident.into(),
-            expr: Rc::new(value.expr.into()),
-            pat: match is_normal_form {
-                true => None,
-                false => pat.map(|v| v.into()).map(Rc::new),
-            },
-            where_clause: value.where_clause.into(),
-        }
+        // Self {
+        //     ident: format!("{}_{}", value.ident.0, seq_gen()).into(),
+        //     ident_name: value.ident.into(),
+        //     expr: Rc::new(value.expr.into()),
+        //     pat: match is_normal_form {
+        //         true => None,
+        //         false => pat.map(|v| v.into()).map(Rc::new),
+        //     },
+        //     where_clause: value.where_clause.into(),
+        // }
+        todo!()
     }
 }
 
@@ -136,9 +145,9 @@ pub struct Ident {
 }
 
 impl Ident {
-    pub fn apply_new(&self) -> Ident {
-        format!("{}__{}", &self.ident, seq_gen()).into()
-    }
+    // pub fn apply_new(&self) -> Ident {
+    //     format!("{}__{}", &self.ident, seq_gen()).into()
+    // }
 }
 
 impl From<ast::Ident> for Ident {
@@ -327,11 +336,19 @@ impl Display for Literal {
     }
 }
 
-fn seq_gen() -> usize {
-    static mut COUNT: usize = 0;
-    unsafe {
-        COUNT += 1;
+pub fn type_check(ast: &ast::Module) -> anyhow::Result<()> {
+    Ok(())
+}
 
-        COUNT
-    }
+fn seq_gen() -> Box<(dyn Fn() -> usize)> {
+    Box::new(
+        move || {
+            let mut count: usize = 0;
+
+            move || {
+                count += 1;
+                count
+            }
+        }()
+    )
 }

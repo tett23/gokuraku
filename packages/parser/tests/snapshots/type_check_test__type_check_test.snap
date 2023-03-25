@@ -1,0 +1,82 @@
+---
+source: packages/parser/tests/type_check_test.rs
+expression: ir
+input_file: packages/parser/fixtures/pds/6.pds
+---
+Ok(
+    SymbolTable {
+        type_symbols: {
+            Ident(
+                "ternary",
+            ): TypeAbstruction {
+                arg: Some(
+                    Value(
+                        Bottom,
+                    ),
+                ),
+                expr: Abstruction(
+                    TypeAbstruction {
+                        arg: Some(
+                            Value(
+                                Bottom,
+                            ),
+                        ),
+                        expr: Abstruction(
+                            TypeAbstruction {
+                                arg: Some(
+                                    Value(
+                                        Bottom,
+                                    ),
+                                ),
+                                expr: Value(
+                                    Bottom,
+                                ),
+                            },
+                        ),
+                    },
+                ),
+            },
+            Ident(
+                "id",
+            ): TypeAbstruction {
+                arg: None,
+                expr: Value(
+                    Bottom,
+                ),
+            },
+            Ident(
+                "unary",
+            ): TypeAbstruction {
+                arg: Some(
+                    Value(
+                        Bottom,
+                    ),
+                ),
+                expr: Value(
+                    Bottom,
+                ),
+            },
+            Ident(
+                "binary",
+            ): TypeAbstruction {
+                arg: Some(
+                    Value(
+                        Bottom,
+                    ),
+                ),
+                expr: Abstruction(
+                    TypeAbstruction {
+                        arg: Some(
+                            Value(
+                                Bottom,
+                            ),
+                        ),
+                        expr: Value(
+                            Bottom,
+                        ),
+                    },
+                ),
+            },
+        },
+    },
+)

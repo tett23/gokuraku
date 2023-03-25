@@ -1,0 +1,4 @@
+id :: Int
+unary :: Int -> Int
+binary:: Int -> Int -> Int
+ternary :: Int -> Int -> Int -> Int
