@@ -162,6 +162,32 @@ pub struct DataAssign {
     pub expr: DataExpr,
 }
 
+impl DataAssign {
+    pub fn is_structual(&self) -> bool {
+        match self.modifiers.as_slice() {
+            &[] => true,
+            &[DataModifier::Structual] => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_nominal(&self) -> bool {
+        match self.modifiers.as_slice() {
+            &[] => true,
+            &[DataModifier::Nominal] => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_valid_modifier(&self) -> bool {
+        match self.modifiers.as_slice() {
+            &[] => true,
+            &[DataModifier::Nominal | DataModifier::Structual] => true,
+            _ => false,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum DataModifier {
     Nominal,

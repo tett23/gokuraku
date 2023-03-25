@@ -7,6 +7,14 @@ Ok(
     SymbolTable {
         type_symbols: {
             Ident(
+                "id",
+            ): TypeAbstruction {
+                arg: None,
+                expr: Value(
+                    Bottom,
+                ),
+            },
+            Ident(
                 "ternary",
             ): TypeAbstruction {
                 arg: Some(
@@ -34,14 +42,6 @@ Ok(
                             },
                         ),
                     },
-                ),
-            },
-            Ident(
-                "id",
-            ): TypeAbstruction {
-                arg: None,
-                expr: Value(
-                    Bottom,
                 ),
             },
             Ident(
@@ -77,6 +77,60 @@ Ok(
                     },
                 ),
             },
+        },
+        data_lattice: BoundedDataLattice {
+            top: [
+                DataLattice {
+                    elements: [
+                        DataElement {
+                            ident: ExistsIdent(
+                                "Unit",
+                            ),
+                            value: Unit,
+                        },
+                    ],
+                    union_elements: None,
+                    intersection_elements: None,
+                },
+                DataLattice {
+                    elements: [
+                        DataElement {
+                            ident: ExistsIdent(
+                                "Int",
+                            ),
+                            value: Unit,
+                        },
+                    ],
+                    union_elements: None,
+                    intersection_elements: None,
+                },
+            ],
+            botom: [
+                DataLattice {
+                    elements: [
+                        DataElement {
+                            ident: ExistsIdent(
+                                "Unit",
+                            ),
+                            value: Unit,
+                        },
+                    ],
+                    union_elements: None,
+                    intersection_elements: None,
+                },
+                DataLattice {
+                    elements: [
+                        DataElement {
+                            ident: ExistsIdent(
+                                "Int",
+                            ),
+                            value: Unit,
+                        },
+                    ],
+                    union_elements: None,
+                    intersection_elements: None,
+                },
+            ],
         },
     },
 )

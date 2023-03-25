@@ -1,3 +1,5 @@
+nominal data Int = ()
+
 id :: Int
 unary :: Int -> Int
 binary:: Int -> Int -> Int
