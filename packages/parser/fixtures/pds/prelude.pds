@@ -2,16 +2,22 @@
 @write :: Char -> IO ()
 @read :: () -> IO Char
 
+*read :: Show a => <IO Char, IO ()>
+*read = @read
+
+*write :: Show a => <a -> IO (), IO ()>
+*write s = @write s
+
 nominal data True = ()
 nominal data False = ()
 
 data Bool = True | False
 
-data Option a = Some a | Nil
+data Option a = nominal Some a | nominal Nil
 
-data Either a b = (Left a) | Right b
+data Either a b = nominal Left a | nominal Right b
 
-data Result a b = (Ok a) | Err b
+data Result a b = nominal Ok a | nominal Err b
 
 trait Show a where {
   show :: a -> Text

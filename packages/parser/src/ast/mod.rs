@@ -2,11 +2,26 @@ mod prose_down;
 
 pub use self::prose_down::*;
 use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Module {
     pub statements: Vec<Statement>,
+}
+
+impl Module {
+    pub fn iter(&self) -> impl Iterator<Item = &Statement> {
+        self.statements.iter()
+    }
+}
+
+impl IntoIterator for Module {
+    type Item = Statement;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.statements.into_iter()
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -24,16 +39,16 @@ pub enum Statement {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HandlerDef {
-    pub eta_envs: EtaEnvs,
     pub ident: HandlerIdent,
     pub expr: HandlerTypeDefExpr,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HandlerTypeDefExpr {
-    pub constraints: Vec<Constraint>,
-    pub handler_expr: HandlerTypeExpr,
+    pub trait_constraints: Vec<TraitConstraint>,
+    pub eta_envs: EtaEnvs,
     pub expr: TypeAbstructionExpr,
+    pub handler_expr: CoroutineType,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -45,15 +60,30 @@ pub struct InstDef {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EtaEnvs(pub Vec<EtaEnv>);
 
+impl EtaEnvs {
+    pub fn iter(&self) -> impl Iterator<Item = &EtaEnv> {
+        self.0.iter()
+    }
+}
+
+impl IntoIterator for EtaEnvs {
+    type Item = EtaEnv;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EtaEnv {
     pub ident: HandlerIdent,
-    pub expr: HandlerTypeExpr,
+    pub expr: CoroutineType,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ImplTrait {
-    pub constraints: Vec<Constraint>,
+    pub constraints: Vec<TraitConstraint>,
     pub ident: TypeIdent,
     pub args: Vec<TypeIdent>,
     pub where_clause: Module,
@@ -78,23 +108,22 @@ pub struct Abstruction {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct HandlerTypeExpr {
+pub struct CoroutineType {
     pub resume: TypeAbstructionExpr,
     pub ret: TypeAbstructionExpr,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TraitDef {
-    pub constraints: Vec<Constraint>,
-    pub ident: TypeIdent,
-    pub args: Vec<TypeIdent>,
+    pub trait_constraints: Vec<TraitConstraint>,
+    pub constructor: Constructor,
     pub where_clause: Module,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Constraint {
-    pub ident: TypeIdent,
-    pub args: Vec<TypeIdent>,
+pub struct TraitConstraint {
+    pub ident: TraitIdent,
+    pub arg: ForallIdent,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -117,7 +146,8 @@ pub struct ApplyEff {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TypeExpr {
-    pub constraints: Vec<Constraint>,
+    pub trait_constraints: Vec<TraitConstraint>,
+    pub eta_envs: EtaEnvs,
     pub expr: TypeAbstructionExpr,
 }
 
@@ -155,8 +185,8 @@ pub struct HandlerAssign {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DataAssign {
-    pub modifiers: Vec<DataModifier>,
-    pub constraints: Vec<Constraint>,
+    pub modifier: Option<DataModifier>,
+    pub constraints: Vec<TraitConstraint>,
     pub ident: TypeIdent,
     pub args: Vec<TypeIdent>,
     pub expr: DataExpr,
@@ -164,27 +194,15 @@ pub struct DataAssign {
 
 impl DataAssign {
     pub fn is_structual(&self) -> bool {
-        match self.modifiers.as_slice() {
-            &[] => true,
-            &[DataModifier::Structual] => true,
-            _ => false,
+        match self.modifier {
+            Some(DataModifier::Structual) => true,
+            Some(DataModifier::Nominal) => false,
+            None => true,
         }
     }
 
     pub fn is_nominal(&self) -> bool {
-        match self.modifiers.as_slice() {
-            &[] => true,
-            &[DataModifier::Nominal] => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_valid_modifier(&self) -> bool {
-        match self.modifiers.as_slice() {
-            &[] => true,
-            &[DataModifier::Nominal | DataModifier::Structual] => true,
-            _ => false,
-        }
+        !self.is_structual()
     }
 }
 
@@ -200,11 +218,42 @@ pub enum DataExpr {
     Value(DataValue),
 }
 
+impl DataExpr {
+    pub fn iter(&self) -> impl Iterator<Item = &DataValue> {
+        match self {
+            DataExpr::Or(lhs, rhs) => lhs.iter().chain(rhs.iter()).collect::<Vec<_>>().into_iter(),
+            DataExpr::Value(v) => vec![v].into_iter(),
+        }
+    }
+}
+
+impl IntoIterator for DataExpr {
+    type Item = DataValue;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        match self {
+            DataExpr::Or(lhs, rhs) => lhs
+                .into_iter()
+                .chain(rhs.into_iter())
+                .collect::<Vec<_>>()
+                .into_iter(),
+            DataExpr::Value(v) => vec![v].into_iter(),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum DataValue {
-    Context(TypeIdent, Vec<TypeIdent>),
-    TypeIdent(TypeIdent),
+    Constructor(Constructor),
     Unit,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Constructor {
+    pub modifier: Option<DataModifier>,
+    pub ident: TypeIdent,
+    pub args: Vec<TypeIdent>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -225,7 +274,6 @@ pub enum PatternExpr {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AssignDef {
-    pub eta_envs: EtaEnvs,
     pub ident: Ident,
     pub expr: TypeExpr,
 }
@@ -242,26 +290,38 @@ pub struct ParameterCondition {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TypeClass {}
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
 pub struct Ident(pub String);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
 pub enum TypeIdent {
     ForallIdent(ForallIdent),
     ExistsIdent(ExistsIdent),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl Display for TypeIdent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TypeIdent::ForallIdent(ident) => write!(f, "forall {}.", ident.0),
+            TypeIdent::ExistsIdent(ident) => write!(f, "exists {}.", ident.0),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
 pub struct ForallIdent(pub String);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
 pub struct ExistsIdent(pub String);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
 pub struct HandlerIdent(pub String);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
 pub struct InstIdent(pub String);
+
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
+pub struct TraitIdent(pub String);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Literal {

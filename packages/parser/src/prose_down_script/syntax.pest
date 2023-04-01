@@ -12,6 +12,7 @@ typeIdent = { existsIdent | forallIdent }
   forallIdent = { lowerIdent }
 handlerIdent = { "*" ~ lowerIdent }
 instIdent = { "@" ~ lowerIdent }
+traitIdent = { upperIdent }
 
 //
 defOp = _{ ws* ~ "::" ~ ws* }
@@ -26,8 +27,8 @@ etaEnvs = { ws* ~ ("<" ~ ws* ~ etaEnvN ~ ws* ~ ","? ~ ">")? }
 // stmts
 stmt = { ws* ~ (instTypeDef | handlerTypeDef | assignTypeDef | traitDef | handlerAssign | implAssign | dataAssign | assign) ~ ws* }
 instTypeDef = { instIdent ~ defOp ~ typeExpr }
-handlerTypeDef = { etaEnvs ~ ws* ~ handlerIdent ~ defOp ~ handlerDefTypeExpr }
-assignTypeDef = { etaEnvs ~ ws* ~ ident ~ defOp ~ (typeExpr | coroutineTypeExpr) }
+handlerTypeDef = { handlerIdent ~ defOp ~ handlerDefTypeExpr }
+assignTypeDef = { ident ~ defOp ~ (typeExpr | coroutineTypeExpr) }
 traitDef = { "trait" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ whereClause }
   traitArgs = { (ws+ ~ typeIdent)* }
   traitValue = _{ stmtsBlock | typeIdent }
@@ -37,7 +38,7 @@ traitDef = { "trait" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ wher
     traitOpOr = { "|" }
 implAssign = { "impl" ~ ws+ ~ traitConstraintExprs ~ existsIdent ~ traitArgs ~ whereClause }
 dataAssign = { dataModifier ~ "data" ~ ws+ ~ traitConstraintExprs ~ existsIdent ~ dataArgs ~ ws* ~ "=" ~ ws* ~ dataExpr }
-  dataModifier = { ((dataModifierNominal | dataModifierStructual) ~ ws+)* }
+  dataModifier = { ((dataModifierNominal | dataModifierStructual) ~ ws+)? }
     dataModifierNominal = { "nominal" }
     dataModifierStructual = { "structual" }
   dataArgs = { (ws+ ~ typeIdent)* }
@@ -45,25 +46,29 @@ dataAssign = { dataModifier ~ "data" ~ ws+ ~ traitConstraintExprs ~ existsIdent 
     dataExprOr = { dataTerm ~ ws* ~ "|" ~ ws* ~ dataExpr }
     dataTerm = _{ dataValue }
     dataValueGroup = { "(" ~ ws* ~ dataExpr ~ ws* ~ ")" }
-    dataValue = { dataValueGroup | dataValueContext | dataValueUnit | typeIdent }
-      dataValueContext = { typeIdent ~ (ws+ ~ dataTerm)+ }
+    dataValue = { dataValueGroup | dataValueConstructor | dataValueUnit }
+      dataValueConstructor = { dataModifier ~ typeIdent ~ dataValueConstructorArgs }
+      	dataValueConstructorArgs = { (ws+ ~ dataTerm)* }
       dataValueUnit = { "(" ~ ws* ~ ")" }
+      // TODO Array
 
 // TODO: dataAssign
 handlerAssign = { handlerIdent ~ assignArgs ~ assignOp ~ expr ~ whereClause? }
 assign = { ident ~ assignArgs ~ assignOp ~ expr ~ whereClause }
 
 // type exprs
-typeExpr = { traitConstraintExprs ~ abstructionTypeExpr }
-handlerDefTypeExpr = { traitConstraintExprs ~ handlerTypeExpr ~ abstructionTypeExpr }
+typeExpr = { traitConstraintExprs ~ etaEnvs ~ abstructionTypeExpr }
+// TODO: return Coroutine
+handlerDefTypeExpr = { traitConstraintExprs ~ etaEnvs ~ handlerTypeExpr ~ abstructionTypeExprOptional }
 coroutineTypeExpr = { traitConstraintExprs ~ handlerTypeExpr }
 traitConstraintExprs = { (ws* ~ (traitConstraintGroup | traitConstraintExprN) ~ ws* ~ "=>" ~ ws*)? }
-  traitConstraintExpr = { typeIdent ~ (ws+ ~ typeIdent)* }
+  traitConstraintExpr = { traitIdent ~ (ws+ ~ forallIdent)* }
   // TODO
   traitConstraintExprN = _{ traitConstraintExpr ~ ws* ~ ("," ~ ws* ~ traitConstraintExpr)* }
   traitConstraintGroup = _{ "(" ~ ws* ~ traitConstraintExprN ~ ws* ~ ")" }
 handlerTypeExpr = { ws* ~ handlerTypeExpr1? }
   handlerTypeExpr1 = _{ "<" ~ ws* ~ abstructionTypeExpr ~ ws* ~ "," ~ ws* ~ abstructionTypeExpr ~ ws* ~ ">" }
+abstructionTypeExprOptional = { abstructionTypeExpr? }
 abstructionTypeExpr = { ws* ~ (typeExprArrow | typeExprContext | typeExprGroup | typeExprLiteral) }
 typeExprArrow = { (typeExprLiteral | typeExprGroup) ~ ws* ~ "->" ~ ws* ~ abstructionTypeExpr }
 typeExprContext = { typeIdent ~ (ws+ ~ abstructionTypeExpr) }

@@ -40,14 +40,14 @@ hardbreak = hardbreakN 1
 (|) :: a -> (a -> b) -> b
 (|) f g = g f
 
-<write: <Text -> IO (), IO ()>, read: <IO Char, IO ()>, none: <(), ()>> main :: IO ()
+main :: <write: <Text -> IO (), IO ()>, read: <IO Char, IO ()>, none: <(), ()>> IO ()
 main = eff *write "Hello world"
 
 // handlers H = {
 //   write s :: Text -> IO ()
 //   write s = @write s
 //
-//   <write: Text -> IO ()> writeLn s :: Text -> IO()
+//   writeLn s :: <write: Text -> IO ()> Text -> IO()
 //   writeLn s = eff write (s ++ "\n")
 // }
 

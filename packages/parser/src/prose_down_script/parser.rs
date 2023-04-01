@@ -4,11 +4,11 @@ use pest::Parser;
 use pest_derive::Parser;
 
 use crate::ast::{
-    Abstruction, Apply, ApplyEff, ApplyInst, Assign, AssignArgs, AssignDef, Constraint, DataAssign,
-    DataExpr, DataModifier, DataValue, EtaEnv, EtaEnvs, ExistsIdent, Expr, ForallIdent,
-    HandlerAssign, HandlerDef, HandlerIdent, HandlerTypeDefExpr, HandlerTypeExpr, Ident, ImplTrait,
-    InstDef, InstIdent, LineComment, Literal, Module, PatternExpr, Statement, TraitDef,
-    TypeAbstructionExpr, TypeExpr, TypeIdent, TypeLiteral,
+    Abstruction, Apply, ApplyEff, ApplyInst, Assign, AssignArgs, AssignDef, Constructor,
+    CoroutineType, DataAssign, DataExpr, DataModifier, DataValue, EtaEnv, EtaEnvs, ExistsIdent,
+    Expr, ForallIdent, HandlerAssign, HandlerDef, HandlerIdent, HandlerTypeDefExpr, Ident,
+    ImplTrait, InstDef, InstIdent, LineComment, Literal, Module, PatternExpr, Statement,
+    TraitConstraint, TraitDef, TraitIdent, TypeAbstructionExpr, TypeExpr, TypeIdent, TypeLiteral,
 };
 
 fn unary(pair: Pair<Rule>) -> Pair<Rule> {
@@ -46,6 +46,12 @@ fn unary_or_binary(pair: Pair<Rule>) -> (Pair<Rule>, Option<Pair<Rule>>) {
     let mut pairs = pair.into_inner();
 
     (pairs.next().unwrap(), pairs.next())
+}
+
+fn unary_or_none(pair: Pair<Rule>) -> Option<Pair<Rule>> {
+    let mut pairs = pair.into_inner();
+
+    pairs.next()
 }
 
 #[derive(Parser)]
@@ -99,7 +105,7 @@ fn parse_impl_trait(pair: Pair<Rule>) -> ImplTrait {
     ImplTrait {
         constraints: constraints
             .into_inner()
-            .map(parse_constraint)
+            .map(parse_trait_constraint)
             .collect::<Vec<_>>(),
         ident: parse_type_ident(ident),
         args: args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
@@ -108,7 +114,7 @@ fn parse_impl_trait(pair: Pair<Rule>) -> ImplTrait {
 }
 
 fn parse_data_assign(pair: Pair<Rule>) -> DataAssign {
-    let (modifiers, constraints, ident, args, expr) = {
+    let (modifier, constraints, ident, args, expr) = {
         let mut pairs = pair.into_inner();
 
         (
@@ -121,13 +127,10 @@ fn parse_data_assign(pair: Pair<Rule>) -> DataAssign {
     };
 
     DataAssign {
-        modifiers: modifiers
-            .into_inner()
-            .map(parse_data_modifier)
-            .collect::<Vec<_>>(),
+        modifier: parse_data_modifier(modifier),
         constraints: constraints
             .into_inner()
-            .map(parse_constraint)
+            .map(parse_trait_constraint)
             .collect::<Vec<_>>(),
         ident: parse_type_ident(ident),
         args: args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
@@ -135,10 +138,13 @@ fn parse_data_assign(pair: Pair<Rule>) -> DataAssign {
     }
 }
 
-fn parse_data_modifier(pair: Pair<Rule>) -> DataModifier {
+fn parse_data_modifier(pair: Pair<Rule>) -> Option<DataModifier> {
     match pair.as_rule() {
-        Rule::dataModifierNominal => DataModifier::Nominal,
-        Rule::dataModifierStructual => DataModifier::Structual,
+        Rule::dataModifierNominal => Some(DataModifier::Nominal),
+        Rule::dataModifierStructual => Some(DataModifier::Structual),
+        Rule::dataModifier => unary_or_none(pair)
+            .map(|pair| parse_data_modifier(pair))
+            .flatten(),
         _ => panic!("{pair}"),
     }
 }
@@ -164,15 +170,14 @@ fn parse_data_expr_or(pair: Pair<Rule>) -> DataExpr {
 
 fn parse_data_value(pair: Pair<Rule>) -> DataExpr {
     match pair.as_rule() {
-        Rule::dataValueContext => {
-            let (ident, args) = binary(pair);
-            DataExpr::Value(DataValue::Context(
-                parse_type_ident(ident),
-                args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
-            ))
+        Rule::dataValueConstructor => {
+            let (modifier, ident, args) = triple(pair);
+            DataExpr::Value(DataValue::Constructor(Constructor {
+                modifier: parse_data_modifier(modifier),
+                ident: parse_type_ident(ident),
+                args: args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
+            }))
         }
-        Rule::typeIdent => DataExpr::Value(DataValue::TypeIdent(parse_type_ident(pair))),
-        Rule::varIdent => DataExpr::Value(DataValue::TypeIdent(parse_type_ident(pair))),
         Rule::dataValueUnit => DataExpr::Value(DataValue::Unit),
         Rule::dataValueGroup => parse_data_expr(unary(pair)),
         Rule::dataValue => parse_data_value(unary(pair)),
@@ -181,24 +186,24 @@ fn parse_data_value(pair: Pair<Rule>) -> DataExpr {
 }
 
 fn parse_handler_def(pair: Pair<Rule>) -> HandlerDef {
-    let (eta_envs, ident, expr) = triple(pair);
+    let (ident, expr) = binary(pair);
 
     HandlerDef {
-        eta_envs: parse_eta_envs(eta_envs),
         ident: parse_handler_ident(ident),
         expr: parse_handler_type_def_expr(expr),
     }
 }
 
 fn parse_handler_type_def_expr(pair: Pair<Rule>) -> HandlerTypeDefExpr {
-    let (constraints, handler, expr) = triple(pair);
+    let (constraints, eta_envs, handler_constraint, expr) = quadruple(pair);
 
     HandlerTypeDefExpr {
-        constraints: constraints
+        trait_constraints: constraints
             .into_inner()
-            .map(parse_constraint)
+            .map(parse_trait_constraint)
             .collect::<Vec<_>>(),
-        handler_expr: parse_handler_type_expr(handler),
+        eta_envs: parse_eta_envs(eta_envs),
+        handler_expr: parse_handler_type_expr(handler_constraint),
         expr: parse_type_abstruction_expr(unary(expr)),
     }
 }
@@ -216,12 +221,15 @@ fn parse_trait_def(pair: Pair<Rule>) -> TraitDef {
     let (constraints, ident, args, where_clause) = quadruple(pair);
 
     TraitDef {
-        constraints: constraints
+        trait_constraints: constraints
             .into_inner()
-            .map(parse_constraint)
+            .map(parse_trait_constraint)
             .collect::<Vec<_>>(),
-        ident: parse_type_ident(ident),
-        args: args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
+        constructor: Constructor {
+            modifier: None,
+            ident: parse_type_ident(ident),
+            args: args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
+        },
         where_clause: parse_where_clause(where_clause),
     }
 }
@@ -248,21 +256,21 @@ fn parse_eta_env(pair: Pair<Rule>) -> EtaEnv {
     }
 }
 
-fn parse_handler_type_expr(pair: Pair<Rule>) -> HandlerTypeExpr {
+fn parse_handler_type_expr(pair: Pair<Rule>) -> CoroutineType {
     let (resume, ret) = binary(pair);
 
-    HandlerTypeExpr {
+    CoroutineType {
         resume: parse_type_abstruction_expr(unary(resume)),
         ret: parse_type_abstruction_expr(unary(ret)),
     }
 }
 
-fn parse_constraint(pair: Pair<Rule>) -> Constraint {
-    let (ident, args) = binary(pair);
+fn parse_trait_constraint(pair: Pair<Rule>) -> TraitConstraint {
+    let (ident, arg) = binary(pair);
 
-    Constraint {
-        ident: parse_type_ident(ident),
-        args: args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
+    TraitConstraint {
+        ident: parse_trait_ident(ident),
+        arg: parse_forall_ident(arg),
     }
 }
 
@@ -414,23 +422,23 @@ fn parse_pattern(pair: Pair<Rule>) -> PatternExpr {
 }
 
 fn parse_assign_def(pair: Pair<Rule>) -> AssignDef {
-    let (eta_envs, ident, type_expr) = triple(pair);
+    let (ident, type_expr) = binary(pair);
 
     AssignDef {
-        eta_envs: parse_eta_envs(eta_envs),
         ident: parse_ident(ident),
         expr: parse_type_expr(type_expr),
     }
 }
 
 fn parse_type_expr(pair: Pair<Rule>) -> TypeExpr {
-    let (constraints, expr) = binary(pair);
+    let (constraints, eta_envs, expr) = triple(pair);
 
     TypeExpr {
-        constraints: constraints
+        trait_constraints: constraints
             .into_inner()
-            .map(parse_constraint)
+            .map(parse_trait_constraint)
             .collect::<Vec<_>>(),
+        eta_envs: parse_eta_envs(eta_envs),
         expr: parse_type_abstruction_expr(unary(expr)),
     }
 }
@@ -509,6 +517,20 @@ fn parse_handler_ident(pair: Pair<Rule>) -> HandlerIdent {
 fn parse_inst_ident(pair: Pair<Rule>) -> InstIdent {
     match pair.as_rule() {
         Rule::instIdent => InstIdent(pair.as_str().to_string()),
+        _ => panic!("{pair}"),
+    }
+}
+
+fn parse_trait_ident(pair: Pair<Rule>) -> TraitIdent {
+    match pair.as_rule() {
+        Rule::traitIdent => TraitIdent(pair.as_str().to_string()),
+        _ => panic!("{pair}"),
+    }
+}
+
+fn parse_forall_ident(pair: Pair<Rule>) -> ForallIdent {
+    match pair.as_rule() {
+        Rule::forallIdent => ForallIdent(pair.as_str().to_string()),
         _ => panic!("{pair}"),
     }
 }

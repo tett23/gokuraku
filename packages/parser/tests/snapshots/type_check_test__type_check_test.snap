@@ -1,136 +1,217 @@
 ---
 source: packages/parser/tests/type_check_test.rs
-expression: ir
+expression: ir2
 input_file: packages/parser/fixtures/pds/6.pds
 ---
 Ok(
-    SymbolTable {
-        type_symbols: {
-            Ident(
-                "unary",
-            ): TypeAbstruction {
-                arg: Some(
-                    Value(
-                        Bottom,
-                    ),
-                ),
-                expr: Value(
-                    Bottom,
-                ),
-            },
-            Ident(
-                "binary",
-            ): TypeAbstruction {
-                arg: Some(
-                    Value(
-                        Bottom,
-                    ),
-                ),
-                expr: Abstruction(
-                    TypeAbstruction {
-                        arg: Some(
-                            Value(
-                                Bottom,
-                            ),
-                        ),
-                        expr: Value(
-                            Bottom,
-                        ),
-                    },
-                ),
-            },
-            Ident(
-                "id",
-            ): TypeAbstruction {
-                arg: None,
-                expr: Value(
-                    Bottom,
-                ),
-            },
-            Ident(
-                "ternary",
-            ): TypeAbstruction {
-                arg: Some(
-                    Value(
-                        Bottom,
-                    ),
-                ),
-                expr: Abstruction(
-                    TypeAbstruction {
-                        arg: Some(
-                            Value(
-                                Bottom,
-                            ),
-                        ),
-                        expr: Abstruction(
-                            TypeAbstruction {
-                                arg: Some(
-                                    Value(
-                                        Bottom,
+    IR2 {
+        ident_symbols: SymbolTable2(
+            {
+                Ident(
+                    "ternary",
+                ): (
+                    [],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [],
+                            abstruction: Arrow(
+                                Term(
+                                    Ident(
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "Int",
+                                            ),
+                                        ),
                                     ),
                                 ),
-                                expr: Value(
-                                    Bottom,
+                                Arrow(
+                                    Term(
+                                        Ident(
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                    Arrow(
+                                        Term(
+                                            Ident(
+                                                ExistsIdent(
+                                                    ExistsIdent(
+                                                        "Int",
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Term(
+                                            Ident(
+                                                ExistsIdent(
+                                                    ExistsIdent(
+                                                        "Int",
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
                                 ),
-                            },
-                        ),
-                    },
+                            ),
+                        },
+                    ),
+                ),
+                Ident(
+                    "id",
+                ): (
+                    [],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [],
+                            abstruction: Term(
+                                Ident(
+                                    ExistsIdent(
+                                        ExistsIdent(
+                                            "Int",
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                Ident(
+                    "unary",
+                ): (
+                    [],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [],
+                            abstruction: Arrow(
+                                Term(
+                                    Ident(
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "Int",
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                                Term(
+                                    Ident(
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "Int",
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                Ident(
+                    "binary",
+                ): (
+                    [],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [],
+                            abstruction: Arrow(
+                                Term(
+                                    Ident(
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "Int",
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                                Arrow(
+                                    Term(
+                                        Ident(
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                    Term(
+                                        Ident(
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
                 ),
             },
-        },
-        data_lattice: BoundedDataLattice {
-            top: [
-                DataLattice {
-                    elements: [
-                        DataElement {
-                            ident: ExistsIdent(
-                                "Unit",
+        ),
+        data_symbols: SymbolTable2(
+            {
+                ExistsIdent(
+                    ExistsIdent(
+                        "True",
+                    ),
+                ): Term(
+                    Unit,
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "Bool",
+                    ),
+                ): Or(
+                    Term(
+                        Constructor(
+                            Structual,
+                            ExistsIdent(
+                                "True",
                             ),
-                            value: Unit,
-                        },
-                    ],
-                    union_elements: None,
-                    intersection_elements: None,
-                },
-                DataLattice {
-                    elements: [
-                        DataElement {
-                            ident: ExistsIdent(
-                                "Int",
+                            [],
+                        ),
+                    ),
+                    Term(
+                        Constructor(
+                            Structual,
+                            ExistsIdent(
+                                "False",
                             ),
-                            value: Unit,
-                        },
-                    ],
-                    union_elements: None,
-                    intersection_elements: None,
-                },
-            ],
-            botom: [
-                DataLattice {
-                    elements: [
-                        DataElement {
-                            ident: ExistsIdent(
-                                "Unit",
-                            ),
-                            value: Unit,
-                        },
-                    ],
-                    union_elements: None,
-                    intersection_elements: None,
-                },
-                DataLattice {
-                    elements: [
-                        DataElement {
-                            ident: ExistsIdent(
-                                "Int",
-                            ),
-                            value: Unit,
-                        },
-                    ],
-                    union_elements: None,
-                    intersection_elements: None,
-                },
-            ],
-        },
+                            [],
+                        ),
+                    ),
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "False",
+                    ),
+                ): Term(
+                    Unit,
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "Int",
+                    ),
+                ): Term(
+                    Unit,
+                ),
+            },
+        ),
+        handler_symbols: SymbolTable2(
+            {},
+        ),
+        trait_symbols: SymbolTable2(
+            {},
+        ),
+        inst_symbols: SymbolTable2(
+            {},
+        ),
     },
 )

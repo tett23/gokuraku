@@ -1,3 +1,7 @@
+data Bool = True | False
+nominal data True = ()
+nominal data False = ()
+
 nominal data Int = ()
 
 id :: Int
