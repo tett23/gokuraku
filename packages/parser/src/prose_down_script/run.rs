@@ -2,7 +2,7 @@
 // use crate::vm::Vm;
 use anyhow::Result;
 
-pub fn run(script: &str) -> Result<()> {
+pub fn run(_script: &str) -> Result<()> {
     Ok(())
     // let ast = parse(&script)?;
     // let mut vm = Vm::default();

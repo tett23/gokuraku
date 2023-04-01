@@ -30,7 +30,7 @@ pub struct Abstruction {
 impl<T> TryFrom<ast::Assign> for Function<T> {
     type Error = anyhow::Error;
 
-    fn try_from(value: ast::Assign) -> Result<Self, Self::Error> {
+    fn try_from(_value: ast::Assign) -> Result<Self, Self::Error> {
         todo!()
     }
 }
@@ -38,7 +38,7 @@ impl<T> TryFrom<ast::Assign> for Function<T> {
 impl<T> TryFrom<ast::HandlerAssign> for Function<T> {
     type Error = anyhow::Error;
 
-    fn try_from(value: ast::HandlerAssign) -> Result<Self, Self::Error> {
+    fn try_from(_value: ast::HandlerAssign) -> Result<Self, Self::Error> {
         todo!()
     }
 }
@@ -144,7 +144,7 @@ impl From<String> for Ident {
 
 impl From<&str> for Ident {
     fn from(value: &str) -> Self {
-        Self(value.to_string().into())
+        Self(value.to_string())
     }
 }
 

@@ -143,8 +143,7 @@ fn parse_data_modifier(pair: Pair<Rule>) -> Option<DataModifier> {
         Rule::dataModifierNominal => Some(DataModifier::Nominal),
         Rule::dataModifierStructual => Some(DataModifier::Structual),
         Rule::dataModifier => unary_or_none(pair)
-            .map(|pair| parse_data_modifier(pair))
-            .flatten(),
+            .and_then(parse_data_modifier),
         _ => panic!("{pair}"),
     }
 }
@@ -466,7 +465,7 @@ fn parse_type_literal(pair: Pair<Rule>) -> TypeLiteral {
         Rule::typeExprTuple => {
             let items = pair
                 .into_inner()
-                .map(|item| parse_type_abstruction_expr(item))
+                .map(parse_type_abstruction_expr)
                 .collect::<Vec<_>>();
             TypeLiteral::Tuple(items.len(), items)
         }

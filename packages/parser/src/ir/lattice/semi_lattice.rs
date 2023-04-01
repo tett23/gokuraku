@@ -4,7 +4,7 @@ trait SemiLattice: PartialOrd {
     type Elem;
 
     fn is_disjoint(&self, other: &Self) -> bool {
-        self.partial_cmp(other) == None
+        self.partial_cmp(other).is_none()
     }
 
     fn union(self, other: &Self) -> Self;
@@ -18,7 +18,7 @@ trait JoinSemiLattice: SemiLattice {
 struct DataJoinSemiLattice {}
 
 impl PartialOrd for DataJoinSemiLattice {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, _other: &Self) -> Option<std::cmp::Ordering> {
         unimplemented!()
     }
 }
@@ -26,21 +26,21 @@ impl PartialOrd for DataJoinSemiLattice {
 impl SemiLattice for DataJoinSemiLattice {
     type Elem = DataTerm;
 
-    fn union(self, other: &Self) -> Self {
+    fn union(self, _other: &Self) -> Self {
         unimplemented!()
     }
 }
 
 impl JoinSemiLattice for DataJoinSemiLattice {
-    fn join(&self, other: &Self) -> Self {
+    fn join(&self, _other: &Self) -> Self {
         unimplemented!()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::prose_down_script_parse;
+    
+    
 
     #[test]
     fn test_join() {

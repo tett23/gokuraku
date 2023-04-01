@@ -122,7 +122,7 @@ acc.handler_symbols.find_or_default_mut(&ident).1 = Some(value);
 
                 (acc, errs)
             });
-    if errs.len() > 0 {
+    if !errs.is_empty() {
         return Err(anyhow!("Errors: {:?}", errs));
     }
 
