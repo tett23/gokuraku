@@ -6,6 +6,7 @@ use std::fs;
 #[test]
 fn pds_test() {
     glob!("../fixtures/pds", "*.pds", |path| {
+        dbg!(&path);
         let input = fs::read_to_string(path).unwrap();
         let ast = parser::prose_down_script_parse(&input).unwrap();
 

@@ -32,41 +32,53 @@ Module {
         ),
         AssignDef(
             AssignDef {
-                eta_envs: EtaEnvs(
-                    [],
-                ),
                 ident: Ident(
                     "f",
                 ),
                 expr: TypeExpr {
-                    constraints: [],
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
                     expr: Arrow(
                         Literal(
-                            Ident(
-                                ExistsIdent(
-                                    ExistsIdent(
-                                        "Int",
-                                    ),
-                                ),
-                            ),
-                        ),
-                        Arrow(
-                            Literal(
-                                Ident(
-                                    ExistsIdent(
+                            Constructor(
+                                DataConstructor {
+                                    modifier: None,
+                                    ident: ExistsIdent(
                                         ExistsIdent(
                                             "Int",
                                         ),
                                     ),
+                                    args: [],
+                                },
+                            ),
+                        ),
+                        Arrow(
+                            Literal(
+                                Constructor(
+                                    DataConstructor {
+                                        modifier: None,
+                                        ident: ExistsIdent(
+                                            ExistsIdent(
+                                                "Int",
+                                            ),
+                                        ),
+                                        args: [],
+                                    },
                                 ),
                             ),
                             Literal(
-                                Ident(
-                                    ForallIdent(
-                                        ForallIdent(
-                                            "a",
+                                Constructor(
+                                    DataConstructor {
+                                        modifier: None,
+                                        ident: ForallIdent(
+                                            ForallIdent(
+                                                "a",
+                                            ),
                                         ),
-                                    ),
+                                        args: [],
+                                    },
                                 ),
                             ),
                         ),
@@ -107,50 +119,67 @@ Module {
         ),
         TraitDef(
             TraitDef {
-                constraints: [],
-                ident: ExistsIdent(
-                    ExistsIdent(
-                        "Show",
-                    ),
-                ),
-                args: [
-                    ForallIdent(
-                        ForallIdent(
-                            "a",
+                trait_constraints: [],
+                constructor: DataConstructor {
+                    modifier: None,
+                    ident: ExistsIdent(
+                        ExistsIdent(
+                            "Show",
                         ),
                     ),
-                ],
+                    args: [
+                        Constructor(
+                            DataConstructor {
+                                modifier: None,
+                                ident: ForallIdent(
+                                    ForallIdent(
+                                        "a",
+                                    ),
+                                ),
+                                args: [],
+                            },
+                        ),
+                    ],
+                },
                 where_clause: Module {
                     statements: [
                         AssignDef(
                             AssignDef {
-                                eta_envs: EtaEnvs(
-                                    [],
-                                ),
                                 ident: Ident(
                                     "show",
                                 ),
                                 expr: TypeExpr {
-                                    constraints: [],
+                                    trait_constraints: [],
+                                    eta_envs: EtaEnvs(
+                                        [],
+                                    ),
                                     expr: Arrow(
                                         Literal(
-                                            Ident(
-                                                ForallIdent(
-                                                    ForallIdent(
-                                                        "a",
+                                            Constructor(
+                                                DataConstructor {
+                                                    modifier: None,
+                                                    ident: ForallIdent(
+                                                        ForallIdent(
+                                                            "a",
+                                                        ),
                                                     ),
-                                                ),
+                                                    args: [],
+                                                },
                                             ),
                                         ),
                                         Literal(
                                             Array(
                                                 Literal(
-                                                    Ident(
-                                                        ExistsIdent(
-                                                            ExistsIdent(
-                                                                "Char",
+                                                    Constructor(
+                                                        DataConstructor {
+                                                            modifier: None,
+                                                            ident: ExistsIdent(
+                                                                ExistsIdent(
+                                                                    "Char",
+                                                                ),
                                                             ),
-                                                        ),
+                                                            args: [],
+                                                        },
                                                     ),
                                                 ),
                                             ),
@@ -174,45 +203,44 @@ Module {
                     "@write",
                 ),
                 expr: TypeExpr {
-                    constraints: [
-                        Constraint {
-                            ident: ExistsIdent(
-                                ExistsIdent(
-                                    "Show",
-                                ),
+                    trait_constraints: [
+                        TraitConstraint {
+                            ident: TraitIdent(
+                                "Show",
                             ),
-                            args: [
-                                ForallIdent(
-                                    ForallIdent(
-                                        "a",
-                                    ),
-                                ),
-                            ],
+                            arg: ForallIdent(
+                                "a",
+                            ),
                         },
                     ],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
                     expr: Arrow(
                         Literal(
-                            Ident(
-                                ForallIdent(
-                                    ForallIdent(
-                                        "a",
+                            Constructor(
+                                DataConstructor {
+                                    modifier: None,
+                                    ident: ForallIdent(
+                                        ForallIdent(
+                                            "a",
+                                        ),
                                     ),
-                                ),
+                                    args: [],
+                                },
                             ),
                         ),
                         Literal(
-                            Context(
-                                ExistsIdent(
-                                    ExistsIdent(
-                                        "IO",
+                            Constructor(
+                                DataConstructor {
+                                    modifier: None,
+                                    ident: ExistsIdent(
+                                        ExistsIdent(
+                                            "IO",
+                                        ),
                                     ),
-                                ),
-                                Literal(
-                                    Tuple(
-                                        0,
-                                        [],
-                                    ),
-                                ),
+                                    args: [],
+                                },
                             ),
                         ),
                     ),
@@ -221,67 +249,61 @@ Module {
         ),
         HandlerDef(
             HandlerDef {
-                eta_envs: EtaEnvs(
-                    [],
-                ),
                 ident: HandlerIdent(
                     "*write",
                 ),
                 expr: HandlerTypeDefExpr {
-                    constraints: [
-                        Constraint {
-                            ident: ExistsIdent(
-                                ExistsIdent(
-                                    "Show",
-                                ),
+                    trait_constraints: [
+                        TraitConstraint {
+                            ident: TraitIdent(
+                                "Show",
                             ),
-                            args: [
-                                ForallIdent(
-                                    ForallIdent(
-                                        "a",
-                                    ),
-                                ),
-                            ],
+                            arg: ForallIdent(
+                                "a",
+                            ),
                         },
                     ],
-                    handler_expr: HandlerTypeExpr {
-                        resume: Arrow(
-                            Literal(
-                                Ident(
-                                    ForallIdent(
-                                        ForallIdent(
-                                            "a",
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
+                    expr: Literal(
+                        Coroutine(
+                            CoroutineType {
+                                resume: Arrow(
+                                    Literal(
+                                        Constructor(
+                                            DataConstructor {
+                                                modifier: None,
+                                                ident: ForallIdent(
+                                                    ForallIdent(
+                                                        "a",
+                                                    ),
+                                                ),
+                                                args: [],
+                                            },
+                                        ),
+                                    ),
+                                    Literal(
+                                        Tuple(
+                                            0,
+                                            [],
                                         ),
                                     ),
                                 ),
-                            ),
-                            Literal(
-                                Tuple(
-                                    0,
-                                    [],
-                                ),
-                            ),
-                        ),
-                        ret: Literal(
-                            Context(
-                                ExistsIdent(
-                                    ExistsIdent(
-                                        "IO",
+                                ret: Literal(
+                                    Constructor(
+                                        DataConstructor {
+                                            modifier: None,
+                                            ident: ExistsIdent(
+                                                ExistsIdent(
+                                                    "IO",
+                                                ),
+                                            ),
+                                            args: [],
+                                        },
                                     ),
                                 ),
-                                Literal(
-                                    Tuple(
-                                        0,
-                                        [],
-                                    ),
-                                ),
-                            ),
-                        ),
-                    },
-                    expr: Literal(
-                        Tuple(
-                            0,
-                            [],
+                            },
                         ),
                     ),
                 },
@@ -320,53 +342,44 @@ Module {
         ),
         HandlerDef(
             HandlerDef {
-                eta_envs: EtaEnvs(
-                    [],
-                ),
                 ident: HandlerIdent(
                     "*read",
                 ),
                 expr: HandlerTypeDefExpr {
-                    constraints: [],
-                    handler_expr: HandlerTypeExpr {
-                        resume: Literal(
-                            Context(
-                                ExistsIdent(
-                                    ExistsIdent(
-                                        "IO",
-                                    ),
-                                ),
-                                Literal(
-                                    Ident(
-                                        ExistsIdent(
-                                            ExistsIdent(
-                                                "Char",
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                        ret: Literal(
-                            Context(
-                                ExistsIdent(
-                                    ExistsIdent(
-                                        "IO",
-                                    ),
-                                ),
-                                Literal(
-                                    Tuple(
-                                        0,
-                                        [],
-                                    ),
-                                ),
-                            ),
-                        ),
-                    },
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
                     expr: Literal(
-                        Tuple(
-                            0,
-                            [],
+                        Coroutine(
+                            CoroutineType {
+                                resume: Literal(
+                                    Constructor(
+                                        DataConstructor {
+                                            modifier: None,
+                                            ident: ExistsIdent(
+                                                ExistsIdent(
+                                                    "IO",
+                                                ),
+                                            ),
+                                            args: [],
+                                        },
+                                    ),
+                                ),
+                                ret: Literal(
+                                    Constructor(
+                                        DataConstructor {
+                                            modifier: None,
+                                            ident: ExistsIdent(
+                                                ExistsIdent(
+                                                    "IO",
+                                                ),
+                                            ),
+                                            args: [],
+                                        },
+                                    ),
+                                ),
+                            },
                         ),
                     ),
                 },
@@ -395,53 +408,68 @@ Module {
                     statements: [
                         AssignDef(
                             AssignDef {
-                                eta_envs: EtaEnvs(
-                                    [],
-                                ),
                                 ident: Ident(
                                     "write",
                                 ),
                                 expr: TypeExpr {
-                                    constraints: [
-                                        Constraint {
-                                            ident: ExistsIdent(
-                                                ExistsIdent(
-                                                    "Show",
-                                                ),
+                                    trait_constraints: [
+                                        TraitConstraint {
+                                            ident: TraitIdent(
+                                                "Show",
                                             ),
-                                            args: [
-                                                ForallIdent(
-                                                    ForallIdent(
-                                                        "a",
-                                                    ),
-                                                ),
-                                            ],
+                                            arg: ForallIdent(
+                                                "a",
+                                            ),
                                         },
                                     ],
-                                    expr: Arrow(
-                                        Literal(
-                                            Ident(
-                                                ForallIdent(
-                                                    ForallIdent(
-                                                        "a",
+                                    eta_envs: EtaEnvs(
+                                        [],
+                                    ),
+                                    expr: Literal(
+                                        Coroutine(
+                                            CoroutineType {
+                                                resume: Arrow(
+                                                    Literal(
+                                                        Constructor(
+                                                            DataConstructor {
+                                                                modifier: None,
+                                                                ident: ForallIdent(
+                                                                    ForallIdent(
+                                                                        "a",
+                                                                    ),
+                                                                ),
+                                                                args: [],
+                                                            },
+                                                        ),
+                                                    ),
+                                                    Literal(
+                                                        Constructor(
+                                                            DataConstructor {
+                                                                modifier: None,
+                                                                ident: ExistsIdent(
+                                                                    ExistsIdent(
+                                                                        "IO",
+                                                                    ),
+                                                                ),
+                                                                args: [],
+                                                            },
+                                                        ),
                                                     ),
                                                 ),
-                                            ),
-                                        ),
-                                        Literal(
-                                            Context(
-                                                ExistsIdent(
-                                                    ExistsIdent(
-                                                        "IO",
+                                                ret: Literal(
+                                                    Constructor(
+                                                        DataConstructor {
+                                                            modifier: None,
+                                                            ident: ExistsIdent(
+                                                                ExistsIdent(
+                                                                    "IO",
+                                                                ),
+                                                            ),
+                                                            args: [],
+                                                        },
                                                     ),
                                                 ),
-                                                Literal(
-                                                    Tuple(
-                                                        0,
-                                                        [],
-                                                    ),
-                                                ),
-                                            ),
+                                            },
                                         ),
                                     ),
                                 },
@@ -476,84 +504,78 @@ Module {
         ),
         AssignDef(
             AssignDef {
-                eta_envs: EtaEnvs(
-                    [
-                        EtaEnv {
-                            ident: HandlerIdent(
-                                "write",
-                            ),
-                            expr: HandlerTypeExpr {
-                                resume: Literal(
-                                    Tuple(
-                                        0,
-                                        [],
-                                    ),
-                                ),
-                                ret: Literal(
-                                    Context(
-                                        ExistsIdent(
-                                            ExistsIdent(
-                                                "IO",
-                                            ),
-                                        ),
-                                        Literal(
-                                            Tuple(
-                                                0,
-                                                [],
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            },
-                        },
-                        EtaEnv {
-                            ident: HandlerIdent(
-                                "b",
-                            ),
-                            expr: HandlerTypeExpr {
-                                resume: Literal(
-                                    Tuple(
-                                        0,
-                                        [],
-                                    ),
-                                ),
-                                ret: Literal(
-                                    Context(
-                                        ExistsIdent(
-                                            ExistsIdent(
-                                                "IO",
-                                            ),
-                                        ),
-                                        Literal(
-                                            Tuple(
-                                                0,
-                                                [],
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            },
-                        },
-                    ],
-                ),
                 ident: Ident(
                     "main",
                 ),
                 expr: TypeExpr {
-                    constraints: [],
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [
+                            EtaEnv {
+                                ident: HandlerIdent(
+                                    "write",
+                                ),
+                                expr: CoroutineType {
+                                    resume: Literal(
+                                        Tuple(
+                                            0,
+                                            [],
+                                        ),
+                                    ),
+                                    ret: Literal(
+                                        Constructor(
+                                            DataConstructor {
+                                                modifier: None,
+                                                ident: ExistsIdent(
+                                                    ExistsIdent(
+                                                        "IO",
+                                                    ),
+                                                ),
+                                                args: [],
+                                            },
+                                        ),
+                                    ),
+                                },
+                            },
+                            EtaEnv {
+                                ident: HandlerIdent(
+                                    "b",
+                                ),
+                                expr: CoroutineType {
+                                    resume: Literal(
+                                        Tuple(
+                                            0,
+                                            [],
+                                        ),
+                                    ),
+                                    ret: Literal(
+                                        Constructor(
+                                            DataConstructor {
+                                                modifier: None,
+                                                ident: ExistsIdent(
+                                                    ExistsIdent(
+                                                        "IO",
+                                                    ),
+                                                ),
+                                                args: [],
+                                            },
+                                        ),
+                                    ),
+                                },
+                            },
+                        ],
+                    ),
                     expr: Literal(
-                        Context(
-                            ExistsIdent(
-                                ExistsIdent(
-                                    "IO",
+                        Constructor(
+                            DataConstructor {
+                                modifier: None,
+                                ident: ExistsIdent(
+                                    ExistsIdent(
+                                        "IO",
+                                    ),
                                 ),
-                            ),
-                            Literal(
-                                Tuple(
-                                    0,
-                                    [],
-                                ),
-                            ),
+                                args: [],
+                            },
                         ),
                     ),
                 },

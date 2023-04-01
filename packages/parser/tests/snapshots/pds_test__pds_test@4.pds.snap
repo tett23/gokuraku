@@ -7,76 +7,74 @@ Module {
     statements: [
         AssignDef(
             AssignDef {
-                eta_envs: EtaEnvs(
-                    [
-                        EtaEnv {
-                            ident: HandlerIdent(
-                                "write",
-                            ),
-                            expr: HandlerTypeExpr {
-                                resume: Arrow(
-                                    Literal(
-                                        Ident(
-                                            ExistsIdent(
-                                                ExistsIdent(
-                                                    "Text",
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                    Literal(
-                                        Context(
-                                            ExistsIdent(
-                                                ExistsIdent(
-                                                    "IO",
-                                                ),
-                                            ),
-                                            Literal(
-                                                Tuple(
-                                                    0,
-                                                    [],
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                                ret: Literal(
-                                    Context(
-                                        ExistsIdent(
-                                            ExistsIdent(
-                                                "IO",
-                                            ),
-                                        ),
-                                        Literal(
-                                            Tuple(
-                                                0,
-                                                [],
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            },
-                        },
-                    ],
-                ),
                 ident: Ident(
                     "main",
                 ),
                 expr: TypeExpr {
-                    constraints: [],
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [
+                            EtaEnv {
+                                ident: HandlerIdent(
+                                    "write",
+                                ),
+                                expr: CoroutineType {
+                                    resume: Arrow(
+                                        Literal(
+                                            Constructor(
+                                                DataConstructor {
+                                                    modifier: None,
+                                                    ident: ExistsIdent(
+                                                        ExistsIdent(
+                                                            "Text",
+                                                        ),
+                                                    ),
+                                                    args: [],
+                                                },
+                                            ),
+                                        ),
+                                        Literal(
+                                            Constructor(
+                                                DataConstructor {
+                                                    modifier: None,
+                                                    ident: ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    args: [],
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    ret: Literal(
+                                        Constructor(
+                                            DataConstructor {
+                                                modifier: None,
+                                                ident: ExistsIdent(
+                                                    ExistsIdent(
+                                                        "IO",
+                                                    ),
+                                                ),
+                                                args: [],
+                                            },
+                                        ),
+                                    ),
+                                },
+                            },
+                        ],
+                    ),
                     expr: Literal(
-                        Context(
-                            ExistsIdent(
-                                ExistsIdent(
-                                    "IO",
+                        Constructor(
+                            DataConstructor {
+                                modifier: None,
+                                ident: ExistsIdent(
+                                    ExistsIdent(
+                                        "IO",
+                                    ),
                                 ),
-                            ),
-                            Literal(
-                                Tuple(
-                                    0,
-                                    [],
-                                ),
-                            ),
+                                args: [],
+                            },
                         ),
                     ),
                 },

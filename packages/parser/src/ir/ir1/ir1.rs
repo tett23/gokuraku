@@ -34,7 +34,7 @@ pub fn transform1(ast: &ast::Module) -> IR1 {
                 acc.handler_symbols.insert(ident.clone().into());
             }
             ast::Statement::TraitDef(ast::TraitDef {
-                constructor: ast::Constructor { ident, .. },
+                constructor: ast::DataConstructor { ident, .. },
                 ..
             }) => {
                 acc.trait_symbols.insert(ident.clone().into());

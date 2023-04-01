@@ -4,8 +4,8 @@ use pest::Parser;
 use pest_derive::Parser;
 
 use crate::ast::{
-    Abstruction, Apply, ApplyEff, ApplyInst, Assign, AssignArgs, AssignDef, Constructor,
-    CoroutineType, DataAssign, DataExpr, DataModifier, DataValue, EtaEnv, EtaEnvs, ExistsIdent,
+    Abstruction, Apply, ApplyEff, ApplyInst, Assign, AssignArgs, AssignDef, CoroutineType,
+    DataAssign, DataConstructor, DataExpr, DataModifier, DataValue, EtaEnv, EtaEnvs, ExistsIdent,
     Expr, ForallIdent, HandlerAssign, HandlerDef, HandlerIdent, HandlerTypeDefExpr, Ident,
     ImplTrait, InstDef, InstIdent, LineComment, Literal, Module, PatternExpr, Statement,
     TraitConstraint, TraitDef, TraitIdent, TypeAbstructionExpr, TypeExpr, TypeIdent, TypeLiteral,
@@ -60,15 +60,6 @@ fn unary_or_none(pair: Pair<Rule>) -> Option<Pair<Rule>> {
 pub struct PdsParser;
 
 pub fn parse(input: &str) -> anyhow::Result<Module> {
-    // let pratt = PrattParser::<Rule>::new().op(Op::infix(Rule::dataExprOr, Assoc::Left));
-    // let a = pratt
-    //     .map_primary(parse_stmt)
-    //     .map_infix(|lhs, op, rhs| {
-    //         dbg!(op);
-    //         todo!()
-    //     })
-    //     .parse(PdsParser::parse(Rule::root, input).unwrap());
-
     let stmts = PdsParser::parse(Rule::root, input)
         .context("parse error")?
         .map(parse_stmt)
@@ -142,8 +133,7 @@ fn parse_data_modifier(pair: Pair<Rule>) -> Option<DataModifier> {
     match pair.as_rule() {
         Rule::dataModifierNominal => Some(DataModifier::Nominal),
         Rule::dataModifierStructual => Some(DataModifier::Structual),
-        Rule::dataModifier => unary_or_none(pair)
-            .and_then(parse_data_modifier),
+        Rule::dataModifier => unary_or_none(pair).and_then(parse_data_modifier),
         _ => panic!("{pair}"),
     }
 }
@@ -170,12 +160,7 @@ fn parse_data_expr_or(pair: Pair<Rule>) -> DataExpr {
 fn parse_data_value(pair: Pair<Rule>) -> DataExpr {
     match pair.as_rule() {
         Rule::dataValueConstructor => {
-            let (modifier, ident, args) = triple(pair);
-            DataExpr::Value(DataValue::Constructor(Constructor {
-                modifier: parse_data_modifier(modifier),
-                ident: parse_type_ident(ident),
-                args: args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
-            }))
+            DataExpr::Value(DataValue::Constructor(parse_type_expr_constructor(pair)))
         }
         Rule::dataValueUnit => DataExpr::Value(DataValue::Unit),
         Rule::dataValueGroup => parse_data_expr(unary(pair)),
@@ -194,7 +179,7 @@ fn parse_handler_def(pair: Pair<Rule>) -> HandlerDef {
 }
 
 fn parse_handler_type_def_expr(pair: Pair<Rule>) -> HandlerTypeDefExpr {
-    let (constraints, eta_envs, handler_constraint, expr) = quadruple(pair);
+    let (constraints, eta_envs, expr) = triple(pair);
 
     HandlerTypeDefExpr {
         trait_constraints: constraints
@@ -202,8 +187,7 @@ fn parse_handler_type_def_expr(pair: Pair<Rule>) -> HandlerTypeDefExpr {
             .map(parse_trait_constraint)
             .collect::<Vec<_>>(),
         eta_envs: parse_eta_envs(eta_envs),
-        handler_expr: parse_handler_type_expr(handler_constraint),
-        expr: parse_type_abstruction_expr(unary(expr)),
+        expr: parse_type_abstruction_expr(expr),
     }
 }
 
@@ -224,10 +208,13 @@ fn parse_trait_def(pair: Pair<Rule>) -> TraitDef {
             .into_inner()
             .map(parse_trait_constraint)
             .collect::<Vec<_>>(),
-        constructor: Constructor {
+        constructor: DataConstructor {
             modifier: None,
             ident: parse_type_ident(ident),
-            args: args.into_inner().map(parse_type_ident).collect::<Vec<_>>(),
+            args: args
+                .into_inner()
+                .map(parse_type_literal)
+                .collect::<Vec<_>>(),
         },
         where_clause: parse_where_clause(where_clause),
     }
@@ -285,6 +272,8 @@ fn parse_expr(pair: Pair<Rule>) -> Expr {
         Rule::effApply => parse_eff_apply(pair),
         Rule::variable => Expr::Ident(parse_ident(unary(pair))),
         Rule::expr => parse_expr(unary(pair)),
+        Rule::infixIdentSeparator => Expr::Ident(parse_ident(pair)),
+        Rule::infixOperator => Expr::Ident(parse_ident(pair)),
         _ => unreachable!("{pair}"),
     }
 }
@@ -304,7 +293,10 @@ fn parse_apply_prefix(pair: Pair<Rule>) -> Expr {
 
     match expr {
         Some(expr) => Expr::Apply(Apply {
-            ident: parse_ident(ident),
+            abstruction: Abstruction {
+                arg: None,
+                expr: Box::new(parse_expr(ident)),
+            },
             expr: Box::new(parse_expr(expr)),
         }),
         None => Expr::Ident(parse_ident(ident)),
@@ -314,12 +306,12 @@ fn parse_apply_prefix(pair: Pair<Rule>) -> Expr {
 fn parse_apply_infix(pair: Pair<Rule>) -> Expr {
     let (lhs, ident, rhs) = triple(pair);
 
-    Expr::Abstruction(Abstruction {
-        left: Box::new(Expr::Abstruction(Abstruction {
-            left: Box::new(Expr::Ident(parse_ident(ident))),
-            right: Box::new(parse_expr(lhs)),
-        })),
-        right: Box::new(parse_expr(rhs)),
+    Expr::Apply(Apply {
+        abstruction: Abstruction {
+            arg: Some(Box::new(parse_expr(lhs))),
+            expr: Box::new(parse_expr(ident)),
+        },
+        expr: Box::new(parse_expr(rhs)),
     })
 }
 
@@ -410,11 +402,13 @@ fn parse_pattern(pair: Pair<Rule>) -> PatternExpr {
         }
         Rule::patternLiteral => PatternExpr::Literal(parse_literal(unary(pair))),
         Rule::patternIdent => PatternExpr::Bind(parse_ident(unary(pair))),
-        Rule::patternTypeIdent => PatternExpr::TypeIdent(parse_type_ident(unary(pair))),
         Rule::patternListHead => {
             todo!()
         }
         Rule::patternAny => PatternExpr::Any,
+        Rule::patternConstructor => {
+            PatternExpr::Constructor(parse_type_expr_constructor(unary(pair)))
+        }
         Rule::pattern => parse_pattern(unary(pair)),
         _ => unreachable!("{pair}"),
     }
@@ -451,10 +445,13 @@ fn parse_type_abstruction_expr(pair: Pair<Rule>) -> TypeAbstructionExpr {
                 Box::new(parse_type_abstruction_expr(unary(rhs))),
             )
         }
-        Rule::typeExprContext => TypeAbstructionExpr::Literal(parse_type_literal(pair)),
+        Rule::typeExprConstructor => TypeAbstructionExpr::Literal(TypeLiteral::Constructor(
+            parse_type_expr_constructor(pair),
+        )),
         Rule::typeExprGroup => parse_type_abstruction_expr(unary(pair)),
         Rule::typeExprLiteral => TypeAbstructionExpr::Literal(parse_type_literal(unary(pair))),
         Rule::abstructionTypeExpr => parse_type_abstruction_expr(unary(pair)),
+        Rule::typeExprCoroutine => TypeAbstructionExpr::Literal(parse_type_literal(pair)),
         _ => unreachable!("{pair}"),
     }
 }
@@ -473,16 +470,51 @@ fn parse_type_literal(pair: Pair<Rule>) -> TypeLiteral {
             TypeLiteral::Array(Box::new(parse_type_abstruction_expr(unary(unary(pair)))))
         }
         Rule::typeExprDivergent => TypeLiteral::Bottom,
-        Rule::typeExprContext => {
-            let (ident, expr) = binary(pair);
-            TypeLiteral::Context(
-                parse_type_ident(ident),
-                Box::new(parse_type_abstruction_expr(unary(expr))),
-            )
+        Rule::typeExprConstructor => {
+            TypeLiteral::Constructor(parse_type_expr_constructor(unary(pair)))
+        }
+        Rule::dataValueConstructor => TypeLiteral::Constructor(parse_type_expr_constructor(pair)),
+        Rule::typeIdent => TypeLiteral::Constructor(parse_type_expr_constructor(pair)),
+        Rule::typeExprCoroutine => {
+            TypeLiteral::Coroutine(Box::new(parse_type_expr_coroutine(pair)))
         }
         Rule::typeExprTop => TypeLiteral::Top,
-        Rule::typeIdent => TypeLiteral::Ident(parse_type_ident(pair)),
+        Rule::dataValue => parse_type_literal(unary(pair)),
         _ => unreachable!("{pair}"),
+    }
+}
+
+fn parse_type_expr_constructor(pair: Pair<Rule>) -> DataConstructor {
+    match pair.as_rule() {
+        Rule::dataValue => parse_type_expr_constructor(unary(pair)),
+        Rule::dataValueConstructor => {
+            let (modifier, ident, args) = triple(pair);
+
+            DataConstructor {
+                modifier: parse_data_modifier(modifier),
+                ident: parse_type_ident(ident),
+                args: args
+                    .into_inner()
+                    .map(parse_type_literal)
+                    .collect::<Vec<_>>(),
+            }
+        }
+        Rule::typeIdent => DataConstructor {
+            modifier: None,
+            ident: parse_type_ident(pair),
+            args: Vec::new(),
+        },
+        Rule::typeExprConstructor => parse_type_expr_constructor(unary(pair)),
+        _ => unreachable!("{pair}"),
+    }
+}
+
+fn parse_type_expr_coroutine(pair: Pair<Rule>) -> CoroutineType {
+    let (resume, ret) = binary(pair);
+
+    CoroutineType {
+        resume: parse_type_abstruction_expr(resume),
+        ret: parse_type_abstruction_expr(ret),
     }
 }
 

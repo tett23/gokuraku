@@ -2,7 +2,8 @@ use super::symbol_table2::SymbolTable2;
 use crate::ast;
 use crate::ir::ir1::IR1;
 use crate::ir::{
-    DataExpr, Function, HandlerIdent, Ident, InstIdent, TypeAbstructionEnv, TypeIdent,
+    DataExpr, Function, HandlerFunction, HandlerIdent, Ident, InstIdent, TypeAbstructionEnv,
+    TypeIdent,
 };
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
@@ -12,7 +13,7 @@ pub struct IR2 {
     pub ident_symbols: SymbolTable2<Ident, (Vec<Function<IR2>>, Option<TypeAbstructionEnv>)>,
     pub data_symbols: SymbolTable2<TypeIdent, DataExpr>,
     pub handler_symbols:
-        SymbolTable2<HandlerIdent, (Vec<Function<IR2>>, Option<TypeAbstructionEnv>)>,
+        SymbolTable2<HandlerIdent, (Vec<HandlerFunction<IR2>>, Option<TypeAbstructionEnv>)>,
     // TODO: traitはTypeAbstructionではない
     pub trait_symbols: SymbolTable2<TypeIdent, TypeAbstructionEnv>,
     pub inst_symbols: SymbolTable2<InstIdent, TypeAbstructionEnv>,
@@ -85,7 +86,7 @@ acc.handler_symbols.find_or_default_mut(&ident).1 = Some(value);
                     }
                     ast::Statement::HandlerAssign(handler_assign) => {
                         let ident = HandlerIdent::from(handler_assign.ident.clone());
-                        let value = match Function::try_from(handler_assign){
+                        let value = match HandlerFunction::try_from(handler_assign){
                             Ok(value)=>value,
                             Err(err)=>{errs.push(err); return (acc, errs);},
                         };
@@ -105,7 +106,7 @@ acc.handler_symbols.find_or_default_mut(&ident).1 = Some(value);
                         acc.trait_symbols.insert(ident, value);
                     }
                     ast::Statement::ImplTrait(_impl_trait) => {
-                        todo!("impl_trait not implemented yet")
+                        // TODO: impl trait
                     }
                     ast::Statement::InstDef(inst_def) => {
                         let ident = InstIdent::from(inst_def.ident.clone());

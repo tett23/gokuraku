@@ -1,4 +1,4 @@
-f 1  2 = a * b
+f 1 2 = a * b
 trait Show a where {
  a :: Int
  (++) = a -> a -> a

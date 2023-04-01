@@ -10,15 +10,15 @@ trait Show a where {
 
 @write :: Show a => a -> IO ()
 
-*write :: Show a => <a -> (), IO ()> ()
+*write :: Show a => <a -> (), IO ()>
 *write s = @write s
 
-*read :: <IO Char, IO ()> ()
+*read :: <IO Char, IO ()>
 
 echo s = await (write s) where {
   write :: Show a => <a -> IO (), IO ()>
   write = eff *write ()
 }
 
-<write: <(), IO ()>, b: <(), IO ()>> main :: IO ()
+main :: <write: <(), IO ()>, b: <(), IO ()>> IO ()
 main = echo "Hello world"

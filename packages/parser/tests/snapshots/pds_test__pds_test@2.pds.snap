@@ -24,23 +24,23 @@ Module {
                         ),
                     ],
                 },
-                expr: Abstruction(
-                    Abstruction {
-                        left: Abstruction(
-                            Abstruction {
-                                left: Ident(
-                                    Ident(
-                                        "*",
-                                    ),
-                                ),
-                                right: Ident(
+                expr: Apply(
+                    Apply {
+                        abstruction: Abstruction {
+                            arg: Some(
+                                Ident(
                                     Ident(
                                         "a",
                                     ),
                                 ),
-                            },
-                        ),
-                        right: Ident(
+                            ),
+                            expr: Ident(
+                                Ident(
+                                    "*",
+                                ),
+                            ),
+                        },
+                        expr: Ident(
                             Ident(
                                 "b",
                             ),
@@ -54,38 +54,51 @@ Module {
         ),
         TraitDef(
             TraitDef {
-                constraints: [],
-                ident: ExistsIdent(
-                    ExistsIdent(
-                        "Show",
-                    ),
-                ),
-                args: [
-                    ForallIdent(
-                        ForallIdent(
-                            "a",
+                trait_constraints: [],
+                constructor: DataConstructor {
+                    modifier: None,
+                    ident: ExistsIdent(
+                        ExistsIdent(
+                            "Show",
                         ),
                     ),
-                ],
+                    args: [
+                        Constructor(
+                            DataConstructor {
+                                modifier: None,
+                                ident: ForallIdent(
+                                    ForallIdent(
+                                        "a",
+                                    ),
+                                ),
+                                args: [],
+                            },
+                        ),
+                    ],
+                },
                 where_clause: Module {
                     statements: [
                         AssignDef(
                             AssignDef {
-                                eta_envs: EtaEnvs(
-                                    [],
-                                ),
                                 ident: Ident(
                                     "a",
                                 ),
                                 expr: TypeExpr {
-                                    constraints: [],
+                                    trait_constraints: [],
+                                    eta_envs: EtaEnvs(
+                                        [],
+                                    ),
                                     expr: Literal(
-                                        Ident(
-                                            ExistsIdent(
-                                                ExistsIdent(
-                                                    "Int",
+                                        Constructor(
+                                            DataConstructor {
+                                                modifier: None,
+                                                ident: ExistsIdent(
+                                                    ExistsIdent(
+                                                        "Int",
+                                                    ),
                                                 ),
-                                            ),
+                                                args: [],
+                                            },
                                         ),
                                     ),
                                 },
@@ -99,39 +112,39 @@ Module {
                                 args: AssignArgs {
                                     patterns: [],
                                 },
-                                expr: Abstruction(
-                                    Abstruction {
-                                        left: Abstruction(
-                                            Abstruction {
-                                                left: Ident(
-                                                    Ident(
-                                                        "->",
-                                                    ),
-                                                ),
-                                                right: Ident(
+                                expr: Apply(
+                                    Apply {
+                                        abstruction: Abstruction {
+                                            arg: Some(
+                                                Ident(
                                                     Ident(
                                                         "a",
                                                     ),
                                                 ),
-                                            },
-                                        ),
-                                        right: Abstruction(
-                                            Abstruction {
-                                                left: Abstruction(
-                                                    Abstruction {
-                                                        left: Ident(
-                                                            Ident(
-                                                                "->",
-                                                            ),
-                                                        ),
-                                                        right: Ident(
+                                            ),
+                                            expr: Ident(
+                                                Ident(
+                                                    "->",
+                                                ),
+                                            ),
+                                        },
+                                        expr: Apply(
+                                            Apply {
+                                                abstruction: Abstruction {
+                                                    arg: Some(
+                                                        Ident(
                                                             Ident(
                                                                 "a",
                                                             ),
                                                         ),
-                                                    },
-                                                ),
-                                                right: Ident(
+                                                    ),
+                                                    expr: Ident(
+                                                        Ident(
+                                                            "->",
+                                                        ),
+                                                    ),
+                                                },
+                                                expr: Ident(
                                                     Ident(
                                                         "a",
                                                     ),
@@ -169,137 +182,143 @@ Module {
         ),
         LineComment(
             LineComment(
-                "lineComment(79, 96)",
+                "lineComment(78, 95)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(96, 116)",
+                "lineComment(95, 115)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(116, 129)",
+                "lineComment(115, 128)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(129, 149)",
+                "lineComment(128, 148)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(149, 176)",
+                "lineComment(148, 175)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(176, 200)",
+                "lineComment(175, 199)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(200, 216)",
+                "lineComment(199, 215)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(217, 240)",
+                "lineComment(216, 239)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(241, 263)",
+                "lineComment(240, 262)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(263, 276)",
+                "lineComment(262, 275)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(276, 298)",
+                "lineComment(275, 297)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(298, 314)",
+                "lineComment(297, 313)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(314, 317)",
+                "lineComment(313, 316)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(317, 341)",
+                "lineComment(316, 340)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(341, 359)",
+                "lineComment(340, 358)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(359, 364)",
+                "lineComment(358, 363)",
             ),
         ),
         AssignDef(
             AssignDef {
-                eta_envs: EtaEnvs(
-                    [],
-                ),
                 ident: Ident(
                     "repeat",
                 ),
                 expr: TypeExpr {
-                    constraints: [
-                        Constraint {
-                            ident: ExistsIdent(
-                                ExistsIdent(
-                                    "Identity",
-                                ),
+                    trait_constraints: [
+                        TraitConstraint {
+                            ident: TraitIdent(
+                                "Identity",
                             ),
-                            args: [
-                                ForallIdent(
-                                    ForallIdent(
-                                        "a",
-                                    ),
-                                ),
-                            ],
+                            arg: ForallIdent(
+                                "a",
+                            ),
                         },
                     ],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
                     expr: Arrow(
                         Arrow(
                             Literal(
-                                Ident(
-                                    ForallIdent(
-                                        ForallIdent(
-                                            "a",
+                                Constructor(
+                                    DataConstructor {
+                                        modifier: None,
+                                        ident: ForallIdent(
+                                            ForallIdent(
+                                                "a",
+                                            ),
                                         ),
-                                    ),
+                                        args: [],
+                                    },
                                 ),
                             ),
                             Literal(
-                                Ident(
-                                    ForallIdent(
-                                        ForallIdent(
-                                            "a",
+                                Constructor(
+                                    DataConstructor {
+                                        modifier: None,
+                                        ident: ForallIdent(
+                                            ForallIdent(
+                                                "a",
+                                            ),
                                         ),
-                                    ),
+                                        args: [],
+                                    },
                                 ),
                             ),
                         ),
                         Literal(
-                            Ident(
-                                ExistsIdent(
-                                    ExistsIdent(
-                                        "Nat",
+                            Constructor(
+                                DataConstructor {
+                                    modifier: None,
+                                    ident: ExistsIdent(
+                                        ExistsIdent(
+                                            "Nat",
+                                        ),
                                     ),
-                                ),
+                                    args: [],
+                                },
                             ),
                         ),
                     ),
@@ -366,30 +385,25 @@ Module {
         ),
         AssignDef(
             AssignDef {
-                eta_envs: EtaEnvs(
-                    [],
-                ),
                 ident: Ident(
                     "repeatText",
                 ),
                 expr: TypeExpr {
-                    constraints: [],
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
                     expr: Literal(
-                        Context(
-                            ExistsIdent(
-                                ExistsIdent(
-                                    "Text",
-                                ),
-                            ),
-                            Literal(
-                                Ident(
+                        Constructor(
+                            DataConstructor {
+                                modifier: None,
+                                ident: ExistsIdent(
                                     ExistsIdent(
-                                        ExistsIdent(
-                                            "Nat",
-                                        ),
+                                        "Text",
                                     ),
                                 ),
-                            ),
+                                args: [],
+                            },
                         ),
                     ),
                 },
@@ -426,21 +440,25 @@ Module {
         ),
         AssignDef(
             AssignDef {
-                eta_envs: EtaEnvs(
-                    [],
-                ),
                 ident: Ident(
                     "hardbrakeN",
                 ),
                 expr: TypeExpr {
-                    constraints: [],
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
                     expr: Literal(
-                        Ident(
-                            ExistsIdent(
-                                ExistsIdent(
-                                    "Nat",
+                        Constructor(
+                            DataConstructor {
+                                modifier: None,
+                                ident: ExistsIdent(
+                                    ExistsIdent(
+                                        "Nat",
+                                    ),
                                 ),
-                            ),
+                                args: [],
+                            },
                         ),
                     ),
                 },
@@ -490,52 +508,68 @@ Module {
         ),
         AssignDef(
             AssignDef {
-                eta_envs: EtaEnvs(
-                    [],
-                ),
                 ident: Ident(
                     "(|)",
                 ),
                 expr: TypeExpr {
-                    constraints: [],
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
                     expr: Arrow(
                         Literal(
-                            Ident(
-                                ForallIdent(
-                                    ForallIdent(
-                                        "a",
+                            Constructor(
+                                DataConstructor {
+                                    modifier: None,
+                                    ident: ForallIdent(
+                                        ForallIdent(
+                                            "a",
+                                        ),
                                     ),
-                                ),
+                                    args: [],
+                                },
                             ),
                         ),
                         Arrow(
                             Arrow(
                                 Literal(
-                                    Ident(
-                                        ForallIdent(
-                                            ForallIdent(
-                                                "a",
+                                    Constructor(
+                                        DataConstructor {
+                                            modifier: None,
+                                            ident: ForallIdent(
+                                                ForallIdent(
+                                                    "a",
+                                                ),
                                             ),
-                                        ),
+                                            args: [],
+                                        },
                                     ),
                                 ),
                                 Literal(
-                                    Ident(
-                                        ForallIdent(
-                                            ForallIdent(
-                                                "b",
+                                    Constructor(
+                                        DataConstructor {
+                                            modifier: None,
+                                            ident: ForallIdent(
+                                                ForallIdent(
+                                                    "b",
+                                                ),
                                             ),
-                                        ),
+                                            args: [],
+                                        },
                                     ),
                                 ),
                             ),
                             Literal(
-                                Ident(
-                                    ForallIdent(
-                                        ForallIdent(
-                                            "b",
+                                Constructor(
+                                    DataConstructor {
+                                        modifier: None,
+                                        ident: ForallIdent(
+                                            ForallIdent(
+                                                "b",
+                                            ),
                                         ),
-                                    ),
+                                        args: [],
+                                    },
                                 ),
                             ),
                         ),
@@ -574,135 +608,126 @@ Module {
         ),
         AssignDef(
             AssignDef {
-                eta_envs: EtaEnvs(
-                    [
-                        EtaEnv {
-                            ident: HandlerIdent(
-                                "write",
-                            ),
-                            expr: HandlerTypeExpr {
-                                resume: Arrow(
-                                    Literal(
-                                        Ident(
-                                            ExistsIdent(
-                                                ExistsIdent(
-                                                    "Text",
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                    Literal(
-                                        Context(
-                                            ExistsIdent(
-                                                ExistsIdent(
-                                                    "IO",
-                                                ),
-                                            ),
-                                            Literal(
-                                                Tuple(
-                                                    0,
-                                                    [],
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                                ret: Literal(
-                                    Context(
-                                        ExistsIdent(
-                                            ExistsIdent(
-                                                "IO",
-                                            ),
-                                        ),
-                                        Literal(
-                                            Tuple(
-                                                0,
-                                                [],
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            },
-                        },
-                        EtaEnv {
-                            ident: HandlerIdent(
-                                "read",
-                            ),
-                            expr: HandlerTypeExpr {
-                                resume: Literal(
-                                    Context(
-                                        ExistsIdent(
-                                            ExistsIdent(
-                                                "IO",
-                                            ),
-                                        ),
-                                        Literal(
-                                            Ident(
-                                                ExistsIdent(
-                                                    ExistsIdent(
-                                                        "Char",
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                                ret: Literal(
-                                    Context(
-                                        ExistsIdent(
-                                            ExistsIdent(
-                                                "IO",
-                                            ),
-                                        ),
-                                        Literal(
-                                            Tuple(
-                                                0,
-                                                [],
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            },
-                        },
-                        EtaEnv {
-                            ident: HandlerIdent(
-                                "none",
-                            ),
-                            expr: HandlerTypeExpr {
-                                resume: Literal(
-                                    Tuple(
-                                        0,
-                                        [],
-                                    ),
-                                ),
-                                ret: Literal(
-                                    Tuple(
-                                        0,
-                                        [],
-                                    ),
-                                ),
-                            },
-                        },
-                    ],
-                ),
                 ident: Ident(
                     "main",
                 ),
                 expr: TypeExpr {
-                    constraints: [],
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [
+                            EtaEnv {
+                                ident: HandlerIdent(
+                                    "write",
+                                ),
+                                expr: CoroutineType {
+                                    resume: Arrow(
+                                        Literal(
+                                            Constructor(
+                                                DataConstructor {
+                                                    modifier: None,
+                                                    ident: ExistsIdent(
+                                                        ExistsIdent(
+                                                            "Text",
+                                                        ),
+                                                    ),
+                                                    args: [],
+                                                },
+                                            ),
+                                        ),
+                                        Literal(
+                                            Constructor(
+                                                DataConstructor {
+                                                    modifier: None,
+                                                    ident: ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    args: [],
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    ret: Literal(
+                                        Constructor(
+                                            DataConstructor {
+                                                modifier: None,
+                                                ident: ExistsIdent(
+                                                    ExistsIdent(
+                                                        "IO",
+                                                    ),
+                                                ),
+                                                args: [],
+                                            },
+                                        ),
+                                    ),
+                                },
+                            },
+                            EtaEnv {
+                                ident: HandlerIdent(
+                                    "read",
+                                ),
+                                expr: CoroutineType {
+                                    resume: Literal(
+                                        Constructor(
+                                            DataConstructor {
+                                                modifier: None,
+                                                ident: ExistsIdent(
+                                                    ExistsIdent(
+                                                        "IO",
+                                                    ),
+                                                ),
+                                                args: [],
+                                            },
+                                        ),
+                                    ),
+                                    ret: Literal(
+                                        Constructor(
+                                            DataConstructor {
+                                                modifier: None,
+                                                ident: ExistsIdent(
+                                                    ExistsIdent(
+                                                        "IO",
+                                                    ),
+                                                ),
+                                                args: [],
+                                            },
+                                        ),
+                                    ),
+                                },
+                            },
+                            EtaEnv {
+                                ident: HandlerIdent(
+                                    "none",
+                                ),
+                                expr: CoroutineType {
+                                    resume: Literal(
+                                        Tuple(
+                                            0,
+                                            [],
+                                        ),
+                                    ),
+                                    ret: Literal(
+                                        Tuple(
+                                            0,
+                                            [],
+                                        ),
+                                    ),
+                                },
+                            },
+                        ],
+                    ),
                     expr: Literal(
-                        Context(
-                            ExistsIdent(
-                                ExistsIdent(
-                                    "IO",
+                        Constructor(
+                            DataConstructor {
+                                modifier: None,
+                                ident: ExistsIdent(
+                                    ExistsIdent(
+                                        "IO",
+                                    ),
                                 ),
-                            ),
-                            Literal(
-                                Tuple(
-                                    0,
-                                    [],
-                                ),
-                            ),
+                                args: [],
+                            },
                         ),
                     ),
                 },
@@ -735,37 +760,37 @@ Module {
         ),
         LineComment(
             LineComment(
-                "lineComment(749, 767)",
+                "lineComment(748, 766)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(767, 797)",
+                "lineComment(766, 796)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(797, 821)",
+                "lineComment(796, 820)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(821, 824)",
+                "lineComment(820, 823)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(824, 878)",
+                "lineComment(823, 877)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(878, 917)",
+                "lineComment(877, 916)",
             ),
         ),
         LineComment(
             LineComment(
-                "lineComment(917, 922)",
+                "lineComment(916, 921)",
             ),
         ),
         Assign(

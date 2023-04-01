@@ -48,7 +48,6 @@ pub struct HandlerTypeDefExpr {
     pub trait_constraints: Vec<TraitConstraint>,
     pub eta_envs: EtaEnvs,
     pub expr: TypeAbstructionExpr,
-    pub handler_expr: CoroutineType,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -94,8 +93,8 @@ pub enum Expr {
     Apply(Apply),
     ApplyInst(ApplyInst),
     ApplyEff(ApplyEff),
-    Ident(Ident),
     InstIdent(InstIdent),
+    Ident(Ident),
     HandlerIdent(HandlerIdent),
     Literal(Literal),
     Abstruction(Abstruction),
@@ -103,8 +102,8 @@ pub enum Expr {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Abstruction {
-    pub left: Box<Expr>,
-    pub right: Box<Expr>,
+    pub arg: Option<Box<Expr>>,
+    pub expr: Box<Expr>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -116,7 +115,7 @@ pub struct CoroutineType {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TraitDef {
     pub trait_constraints: Vec<TraitConstraint>,
-    pub constructor: Constructor,
+    pub constructor: DataConstructor,
     pub where_clause: Module,
 }
 
@@ -128,7 +127,7 @@ pub struct TraitConstraint {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Apply {
-    pub ident: Ident,
+    pub abstruction: Abstruction,
     pub expr: Box<Expr>,
 }
 
@@ -161,9 +160,10 @@ pub enum TypeAbstructionExpr {
 pub enum TypeLiteral {
     Top,
     Array(Box<TypeAbstructionExpr>),
-    Context(TypeIdent, Box<TypeAbstructionExpr>),
+    Constructor(DataConstructor),
     Tuple(usize, Vec<TypeAbstructionExpr>),
-    Ident(TypeIdent),
+    Coroutine(Box<CoroutineType>),
+    // Abstruction
     Bottom,
 }
 
@@ -245,15 +245,15 @@ impl IntoIterator for DataExpr {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum DataValue {
-    Constructor(Constructor),
+    Constructor(DataConstructor),
     Unit,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Constructor {
+pub struct DataConstructor {
     pub modifier: Option<DataModifier>,
     pub ident: TypeIdent,
-    pub args: Vec<TypeIdent>,
+    pub args: Vec<TypeLiteral>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -261,13 +261,28 @@ pub struct AssignArgs {
     pub patterns: Vec<PatternExpr>,
 }
 
+impl AssignArgs {
+    pub fn iter(&self) -> impl Iterator<Item = &PatternExpr> {
+        self.patterns.iter()
+    }
+}
+
+impl IntoIterator for AssignArgs {
+    type Item = PatternExpr;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.patterns.into_iter()
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum PatternExpr {
     Or(Box<PatternExpr>, Box<PatternExpr>),
     Literal(Literal),
     Bind(Ident),
-    TypeIdent(TypeIdent),
     ListHead(),
+    Constructor(DataConstructor),
     Tuple(usize, Vec<PatternExpr>),
     Any,
 }

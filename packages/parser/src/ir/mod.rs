@@ -6,40 +6,79 @@ mod seq_gen;
 use crate::ast::{self};
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::{HashMap, VecDeque},
-    fmt::Display,
-    ops::Deref,
-    rc::Rc,
-};
+use std::{fmt::Display, rc::Rc};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Function<T> {
+pub struct Function<T: Default> {
     pub ident: Ident,
-    pub arg: Rc<PatternExpr>,
-    pub expr: Rc<Expr>,
+    pub expr: Abstruction,
+    pub where_clause: T,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct HandlerFunction<T: Default> {
+    pub ident: HandlerIdent,
+    pub expr: Abstruction,
     pub where_clause: T,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Abstruction {
-    pub arg: Option<Ident>,
+    pub arg: Option<PatternExpr>,
     pub expr: Expr,
 }
 
-impl<T> TryFrom<ast::Assign> for Function<T> {
-    type Error = anyhow::Error;
-
-    fn try_from(_value: ast::Assign) -> Result<Self, Self::Error> {
-        todo!()
+impl From<ast::Abstruction> for Abstruction {
+    fn from(value: ast::Abstruction) -> Self {
+        Self {
+            arg: value.arg.map(|arg| PatternExpr::from(*arg)),
+            expr: Expr::from(*value.expr),
+        }
     }
 }
 
-impl<T> TryFrom<ast::HandlerAssign> for Function<T> {
+impl<T: Default> TryFrom<ast::Assign> for Function<T> {
     type Error = anyhow::Error;
 
-    fn try_from(_value: ast::HandlerAssign) -> Result<Self, Self::Error> {
-        todo!()
+    fn try_from(value: ast::Assign) -> Result<Self, Self::Error> {
+        let expr = build_abstruction(value.args.into_iter().rev().collect::<Vec<_>>(), value.expr);
+
+        Ok(Self {
+            ident: value.ident.into(),
+            expr,
+            where_clause: T::default(),
+        })
+    }
+}
+
+fn build_abstruction(mut args: Vec<ast::PatternExpr>, expr: ast::Expr) -> Abstruction {
+    let pat = match args.pop() {
+        Some(pat) => pat,
+        None => {
+            return Abstruction {
+                arg: None,
+                expr: Expr::try_from(expr).unwrap(),
+            }
+        }
+    };
+
+    Abstruction {
+        arg: Some(PatternExpr::from(pat)),
+        expr: Expr::Abstruction(Box::new(build_abstruction(args, expr))),
+    }
+}
+
+impl<T: Default> TryFrom<ast::HandlerAssign> for HandlerFunction<T> {
+    type Error = anyhow::Error;
+
+    fn try_from(value: ast::HandlerAssign) -> Result<Self, Self::Error> {
+        let expr = build_abstruction(value.args.into_iter().rev().collect::<Vec<_>>(), value.expr);
+
+        Ok(Self {
+            ident: value.ident.into(),
+            expr,
+            where_clause: T::default(),
+        })
     }
 }
 
@@ -113,18 +152,42 @@ pub struct CoroutineType {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct PatternExpr {}
+pub enum PatternExpr {
+    Or(Box<PatternExpr>, Box<PatternExpr>),
+    Literal(Literal),
+    Bind(Ident),
+    Constructor(DataConstructor),
+    ListHead(),
+    Tuple(usize, Vec<PatternExpr>),
+    Any,
+}
 
 impl From<ast::PatternExpr> for PatternExpr {
     fn from(value: ast::PatternExpr) -> Self {
         match value {
-            ast::PatternExpr::Or(_, _) => todo!(),
-            ast::PatternExpr::Literal(_) => todo!(),
-            ast::PatternExpr::Bind(_) => todo!(),
-            ast::PatternExpr::ListHead() => todo!(),
-            ast::PatternExpr::Tuple(_, _) => todo!(),
-            ast::PatternExpr::Any => todo!(),
-            ast::PatternExpr::TypeIdent(_) => todo!(),
+            ast::PatternExpr::Or(lhs, rhs) => {
+                Self::Or(Box::new((*lhs).into()), Box::new((*rhs).into()))
+            }
+            ast::PatternExpr::Literal(lit) => Self::Literal(lit.into()),
+            ast::PatternExpr::Bind(ident) => Self::Bind(ident.into()),
+            ast::PatternExpr::ListHead() => {
+                todo!()
+            }
+            ast::PatternExpr::Tuple(size, exprs) => {
+                Self::Tuple(size, exprs.into_iter().map(PatternExpr::from).collect())
+            }
+            ast::PatternExpr::Constructor(constructor) => Self::Constructor(constructor.into()),
+            ast::PatternExpr::Any => Self::Any,
+        }
+    }
+}
+
+impl From<ast::Expr> for PatternExpr {
+    fn from(value: ast::Expr) -> Self {
+        match value {
+            ast::Expr::Literal(lit) => Self::Literal(lit.into()),
+            ast::Expr::Ident(ident) => Self::Bind(ident.into()),
+            _ => unreachable!("{:?}", value),
         }
     }
 }
@@ -157,58 +220,62 @@ impl Display for Ident {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Expr {
     Literal(Literal),
+    Abstruction(Box<Abstruction>),
     Apply(Apply),
     ApplyEmbedded(ApplyInst),
+    ApplyEff(ApplyEff),
     Reference(Ident),
+    ReferenceInst(InstIdent),
+    ReferenceHandler(HandlerIdent),
     Pattern(Pattern),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Context {
-    pub values: HashMap<Ident, Rc<Expr>>,
-}
+// #[derive(Debug, Serialize, Deserialize)]
+// pub struct Context {
+//     pub values: HashMap<Ident, Rc<Expr>>,
+// }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ContextStack(VecDeque<Context>);
+// #[derive(Debug, Serialize, Deserialize)]
+// pub struct ContextStack(VecDeque<Context>);
 
-impl Deref for Context {
-    type Target = HashMap<Ident, Rc<Expr>>;
+// impl Deref for Context {
+//     type Target = HashMap<Ident, Rc<Expr>>;
 
-    fn deref(&self) -> &Self::Target {
-        &self.values
-    }
-}
+//     fn deref(&self) -> &Self::Target {
+//         &self.values
+//     }
+// }
 
-impl Expr {
-    fn is_normal_form(&self, context: &Context) -> bool {
-        match self {
-            Expr::Literal(_) => true,
-            Expr::ApplyEmbedded(_) => false,
-            Expr::Apply(_) => false,
-            Expr::Reference(ident) => {
-                let value = context.get(ident).unwrap();
-                value.is_normal_form(context)
-            }
-            Expr::Pattern(_) => false,
-        }
-    }
+// impl Expr {
+//     fn is_normal_form(&self, context: &Context) -> bool {
+//         match self {
+//             Expr::Literal(_) => true,
+//             Expr::ApplyEmbedded(_) => false,
+//             Expr::Apply(_) => false,
+//             Expr::Reference(ident) => {
+//                 let value = context.get(ident).unwrap();
+//                 value.is_normal_form(context)
+//             }
+//             Expr::Pattern(_) => false,
+//         }
+//     }
 
-    fn eval(&self, context: &Context) -> Rc<Expr> {
-        match self {
-            Expr::Literal(value) => Rc::new(Expr::Literal(value.clone())),
-            Expr::Apply(_) => todo!(),
-            Expr::ApplyEmbedded(_) => todo!(),
-            Expr::Reference(ident) => context
-                .get(ident)
-                .map(|item| match Self::is_normal_form(item, context) {
-                    true => item.clone(),
-                    false => self.eval(context),
-                })
-                .unwrap(),
-            Expr::Pattern(_) => todo!(),
-        }
-    }
-}
+//     fn eval(&self, context: &Context) -> Rc<Expr> {
+//         match self {
+//             Expr::Literal(value) => Rc::new(Expr::Literal(value.clone())),
+//             Expr::Apply(_) => todo!(),
+//             Expr::ApplyEmbedded(_) => todo!(),
+//             Expr::Reference(ident) => context
+//                 .get(ident)
+//                 .map(|item| match Self::is_normal_form(item, context) {
+//                     true => item.clone(),
+//                     false => self.eval(context),
+//                 })
+//                 .unwrap(),
+//             Expr::Pattern(_) => todo!(),
+//         }
+//     }
+// }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TypeAbstructionEnv {
@@ -323,14 +390,20 @@ pub struct Pattern {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Apply {
-    pub ident: Ident,
-    pub expr: Rc<Expr>,
+    pub abstruction: Box<Abstruction>,
+    pub expr: Box<Expr>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ApplyInst {
-    pub ident: Ident,
-    pub expr: Rc<Expr>,
+    pub ident: InstIdent,
+    pub expr: Box<Expr>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ApplyEff {
+    pub ident: HandlerIdent,
+    pub expr: Box<Expr>,
 }
 
 impl From<ast::Expr> for Expr {
@@ -340,10 +413,14 @@ impl From<ast::Expr> for Expr {
             ast::Expr::Apply(value) => Self::Apply(value.into()),
             ast::Expr::ApplyInst(value) => Self::ApplyEmbedded(value.into()),
             ast::Expr::Ident(value) => Self::Reference(value.into()),
-            ast::Expr::ApplyEff(_) => todo!(),
-            ast::Expr::InstIdent(_) => todo!(),
-            ast::Expr::HandlerIdent(_) => todo!(),
-            ast::Expr::Abstruction(_) => todo!(),
+            ast::Expr::ApplyEff(value) => Self::ApplyEff(value.into()),
+            ast::Expr::InstIdent(value) => Self::ReferenceInst(value.into()),
+            ast::Expr::HandlerIdent(value) => Self::ReferenceHandler(value.into()),
+            ast::Expr::Abstruction(value) => {
+                dbg!(&value);
+                // Self::Abstruction(Box::new());
+                todo!()
+            }
         }
     }
 }
@@ -351,8 +428,8 @@ impl From<ast::Expr> for Expr {
 impl From<ast::Apply> for Apply {
     fn from(value: ast::Apply) -> Self {
         Self {
-            ident: value.ident.into(),
-            expr: Rc::new((*value.expr).into()),
+            abstruction: Box::new(value.abstruction.into()),
+            expr: Box::new((*value.expr).into()),
         }
     }
 }
@@ -361,30 +438,38 @@ impl From<ast::ApplyInst> for ApplyInst {
     fn from(value: ast::ApplyInst) -> Self {
         Self {
             ident: value.ident.into(),
-            expr: Rc::new((*value.expr).into()),
+            expr: Box::new((*value.expr).into()),
         }
     }
 }
 
-impl Expr {
-    pub fn as_literal(&self) -> Literal {
-        match self {
-            Expr::Literal(v) => v.clone(),
-            Expr::Apply(_) => panic!(),
-            Expr::ApplyEmbedded(_) => panic!(),
-            Expr::Reference(_) => panic!(),
-            Expr::Pattern(_) => todo!(),
+impl From<ast::ApplyEff> for ApplyEff {
+    fn from(value: ast::ApplyEff) -> Self {
+        Self {
+            ident: value.ident.into(),
+            expr: Box::new((*value.expr).into()),
         }
     }
 }
+// impl Expr {
+//     pub fn as_literal(&self) -> Literal {
+//         match self {
+//             Expr::Literal(v) => v.clone(),
+//             Expr::Apply(_) => panic!(),
+//             Expr::ApplyEmbedded(_) => panic!(),
+//             Expr::Reference(_) => panic!(),
+//             Expr::Pattern(_) => todo!(),
+//         }
+//     }
+// }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Literal {
     Char(char),
     Text(String),
     Int(isize),
-    Tuple(usize, Box<[Rc<Expr>]>),
-    List(Vec<Rc<Expr>>),
+    Tuple(usize, Vec<Expr>),
+    List(Vec<Expr>),
 }
 
 impl From<ast::Literal> for Literal {
@@ -393,9 +478,11 @@ impl From<ast::Literal> for Literal {
             ast::Literal::Char(value) => Self::Char(value),
             ast::Literal::Text(value) => Self::Text(value),
             ast::Literal::Int(value) => Self::Int(value),
-            ast::Literal::Unit => Self::Tuple(0, Box::new([])),
+            ast::Literal::Unit => Self::Tuple(0, Vec::new()),
             ast::Literal::Array(_) => todo!(),
-            ast::Literal::Tuple(_, _) => todo!(),
+            ast::Literal::Tuple(size, elems) => {
+                Self::Tuple(size, elems.into_iter().map(|item| item.into()).collect())
+            }
         }
     }
 }
@@ -535,9 +622,10 @@ pub enum TypeValue {
     Bottom,
     Unknown,
     Array(Box<TypeAbstruction>),
-    Context(TypeIdent, Box<TypeAbstruction>),
+    Constructor(DataConstructor),
     Tuple(usize, Vec<TypeAbstruction>),
     Ident(TypeIdent),
+    Coroutine(Box<CoroutineType>),
 }
 
 impl From<ast::TypeLiteral> for TypeValue {
@@ -548,10 +636,9 @@ impl From<ast::TypeLiteral> for TypeValue {
             ast::TypeLiteral::Array(expr) => {
                 TypeValue::Array(Box::new(TypeAbstruction::try_from(*expr).unwrap()))
             }
-            ast::TypeLiteral::Context(ident, expr) => TypeValue::Context(
-                ident.into(),
-                Box::new(TypeAbstruction::try_from(*expr).unwrap()),
-            ),
+            ast::TypeLiteral::Constructor(constructor) => {
+                TypeValue::Constructor(constructor.into())
+            }
             ast::TypeLiteral::Tuple(size, exprs) => TypeValue::Tuple(
                 size,
                 exprs
@@ -559,7 +646,7 @@ impl From<ast::TypeLiteral> for TypeValue {
                     .map(|expr| TypeAbstruction::try_from(expr).unwrap())
                     .collect(),
             ),
-            ast::TypeLiteral::Ident(ident) => TypeValue::Ident(ident.into()),
+            ast::TypeLiteral::Coroutine(ident) => TypeValue::Coroutine(Box::new((*ident).into())),
         }
     }
 }
@@ -638,7 +725,7 @@ impl TryFrom<ast::DataAssign> for DataExpr {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum DataTerm {
     Top,
     Bottom,
@@ -646,33 +733,56 @@ pub enum DataTerm {
     Unit,
     Parameter(ForallIdent),
     Ident(ExistsIdent),
-    Constructor(DataModifier, ExistsIdent, Vec<DataTerm>),
+    Tuple(usize, Vec<DataTerm>),
+    Abstruction(Box<TypeAbstruction>),
+    Constructor(DataConstructor),
+    Coroutine(Box<CoroutineType>),
 }
 
 impl From<ast::DataValue> for DataTerm {
     fn from(value: ast::DataValue) -> Self {
         match value {
-            ast::DataValue::Constructor(ast::Constructor {
-                modifier,
-                ident: ast::TypeIdent::ExistsIdent(ident),
-                args,
-            }) => DataTerm::Constructor(
-                modifier.into(),
-                ident.into(),
-                args.into_iter()
-                    .map(|p| match p {
-                        ast::TypeIdent::ExistsIdent(ident) => DataTerm::Ident(ident.into()),
-                        ast::TypeIdent::ForallIdent(ident) => DataTerm::Parameter(ident.into()),
-                    })
-                    .collect::<Vec<_>>(),
-            ),
-            ast::DataValue::Constructor(ast::Constructor {
-                ident: ast::TypeIdent::ForallIdent(_),
-                ..
-            }) => {
-                unreachable!("forall ident is not allowed in data constructor")
-            }
+            ast::DataValue::Constructor(constructor) => DataTerm::Constructor(constructor.into()),
             ast::DataValue::Unit => DataTerm::Unit,
         }
+    }
+}
+
+impl From<ast::TypeLiteral> for DataTerm {
+    fn from(value: ast::TypeLiteral) -> Self {
+        match value {
+            ast::TypeLiteral::Top => DataTerm::Top,
+            ast::TypeLiteral::Bottom => DataTerm::Bottom,
+            ast::TypeLiteral::Array(_) => {
+                todo!()
+            }
+            ast::TypeLiteral::Constructor(constructor) => DataTerm::Constructor(constructor.into()),
+            ast::TypeLiteral::Tuple(size, elems) => DataTerm::Tuple(
+                size,
+                elems.into_iter().map(|p| p.into()).collect::<Vec<_>>(),
+            ),
+            ast::TypeLiteral::Coroutine(coroutine) => {
+                DataTerm::Coroutine(Box::new((*coroutine).into()))
+            }
+        }
+    }
+}
+
+impl From<ast::TypeAbstructionExpr> for DataTerm {
+    fn from(value: ast::TypeAbstructionExpr) -> Self {
+        DataTerm::Abstruction(Box::new(value.into()))
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DataConstructor(DataModifier, TypeIdent, Vec<DataTerm>);
+
+impl From<ast::DataConstructor> for DataConstructor {
+    fn from(value: ast::DataConstructor) -> Self {
+        Self(
+            value.modifier.into(),
+            value.ident.into(),
+            value.args.into_iter().map(|p| p.into()).collect::<Vec<_>>(),
+        )
     }
 }

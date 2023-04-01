@@ -1,2 +1,2 @@
-// <write: Text -> IO ()> main :: IO ()
+// main :: <write: Text -> IO ()> IO ()
 main = "Hello world"

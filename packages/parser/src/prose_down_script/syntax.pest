@@ -20,7 +20,7 @@ assignOp = _{ ws* ~ "=" ~ ws* }
 assignArgs = { (ws+ ~ pattern)* }
 whereClause = { (ws* ~ "where" ~ ws* ~ stmtsBlock)? }
 etaEnvs = { ws* ~ ("<" ~ ws* ~ etaEnvN ~ ws* ~ ","? ~ ">")? }
-  etaEnv = { ws* ~ etaHandlerIdent ~ ws* ~ ":" ~ ws* ~ handlerTypeExpr }
+  etaEnv = { ws* ~ etaHandlerIdent ~ ws* ~ ":" ~ ws* ~ typeExprCoroutine }
     etaHandlerIdent = { lowerIdent }
   etaEnvN = _{ etaEnv ~ ws* ~ ("," ~ ws* ~ etaEnv)* }
 
@@ -28,7 +28,7 @@ etaEnvs = { ws* ~ ("<" ~ ws* ~ etaEnvN ~ ws* ~ ","? ~ ">")? }
 stmt = { ws* ~ (instTypeDef | handlerTypeDef | assignTypeDef | traitDef | handlerAssign | implAssign | dataAssign | assign) ~ ws* }
 instTypeDef = { instIdent ~ defOp ~ typeExpr }
 handlerTypeDef = { handlerIdent ~ defOp ~ handlerDefTypeExpr }
-assignTypeDef = { ident ~ defOp ~ (typeExpr | coroutineTypeExpr) }
+assignTypeDef = { ident ~ defOp ~ assignTypeDefExpr }
 traitDef = { "trait" ~ ws+ ~ traitConstraintExprs ~ typeIdent ~ traitArgs ~ whereClause }
   traitArgs = { (ws+ ~ typeIdent)* }
   traitValue = _{ stmtsBlock | typeIdent }
@@ -48,7 +48,7 @@ dataAssign = { dataModifier ~ "data" ~ ws+ ~ traitConstraintExprs ~ existsIdent 
     dataValueGroup = { "(" ~ ws* ~ dataExpr ~ ws* ~ ")" }
     dataValue = { dataValueGroup | dataValueConstructor | dataValueUnit }
       dataValueConstructor = { dataModifier ~ typeIdent ~ dataValueConstructorArgs }
-      	dataValueConstructorArgs = { (ws+ ~ dataTerm)* }
+        dataValueConstructorArgs = { (ws+ ~ dataTerm)* }
       dataValueUnit = { "(" ~ ws* ~ ")" }
       // TODO Array
 
@@ -56,24 +56,23 @@ dataAssign = { dataModifier ~ "data" ~ ws+ ~ traitConstraintExprs ~ existsIdent 
 handlerAssign = { handlerIdent ~ assignArgs ~ assignOp ~ expr ~ whereClause? }
 assign = { ident ~ assignArgs ~ assignOp ~ expr ~ whereClause }
 
+assignTypeDefExpr = { traitConstraintExprs ~ etaEnvs ~ abstructionTypeExpr }
 // type exprs
 typeExpr = { traitConstraintExprs ~ etaEnvs ~ abstructionTypeExpr }
-// TODO: return Coroutine
-handlerDefTypeExpr = { traitConstraintExprs ~ etaEnvs ~ handlerTypeExpr ~ abstructionTypeExprOptional }
-coroutineTypeExpr = { traitConstraintExprs ~ handlerTypeExpr }
+handlerDefTypeExpr = { traitConstraintExprs ~ etaEnvs ~ abstructionTypeExpr }
+coroutineTypeExpr = { traitConstraintExprs ~ typeExprCoroutine }
 traitConstraintExprs = { (ws* ~ (traitConstraintGroup | traitConstraintExprN) ~ ws* ~ "=>" ~ ws*)? }
   traitConstraintExpr = { traitIdent ~ (ws+ ~ forallIdent)* }
   // TODO
   traitConstraintExprN = _{ traitConstraintExpr ~ ws* ~ ("," ~ ws* ~ traitConstraintExpr)* }
   traitConstraintGroup = _{ "(" ~ ws* ~ traitConstraintExprN ~ ws* ~ ")" }
-handlerTypeExpr = { ws* ~ handlerTypeExpr1? }
-  handlerTypeExpr1 = _{ "<" ~ ws* ~ abstructionTypeExpr ~ ws* ~ "," ~ ws* ~ abstructionTypeExpr ~ ws* ~ ">" }
-abstructionTypeExprOptional = { abstructionTypeExpr? }
-abstructionTypeExpr = { ws* ~ (typeExprArrow | typeExprContext | typeExprGroup | typeExprLiteral) }
+typeExprCoroutine = { ws* ~ typeExprCoroutine1 }
+  typeExprCoroutine1 = _{ "<" ~ ws* ~ abstructionTypeExpr ~ ws* ~ "," ~ ws* ~ abstructionTypeExpr ~ ws* ~ ">" }
+abstructionTypeExpr = { ws* ~ (typeExprArrow | typeExprConstructor | typeExprGroup | typeExprLiteral) }
 typeExprArrow = { (typeExprLiteral | typeExprGroup) ~ ws* ~ "->" ~ ws* ~ abstructionTypeExpr }
-typeExprContext = { typeIdent ~ (ws+ ~ abstructionTypeExpr) }
+typeExprConstructor = { typeIdent ~ (ws+ ~ abstructionTypeExpr)* }
 typeExprGroup = { "(" ~ ws* ~ abstructionTypeExpr ~ ws* ~ ")" }
-typeExprLiteral = { typeExprUnit | typeExprTuple | typeExprArray | typeExprDivergent | typeExprTop | typeIdent | varIdent }
+typeExprLiteral = { typeExprUnit | typeExprTuple | typeExprArray | typeExprDivergent | typeExprTop | typeExprConstructor | typeExprCoroutine }
   typeExprUnit = { "(" ~ ws* ~ ")" }
   typeExprTuple = { "(" ~ ws* ~ (typeExprTupleN | typeExprTuple1) ~ ws* ~ ")" }
     typeExprTuple1 = _{ abstructionTypeExpr ~ ws* ~ "," }
@@ -117,10 +116,10 @@ infixOperator = { operator | infixIdent }
 
 // patterns
 pattern = { patternOr | patternValue }
-  patternValue = _{ patternAny | patternListHead | patternIdent | patternTypeIdent | patternLiteral | patternTuple }
+  patternValue = _{ patternAny | patternListHead | patternIdent | patternConstructor | patternLiteral | patternTuple }
     patternLiteral = { literal }
     patternIdent = { varIdent }
-    patternTypeIdent = { typeIdent }
+    patternConstructor = { typeExprConstructor }
     patternListHead = { "[" ~ ws* ~ patternValue ~ ws* ~ ":" ~ ws* ~ pattern ~ ws* ~ "]" }
     patternAny = { "_" ~ lowerIdent? }
     patternTuple = { "(" ~ ws* ~ patternValue ~ ("," ~ ws* ~ pattern) ~ ws* ~ ")"}
