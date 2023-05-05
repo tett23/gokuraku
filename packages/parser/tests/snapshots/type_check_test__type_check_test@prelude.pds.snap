@@ -1,0 +1,630 @@
+---
+source: packages/parser/tests/type_check_test.rs
+expression: ir2
+input_file: packages/parser/fixtures/pds/prelude.pds
+---
+Ok(
+    IR2 {
+        ident_symbols: SymbolTable2(
+            {},
+        ),
+        data_symbols: SymbolTable2(
+            {
+                ExistsIdent(
+                    ExistsIdent(
+                        "False",
+                    ),
+                ): Term(
+                    Unit,
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "Bool",
+                    ),
+                ): Or(
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Structual,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "True",
+                                    ),
+                                ),
+                                [],
+                            ),
+                        ),
+                    ),
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Structual,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "False",
+                                    ),
+                                ),
+                                [],
+                            ),
+                        ),
+                    ),
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "Option",
+                    ),
+                ): Or(
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Nominal,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "Some",
+                                    ),
+                                ),
+                                [
+                                    Constructor(
+                                        DataConstructor(
+                                            Structual,
+                                            ForallIdent(
+                                                ForallIdent(
+                                                    "a",
+                                                ),
+                                            ),
+                                            [],
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ),
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Nominal,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "Nil",
+                                    ),
+                                ),
+                                [],
+                            ),
+                        ),
+                    ),
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "Either",
+                    ),
+                ): Or(
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Nominal,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "Left",
+                                    ),
+                                ),
+                                [
+                                    Constructor(
+                                        DataConstructor(
+                                            Structual,
+                                            ForallIdent(
+                                                ForallIdent(
+                                                    "a",
+                                                ),
+                                            ),
+                                            [],
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ),
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Nominal,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "Right",
+                                    ),
+                                ),
+                                [
+                                    Constructor(
+                                        DataConstructor(
+                                            Structual,
+                                            ForallIdent(
+                                                ForallIdent(
+                                                    "b",
+                                                ),
+                                            ),
+                                            [],
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ),
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "True",
+                    ),
+                ): Term(
+                    Unit,
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "Result",
+                    ),
+                ): Or(
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Nominal,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "Ok",
+                                    ),
+                                ),
+                                [
+                                    Constructor(
+                                        DataConstructor(
+                                            Structual,
+                                            ForallIdent(
+                                                ForallIdent(
+                                                    "a",
+                                                ),
+                                            ),
+                                            [],
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ),
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Nominal,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "Err",
+                                    ),
+                                ),
+                                [
+                                    Constructor(
+                                        DataConstructor(
+                                            Structual,
+                                            ForallIdent(
+                                                ForallIdent(
+                                                    "b",
+                                                ),
+                                            ),
+                                            [],
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ),
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "Ordering",
+                    ),
+                ): Or(
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Structual,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "LT",
+                                    ),
+                                ),
+                                [],
+                            ),
+                        ),
+                    ),
+                    Or(
+                        Term(
+                            Constructor(
+                                DataConstructor(
+                                    Structual,
+                                    ExistsIdent(
+                                        ExistsIdent(
+                                            "EQ",
+                                        ),
+                                    ),
+                                    [],
+                                ),
+                            ),
+                        ),
+                        Term(
+                            Constructor(
+                                DataConstructor(
+                                    Structual,
+                                    ExistsIdent(
+                                        ExistsIdent(
+                                            "GT",
+                                        ),
+                                    ),
+                                    [],
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        handler_symbols: SymbolTable2(
+            {
+                HandlerIdent(
+                    "*read",
+                ): (
+                    [
+                        HandlerFunction {
+                            ident: HandlerIdent(
+                                "*read",
+                            ),
+                            expr: Abstruction {
+                                arg: None,
+                                expr: ReferenceInst(
+                                    InstIdent(
+                                        "@read",
+                                    ),
+                                ),
+                            },
+                            where_clause: IR2 {
+                                ident_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                data_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                handler_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                trait_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                inst_symbols: SymbolTable2(
+                                    {},
+                                ),
+                            },
+                        },
+                    ],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [
+                                TraitConstraint {
+                                    ident: TraitIdent(
+                                        "Show",
+                                    ),
+                                    arg: ForallIdent(
+                                        "a",
+                                    ),
+                                },
+                            ],
+                            handler_constraints: [],
+                            abstruction: Term(
+                                Coroutine(
+                                    CoroutineType {
+                                        resume: Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                        ret: Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                HandlerIdent(
+                    "*write",
+                ): (
+                    [
+                        HandlerFunction {
+                            ident: HandlerIdent(
+                                "*write",
+                            ),
+                            expr: Abstruction {
+                                arg: Some(
+                                    Bind(
+                                        Ident(
+                                            "s",
+                                        ),
+                                    ),
+                                ),
+                                expr: Abstruction(
+                                    Abstruction {
+                                        arg: None,
+                                        expr: ApplyEmbedded(
+                                            ApplyInst {
+                                                ident: InstIdent(
+                                                    "@write",
+                                                ),
+                                                expr: Reference(
+                                                    Ident(
+                                                        "s",
+                                                    ),
+                                                ),
+                                            },
+                                        ),
+                                    },
+                                ),
+                            },
+                            where_clause: IR2 {
+                                ident_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                data_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                handler_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                trait_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                inst_symbols: SymbolTable2(
+                                    {},
+                                ),
+                            },
+                        },
+                    ],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [
+                                TraitConstraint {
+                                    ident: TraitIdent(
+                                        "Show",
+                                    ),
+                                    arg: ForallIdent(
+                                        "a",
+                                    ),
+                                },
+                            ],
+                            handler_constraints: [],
+                            abstruction: Term(
+                                Coroutine(
+                                    CoroutineType {
+                                        resume: Arrow(
+                                            Term(
+                                                Constructor(
+                                                    DataConstructor(
+                                                        Structual,
+                                                        ForallIdent(
+                                                            ForallIdent(
+                                                                "a",
+                                                            ),
+                                                        ),
+                                                        [],
+                                                    ),
+                                                ),
+                                            ),
+                                            Term(
+                                                Constructor(
+                                                    DataConstructor(
+                                                        Structual,
+                                                        ExistsIdent(
+                                                            ExistsIdent(
+                                                                "IO",
+                                                            ),
+                                                        ),
+                                                        [],
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        ret: Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+            },
+        ),
+        trait_symbols: SymbolTable2(
+            {
+                ExistsIdent(
+                    ExistsIdent(
+                        "Show",
+                    ),
+                ): TypeAbstructionEnv {
+                    trait_constraints: [],
+                    handler_constraints: [],
+                    abstruction: Term(
+                        Unknown,
+                    ),
+                },
+                ExistsIdent(
+                    ExistsIdent(
+                        "PartialOrd",
+                    ),
+                ): TypeAbstructionEnv {
+                    trait_constraints: [],
+                    handler_constraints: [],
+                    abstruction: Term(
+                        Unknown,
+                    ),
+                },
+                ExistsIdent(
+                    ExistsIdent(
+                        "Eq",
+                    ),
+                ): TypeAbstructionEnv {
+                    trait_constraints: [
+                        TraitConstraint {
+                            ident: TraitIdent(
+                                "PartialEq",
+                            ),
+                            arg: ForallIdent(
+                                "a",
+                            ),
+                        },
+                    ],
+                    handler_constraints: [],
+                    abstruction: Term(
+                        Unknown,
+                    ),
+                },
+                ExistsIdent(
+                    ExistsIdent(
+                        "Ord",
+                    ),
+                ): TypeAbstructionEnv {
+                    trait_constraints: [
+                        TraitConstraint {
+                            ident: TraitIdent(
+                                "PartialEq",
+                            ),
+                            arg: ForallIdent(
+                                "a",
+                            ),
+                        },
+                        TraitConstraint {
+                            ident: TraitIdent(
+                                "Eq",
+                            ),
+                            arg: ForallIdent(
+                                "a",
+                            ),
+                        },
+                    ],
+                    handler_constraints: [],
+                    abstruction: Term(
+                        Unknown,
+                    ),
+                },
+                ExistsIdent(
+                    ExistsIdent(
+                        "PartialEq",
+                    ),
+                ): TypeAbstructionEnv {
+                    trait_constraints: [],
+                    handler_constraints: [],
+                    abstruction: Term(
+                        Unknown,
+                    ),
+                },
+            },
+        ),
+        inst_symbols: SymbolTable2(
+            {
+                InstIdent(
+                    "@atomic",
+                ): TypeAbstructionEnv {
+                    trait_constraints: [],
+                    handler_constraints: [],
+                    abstruction: Term(
+                        Tuple(
+                            0,
+                            [],
+                        ),
+                    ),
+                },
+                InstIdent(
+                    "@write",
+                ): TypeAbstructionEnv {
+                    trait_constraints: [],
+                    handler_constraints: [],
+                    abstruction: Arrow(
+                        Term(
+                            Constructor(
+                                DataConstructor(
+                                    Structual,
+                                    ExistsIdent(
+                                        ExistsIdent(
+                                            "Char",
+                                        ),
+                                    ),
+                                    [],
+                                ),
+                            ),
+                        ),
+                        Term(
+                            Constructor(
+                                DataConstructor(
+                                    Structual,
+                                    ExistsIdent(
+                                        ExistsIdent(
+                                            "IO",
+                                        ),
+                                    ),
+                                    [],
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+                InstIdent(
+                    "@read",
+                ): TypeAbstructionEnv {
+                    trait_constraints: [],
+                    handler_constraints: [],
+                    abstruction: Arrow(
+                        Term(
+                            Tuple(
+                                0,
+                                [],
+                            ),
+                        ),
+                        Term(
+                            Constructor(
+                                DataConstructor(
+                                    Structual,
+                                    ExistsIdent(
+                                        ExistsIdent(
+                                            "IO",
+                                        ),
+                                    ),
+                                    [],
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+    },
+)

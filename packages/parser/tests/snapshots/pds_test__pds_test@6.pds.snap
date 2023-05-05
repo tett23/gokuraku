@@ -1,0 +1,294 @@
+---
+source: packages/parser/tests/pds_test.rs
+expression: ast
+input_file: packages/parser/fixtures/pds/6.pds
+---
+Module {
+    statements: [
+        DataAssign(
+            DataAssign {
+                modifier: None,
+                constraints: [],
+                ident: ExistsIdent(
+                    ExistsIdent(
+                        "Bool",
+                    ),
+                ),
+                args: [],
+                expr: Or(
+                    Value(
+                        Constructor(
+                            DataConstructor {
+                                modifier: None,
+                                ident: ExistsIdent(
+                                    ExistsIdent(
+                                        "True",
+                                    ),
+                                ),
+                                args: [],
+                            },
+                        ),
+                    ),
+                    Value(
+                        Constructor(
+                            DataConstructor {
+                                modifier: None,
+                                ident: ExistsIdent(
+                                    ExistsIdent(
+                                        "False",
+                                    ),
+                                ),
+                                args: [],
+                            },
+                        ),
+                    ),
+                ),
+            },
+        ),
+        DataAssign(
+            DataAssign {
+                modifier: Some(
+                    Nominal,
+                ),
+                constraints: [],
+                ident: ExistsIdent(
+                    ExistsIdent(
+                        "True",
+                    ),
+                ),
+                args: [],
+                expr: Value(
+                    Unit,
+                ),
+            },
+        ),
+        DataAssign(
+            DataAssign {
+                modifier: Some(
+                    Nominal,
+                ),
+                constraints: [],
+                ident: ExistsIdent(
+                    ExistsIdent(
+                        "False",
+                    ),
+                ),
+                args: [],
+                expr: Value(
+                    Unit,
+                ),
+            },
+        ),
+        DataAssign(
+            DataAssign {
+                modifier: Some(
+                    Nominal,
+                ),
+                constraints: [],
+                ident: ExistsIdent(
+                    ExistsIdent(
+                        "Int",
+                    ),
+                ),
+                args: [],
+                expr: Value(
+                    Unit,
+                ),
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                ident: Ident(
+                    "id",
+                ),
+                expr: TypeExpr {
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
+                    expr: Literal(
+                        Constructor(
+                            DataConstructor {
+                                modifier: None,
+                                ident: ExistsIdent(
+                                    ExistsIdent(
+                                        "Int",
+                                    ),
+                                ),
+                                args: [],
+                            },
+                        ),
+                    ),
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                ident: Ident(
+                    "unary",
+                ),
+                expr: TypeExpr {
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
+                    expr: Arrow(
+                        Literal(
+                            Constructor(
+                                DataConstructor {
+                                    modifier: None,
+                                    ident: ExistsIdent(
+                                        ExistsIdent(
+                                            "Int",
+                                        ),
+                                    ),
+                                    args: [],
+                                },
+                            ),
+                        ),
+                        Literal(
+                            Constructor(
+                                DataConstructor {
+                                    modifier: None,
+                                    ident: ExistsIdent(
+                                        ExistsIdent(
+                                            "Int",
+                                        ),
+                                    ),
+                                    args: [],
+                                },
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                ident: Ident(
+                    "binary",
+                ),
+                expr: TypeExpr {
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
+                    expr: Arrow(
+                        Literal(
+                            Constructor(
+                                DataConstructor {
+                                    modifier: None,
+                                    ident: ExistsIdent(
+                                        ExistsIdent(
+                                            "Int",
+                                        ),
+                                    ),
+                                    args: [],
+                                },
+                            ),
+                        ),
+                        Arrow(
+                            Literal(
+                                Constructor(
+                                    DataConstructor {
+                                        modifier: None,
+                                        ident: ExistsIdent(
+                                            ExistsIdent(
+                                                "Int",
+                                            ),
+                                        ),
+                                        args: [],
+                                    },
+                                ),
+                            ),
+                            Literal(
+                                Constructor(
+                                    DataConstructor {
+                                        modifier: None,
+                                        ident: ExistsIdent(
+                                            ExistsIdent(
+                                                "Int",
+                                            ),
+                                        ),
+                                        args: [],
+                                    },
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+        AssignDef(
+            AssignDef {
+                ident: Ident(
+                    "ternary",
+                ),
+                expr: TypeExpr {
+                    trait_constraints: [],
+                    eta_envs: EtaEnvs(
+                        [],
+                    ),
+                    expr: Arrow(
+                        Literal(
+                            Constructor(
+                                DataConstructor {
+                                    modifier: None,
+                                    ident: ExistsIdent(
+                                        ExistsIdent(
+                                            "Int",
+                                        ),
+                                    ),
+                                    args: [],
+                                },
+                            ),
+                        ),
+                        Arrow(
+                            Literal(
+                                Constructor(
+                                    DataConstructor {
+                                        modifier: None,
+                                        ident: ExistsIdent(
+                                            ExistsIdent(
+                                                "Int",
+                                            ),
+                                        ),
+                                        args: [],
+                                    },
+                                ),
+                            ),
+                            Arrow(
+                                Literal(
+                                    Constructor(
+                                        DataConstructor {
+                                            modifier: None,
+                                            ident: ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
+                                            ),
+                                            args: [],
+                                        },
+                                    ),
+                                ),
+                                Literal(
+                                    Constructor(
+                                        DataConstructor {
+                                            modifier: None,
+                                            ident: ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
+                                            ),
+                                            args: [],
+                                        },
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+    ],
+}

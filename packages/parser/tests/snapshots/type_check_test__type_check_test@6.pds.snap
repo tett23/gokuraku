@@ -1,0 +1,265 @@
+---
+source: packages/parser/tests/type_check_test.rs
+expression: ir2
+input_file: packages/parser/fixtures/pds/6.pds
+---
+Ok(
+    IR2 {
+        ident_symbols: SymbolTable2(
+            {
+                Ident(
+                    "ternary",
+                ): (
+                    [],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [],
+                            abstruction: Arrow(
+                                Term(
+                                    Constructor(
+                                        DataConstructor(
+                                            Structual,
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
+                                            ),
+                                            [],
+                                        ),
+                                    ),
+                                ),
+                                Arrow(
+                                    Term(
+                                        Constructor(
+                                            DataConstructor(
+                                                Structual,
+                                                ExistsIdent(
+                                                    ExistsIdent(
+                                                        "Int",
+                                                    ),
+                                                ),
+                                                [],
+                                            ),
+                                        ),
+                                    ),
+                                    Arrow(
+                                        Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "Int",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                        Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "Int",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                Ident(
+                    "binary",
+                ): (
+                    [],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [],
+                            abstruction: Arrow(
+                                Term(
+                                    Constructor(
+                                        DataConstructor(
+                                            Structual,
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
+                                            ),
+                                            [],
+                                        ),
+                                    ),
+                                ),
+                                Arrow(
+                                    Term(
+                                        Constructor(
+                                            DataConstructor(
+                                                Structual,
+                                                ExistsIdent(
+                                                    ExistsIdent(
+                                                        "Int",
+                                                    ),
+                                                ),
+                                                [],
+                                            ),
+                                        ),
+                                    ),
+                                    Term(
+                                        Constructor(
+                                            DataConstructor(
+                                                Structual,
+                                                ExistsIdent(
+                                                    ExistsIdent(
+                                                        "Int",
+                                                    ),
+                                                ),
+                                                [],
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                Ident(
+                    "id",
+                ): (
+                    [],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [],
+                            abstruction: Term(
+                                Constructor(
+                                    DataConstructor(
+                                        Structual,
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "Int",
+                                            ),
+                                        ),
+                                        [],
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                Ident(
+                    "unary",
+                ): (
+                    [],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [],
+                            abstruction: Arrow(
+                                Term(
+                                    Constructor(
+                                        DataConstructor(
+                                            Structual,
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
+                                            ),
+                                            [],
+                                        ),
+                                    ),
+                                ),
+                                Term(
+                                    Constructor(
+                                        DataConstructor(
+                                            Structual,
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
+                                            ),
+                                            [],
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+            },
+        ),
+        data_symbols: SymbolTable2(
+            {
+                ExistsIdent(
+                    ExistsIdent(
+                        "Bool",
+                    ),
+                ): Or(
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Structual,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "True",
+                                    ),
+                                ),
+                                [],
+                            ),
+                        ),
+                    ),
+                    Term(
+                        Constructor(
+                            DataConstructor(
+                                Structual,
+                                ExistsIdent(
+                                    ExistsIdent(
+                                        "False",
+                                    ),
+                                ),
+                                [],
+                            ),
+                        ),
+                    ),
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "Int",
+                    ),
+                ): Term(
+                    Unit,
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "True",
+                    ),
+                ): Term(
+                    Unit,
+                ),
+                ExistsIdent(
+                    ExistsIdent(
+                        "False",
+                    ),
+                ): Term(
+                    Unit,
+                ),
+            },
+        ),
+        handler_symbols: SymbolTable2(
+            {},
+        ),
+        trait_symbols: SymbolTable2(
+            {},
+        ),
+        inst_symbols: SymbolTable2(
+            {},
+        ),
+    },
+)

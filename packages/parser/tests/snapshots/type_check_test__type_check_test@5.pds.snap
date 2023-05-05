@@ -1,0 +1,62 @@
+---
+source: packages/parser/tests/type_check_test.rs
+expression: ir2
+input_file: packages/parser/fixtures/pds/5.pds
+---
+Ok(
+    IR2 {
+        ident_symbols: SymbolTable2(
+            {
+                Ident(
+                    "main",
+                ): (
+                    [
+                        Function {
+                            ident: Ident(
+                                "main",
+                            ),
+                            expr: Abstruction {
+                                arg: None,
+                                expr: Literal(
+                                    Text(
+                                        "Hello world",
+                                    ),
+                                ),
+                            },
+                            where_clause: IR2 {
+                                ident_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                data_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                handler_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                trait_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                inst_symbols: SymbolTable2(
+                                    {},
+                                ),
+                            },
+                        },
+                    ],
+                    None,
+                ),
+            },
+        ),
+        data_symbols: SymbolTable2(
+            {},
+        ),
+        handler_symbols: SymbolTable2(
+            {},
+        ),
+        trait_symbols: SymbolTable2(
+            {},
+        ),
+        inst_symbols: SymbolTable2(
+            {},
+        ),
+    },
+)

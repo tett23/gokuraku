@@ -1,0 +1,537 @@
+---
+source: packages/parser/tests/type_check_test.rs
+expression: ir2
+input_file: packages/parser/fixtures/pds/1.pds
+---
+Ok(
+    IR2 {
+        ident_symbols: SymbolTable2(
+            {
+                Ident(
+                    "echo",
+                ): (
+                    [
+                        Function {
+                            ident: Ident(
+                                "echo",
+                            ),
+                            expr: Abstruction {
+                                arg: Some(
+                                    Bind(
+                                        Ident(
+                                            "s",
+                                        ),
+                                    ),
+                                ),
+                                expr: Abstruction(
+                                    Abstruction {
+                                        arg: None,
+                                        expr: Reference(
+                                            Ident(
+                                                "await",
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            },
+                            where_clause: IR2 {
+                                ident_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                data_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                handler_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                trait_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                inst_symbols: SymbolTable2(
+                                    {},
+                                ),
+                            },
+                        },
+                    ],
+                    None,
+                ),
+                Ident(
+                    "main",
+                ): (
+                    [
+                        Function {
+                            ident: Ident(
+                                "main",
+                            ),
+                            expr: Abstruction {
+                                arg: None,
+                                expr: Reference(
+                                    Ident(
+                                        "echo",
+                                    ),
+                                ),
+                            },
+                            where_clause: IR2 {
+                                ident_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                data_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                handler_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                trait_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                inst_symbols: SymbolTable2(
+                                    {},
+                                ),
+                            },
+                        },
+                    ],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [
+                                HandlerConstraint {
+                                    ident: HandlerIdent(
+                                        "write",
+                                    ),
+                                    expr: CoroutineType {
+                                        resume: Term(
+                                            Tuple(
+                                                0,
+                                                [],
+                                            ),
+                                        ),
+                                        ret: Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                },
+                                HandlerConstraint {
+                                    ident: HandlerIdent(
+                                        "b",
+                                    ),
+                                    expr: CoroutineType {
+                                        resume: Term(
+                                            Tuple(
+                                                0,
+                                                [],
+                                            ),
+                                        ),
+                                        ret: Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                },
+                            ],
+                            abstruction: Term(
+                                Constructor(
+                                    DataConstructor(
+                                        Structual,
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "IO",
+                                            ),
+                                        ),
+                                        [],
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                Ident(
+                    "a",
+                ): (
+                    [
+                        Function {
+                            ident: Ident(
+                                "a",
+                            ),
+                            expr: Abstruction {
+                                arg: None,
+                                expr: Literal(
+                                    Tuple(
+                                        1,
+                                        [
+                                            Literal(
+                                                Int(
+                                                    1,
+                                                ),
+                                            ),
+                                        ],
+                                    ),
+                                ),
+                            },
+                            where_clause: IR2 {
+                                ident_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                data_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                handler_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                trait_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                inst_symbols: SymbolTable2(
+                                    {},
+                                ),
+                            },
+                        },
+                    ],
+                    None,
+                ),
+                Ident(
+                    "f",
+                ): (
+                    [
+                        Function {
+                            ident: Ident(
+                                "f",
+                            ),
+                            expr: Abstruction {
+                                arg: Some(
+                                    Or(
+                                        Literal(
+                                            Int(
+                                                1,
+                                            ),
+                                        ),
+                                        Literal(
+                                            Int(
+                                                2,
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                                expr: Abstruction(
+                                    Abstruction {
+                                        arg: None,
+                                        expr: Literal(
+                                            Int(
+                                                1,
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            },
+                            where_clause: IR2 {
+                                ident_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                data_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                handler_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                trait_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                inst_symbols: SymbolTable2(
+                                    {},
+                                ),
+                            },
+                        },
+                    ],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [],
+                            abstruction: Arrow(
+                                Term(
+                                    Constructor(
+                                        DataConstructor(
+                                            Structual,
+                                            ExistsIdent(
+                                                ExistsIdent(
+                                                    "Int",
+                                                ),
+                                            ),
+                                            [],
+                                        ),
+                                    ),
+                                ),
+                                Arrow(
+                                    Term(
+                                        Constructor(
+                                            DataConstructor(
+                                                Structual,
+                                                ExistsIdent(
+                                                    ExistsIdent(
+                                                        "Int",
+                                                    ),
+                                                ),
+                                                [],
+                                            ),
+                                        ),
+                                    ),
+                                    Term(
+                                        Constructor(
+                                            DataConstructor(
+                                                Structual,
+                                                ForallIdent(
+                                                    ForallIdent(
+                                                        "a",
+                                                    ),
+                                                ),
+                                                [],
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+            },
+        ),
+        data_symbols: SymbolTable2(
+            {},
+        ),
+        handler_symbols: SymbolTable2(
+            {
+                HandlerIdent(
+                    "*read",
+                ): (
+                    [],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [],
+                            abstruction: Term(
+                                Coroutine(
+                                    CoroutineType {
+                                        resume: Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                        ret: Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+                HandlerIdent(
+                    "*write",
+                ): (
+                    [
+                        HandlerFunction {
+                            ident: HandlerIdent(
+                                "*write",
+                            ),
+                            expr: Abstruction {
+                                arg: Some(
+                                    Bind(
+                                        Ident(
+                                            "s",
+                                        ),
+                                    ),
+                                ),
+                                expr: Abstruction(
+                                    Abstruction {
+                                        arg: None,
+                                        expr: ApplyEmbedded(
+                                            ApplyInst {
+                                                ident: InstIdent(
+                                                    "@write",
+                                                ),
+                                                expr: Reference(
+                                                    Ident(
+                                                        "s",
+                                                    ),
+                                                ),
+                                            },
+                                        ),
+                                    },
+                                ),
+                            },
+                            where_clause: IR2 {
+                                ident_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                data_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                handler_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                trait_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                inst_symbols: SymbolTable2(
+                                    {},
+                                ),
+                            },
+                        },
+                    ],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [
+                                TraitConstraint {
+                                    ident: TraitIdent(
+                                        "Show",
+                                    ),
+                                    arg: ForallIdent(
+                                        "a",
+                                    ),
+                                },
+                            ],
+                            handler_constraints: [],
+                            abstruction: Term(
+                                Coroutine(
+                                    CoroutineType {
+                                        resume: Arrow(
+                                            Term(
+                                                Constructor(
+                                                    DataConstructor(
+                                                        Structual,
+                                                        ForallIdent(
+                                                            ForallIdent(
+                                                                "a",
+                                                            ),
+                                                        ),
+                                                        [],
+                                                    ),
+                                                ),
+                                            ),
+                                            Term(
+                                                Tuple(
+                                                    0,
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                        ret: Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+            },
+        ),
+        trait_symbols: SymbolTable2(
+            {
+                ExistsIdent(
+                    ExistsIdent(
+                        "Show",
+                    ),
+                ): TypeAbstructionEnv {
+                    trait_constraints: [],
+                    handler_constraints: [],
+                    abstruction: Term(
+                        Unknown,
+                    ),
+                },
+            },
+        ),
+        inst_symbols: SymbolTable2(
+            {
+                InstIdent(
+                    "@write",
+                ): TypeAbstructionEnv {
+                    trait_constraints: [
+                        TraitConstraint {
+                            ident: TraitIdent(
+                                "Show",
+                            ),
+                            arg: ForallIdent(
+                                "a",
+                            ),
+                        },
+                    ],
+                    handler_constraints: [],
+                    abstruction: Arrow(
+                        Term(
+                            Constructor(
+                                DataConstructor(
+                                    Structual,
+                                    ForallIdent(
+                                        ForallIdent(
+                                            "a",
+                                        ),
+                                    ),
+                                    [],
+                                ),
+                            ),
+                        ),
+                        Term(
+                            Constructor(
+                                DataConstructor(
+                                    Structual,
+                                    ExistsIdent(
+                                        ExistsIdent(
+                                            "IO",
+                                        ),
+                                    ),
+                                    [],
+                                ),
+                            ),
+                        ),
+                    ),
+                },
+            },
+        ),
+    },
+)

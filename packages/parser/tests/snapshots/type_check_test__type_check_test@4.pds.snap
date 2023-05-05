@@ -1,0 +1,129 @@
+---
+source: packages/parser/tests/type_check_test.rs
+expression: ir2
+input_file: packages/parser/fixtures/pds/4.pds
+---
+Ok(
+    IR2 {
+        ident_symbols: SymbolTable2(
+            {
+                Ident(
+                    "main",
+                ): (
+                    [
+                        Function {
+                            ident: Ident(
+                                "main",
+                            ),
+                            expr: Abstruction {
+                                arg: None,
+                                expr: Reference(
+                                    Ident(
+                                        "resume",
+                                    ),
+                                ),
+                            },
+                            where_clause: IR2 {
+                                ident_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                data_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                handler_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                trait_symbols: SymbolTable2(
+                                    {},
+                                ),
+                                inst_symbols: SymbolTable2(
+                                    {},
+                                ),
+                            },
+                        },
+                    ],
+                    Some(
+                        TypeAbstructionEnv {
+                            trait_constraints: [],
+                            handler_constraints: [
+                                HandlerConstraint {
+                                    ident: HandlerIdent(
+                                        "write",
+                                    ),
+                                    expr: CoroutineType {
+                                        resume: Arrow(
+                                            Term(
+                                                Constructor(
+                                                    DataConstructor(
+                                                        Structual,
+                                                        ExistsIdent(
+                                                            ExistsIdent(
+                                                                "Text",
+                                                            ),
+                                                        ),
+                                                        [],
+                                                    ),
+                                                ),
+                                            ),
+                                            Term(
+                                                Constructor(
+                                                    DataConstructor(
+                                                        Structual,
+                                                        ExistsIdent(
+                                                            ExistsIdent(
+                                                                "IO",
+                                                            ),
+                                                        ),
+                                                        [],
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        ret: Term(
+                                            Constructor(
+                                                DataConstructor(
+                                                    Structual,
+                                                    ExistsIdent(
+                                                        ExistsIdent(
+                                                            "IO",
+                                                        ),
+                                                    ),
+                                                    [],
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                },
+                            ],
+                            abstruction: Term(
+                                Constructor(
+                                    DataConstructor(
+                                        Structual,
+                                        ExistsIdent(
+                                            ExistsIdent(
+                                                "IO",
+                                            ),
+                                        ),
+                                        [],
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
+                ),
+            },
+        ),
+        data_symbols: SymbolTable2(
+            {},
+        ),
+        handler_symbols: SymbolTable2(
+            {},
+        ),
+        trait_symbols: SymbolTable2(
+            {},
+        ),
+        inst_symbols: SymbolTable2(
+            {},
+        ),
+    },
+)
