@@ -22,11 +22,18 @@ pub(crate) struct Args {
 #[derive(Debug, Subcommand)]
 pub(crate) enum Commands {
     Build(Build),
+    BuildPds(BuildPds),
     Run(Run),
 }
 
 #[derive(Debug, clap::Args)]
 pub(crate) struct Build {}
+
+#[derive(Debug, clap::Args)]
+pub(crate) struct BuildPds {
+    #[clap()]
+    pub(crate) file: PathBuf,
+}
 
 #[derive(Debug, clap::Args)]
 pub(crate) struct Run {
