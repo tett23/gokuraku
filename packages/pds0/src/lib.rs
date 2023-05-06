@@ -7,7 +7,7 @@ use handlebars::{
 };
 use serde_json::json;
 
-fn main() -> Result<()> {
+pub fn stringify() -> Result<()> {
     let mut reg = Handlebars::new();
 
     reg.register_helper("paragraph", Box::new(BlockFn::Fn0(paragraph)));
