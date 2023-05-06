@@ -3,7 +3,7 @@
 use anyhow::{anyhow, Result};
 use handlebars::{
     Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, RenderContext,
-    RenderError, Renderable, Template,
+    Renderable, Template,
 };
 use serde_json::json;
 
@@ -28,38 +28,38 @@ fn main() -> Result<()> {
 #[derive(Clone, Copy)]
 enum InlineFn {
     Fn0(fn() -> Result<String>),
-    Fn1(fn(JsonValue) -> Result<String>),
-    Fn2(fn(JsonValue, JsonValue) -> Result<String>),
-    Fn3(fn(JsonValue, JsonValue, JsonValue) -> Result<String>),
-    Fn4(fn(JsonValue, JsonValue, JsonValue, JsonValue) -> Result<String>),
-    Fn5(fn(JsonValue, JsonValue, JsonValue, JsonValue, JsonValue) -> Result<String>),
+    Fn1(fn(&JsonValue) -> Result<String>),
+    Fn2(fn(&JsonValue, &JsonValue) -> Result<String>),
+    Fn3(fn(&JsonValue, &JsonValue, &JsonValue) -> Result<String>),
+    Fn4(fn(&JsonValue, &JsonValue, &JsonValue, &JsonValue) -> Result<String>),
+    Fn5(fn(&JsonValue, &JsonValue, &JsonValue, &JsonValue, &JsonValue) -> Result<String>),
 }
 
 #[derive(Clone, Copy)]
 enum BlockFn {
     Fn0(fn(&mut PdsContext, &Template) -> Result<String>),
-    Fn1(fn(&mut PdsContext, &Template, JsonValue) -> Result<String>),
-    Fn2(fn(&mut PdsContext, &Template, JsonValue, JsonValue) -> Result<String>),
-    Fn3(fn(&mut PdsContext, &Template, JsonValue, JsonValue, JsonValue) -> Result<String>),
+    Fn1(fn(&mut PdsContext, &Template, &JsonValue) -> Result<String>),
+    Fn2(fn(&mut PdsContext, &Template, &JsonValue, &JsonValue) -> Result<String>),
+    Fn3(fn(&mut PdsContext, &Template, &JsonValue, &JsonValue, &JsonValue) -> Result<String>),
     Fn4(
         fn(
             &mut PdsContext,
             &Template,
-            JsonValue,
-            JsonValue,
-            JsonValue,
-            JsonValue,
+            &JsonValue,
+            &JsonValue,
+            &JsonValue,
+            &JsonValue,
         ) -> Result<String>,
     ),
     Fn5(
         fn(
             &mut PdsContext,
             &Template,
-            JsonValue,
-            JsonValue,
-            JsonValue,
-            JsonValue,
-            JsonValue,
+            &JsonValue,
+            &JsonValue,
+            &JsonValue,
+            &JsonValue,
+            &JsonValue,
         ) -> Result<String>,
     ),
 }
@@ -96,19 +96,11 @@ impl Callable for InlineFn {
     ) -> Result<String> {
         match (self, &args.as_slice()) {
             (InlineFn::Fn0(f), []) => f(),
-            (InlineFn::Fn1(f), [arg1]) => f(arg1.clone()),
-            (InlineFn::Fn2(f), [arg1, arg2]) => f(arg1.clone(), arg2.clone()),
-            (InlineFn::Fn3(f), [arg1, arg2, arg3]) => f(arg1.clone(), arg2.clone(), arg3.clone()),
-            (InlineFn::Fn4(f), [arg1, arg2, arg3, arg4]) => {
-                f(arg1.clone(), arg2.clone(), arg3.clone(), arg4.clone())
-            }
-            (InlineFn::Fn5(f), [arg1, arg2, arg3, arg4, arg5]) => f(
-                arg1.clone(),
-                arg2.clone(),
-                arg3.clone(),
-                arg4.clone(),
-                arg5.clone(),
-            ),
+            (InlineFn::Fn1(f), [arg1]) => f(arg1),
+            (InlineFn::Fn2(f), [arg1, arg2]) => f(arg1, arg2),
+            (InlineFn::Fn3(f), [arg1, arg2, arg3]) => f(arg1, arg2, arg3),
+            (InlineFn::Fn4(f), [arg1, arg2, arg3, arg4]) => f(arg1, arg2, arg3, arg4),
+            (InlineFn::Fn5(f), [arg1, arg2, arg3, arg4, arg5]) => f(arg1, arg2, arg3, arg4, arg5),
             _ => unreachable!(),
         }
     }
@@ -123,34 +115,15 @@ impl Callable for BlockFn {
     ) -> Result<String> {
         match (self, &args.as_slice()) {
             (BlockFn::Fn0(f), []) => f(ctx, template.unwrap()),
-            (BlockFn::Fn1(f), [arg1]) => f(ctx, template.unwrap(), arg1.clone()),
-            (BlockFn::Fn2(f), [arg1, arg2]) => {
-                f(ctx, template.unwrap(), arg1.clone(), arg2.clone())
+            (BlockFn::Fn1(f), [arg1]) => f(ctx, template.unwrap(), arg1),
+            (BlockFn::Fn2(f), [arg1, arg2]) => f(ctx, template.unwrap(), arg1, arg2),
+            (BlockFn::Fn3(f), [arg1, arg2, arg3]) => f(ctx, template.unwrap(), arg1, arg2, arg3),
+            (BlockFn::Fn4(f), [arg1, arg2, arg3, arg4]) => {
+                f(ctx, template.unwrap(), arg1, arg2, arg3, arg4)
             }
-            (BlockFn::Fn3(f), [arg1, arg2, arg3]) => f(
-                ctx,
-                template.unwrap(),
-                arg1.clone(),
-                arg2.clone(),
-                arg3.clone(),
-            ),
-            (BlockFn::Fn4(f), [arg1, arg2, arg3, arg4]) => f(
-                ctx,
-                template.unwrap(),
-                arg1.clone(),
-                arg2.clone(),
-                arg3.clone(),
-                arg4.clone(),
-            ),
-            (BlockFn::Fn5(f), [arg1, arg2, arg3, arg4, arg5]) => f(
-                ctx,
-                template.unwrap(),
-                arg1.clone(),
-                arg2.clone(),
-                arg3.clone(),
-                arg4.clone(),
-                arg5.clone(),
-            ),
+            (BlockFn::Fn5(f), [arg1, arg2, arg3, arg4, arg5]) => {
+                f(ctx, template.unwrap(), arg1, arg2, arg3, arg4, arg5)
+            }
             _ => unreachable!(),
         }
     }
@@ -250,7 +223,7 @@ fn document(ctx: &mut PdsContext, template: &Template) -> Result<String> {
     Ok(format!("<doc>{item}</doc>"))
 }
 
-fn inline_number(p: JsonValue, formatter: JsonValue) -> Result<String> {
+fn inline_number(p: &JsonValue, formatter: &JsonValue) -> Result<String> {
     p.as_i64()
         .map(|p| format!("{}", p))
         .ok_or(anyhow!("not a number"))
