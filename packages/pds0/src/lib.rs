@@ -1,32 +1,53 @@
-#![feature(tuple_trait)]
-#![feature(fn_traits)]
+// #![feature(tuple_trait)]
+// #![feature(fn_traits)]
+#![feature(async_fn_in_trait)]
+#![feature(return_position_impl_trait_in_trait)]
+
+mod ast;
+mod stringify_ast;
+
 use anyhow::{anyhow, Result};
 use handlebars::{
     Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, RenderContext,
     Renderable, Template,
 };
+use parser::ast::{Block, Document, Inline};
 use serde_json::json;
 
-pub fn stringify() -> Result<()> {
+pub trait TemplateContext {}
+
+pub fn stringify(template: &str, _template_context: &dyn TemplateContext) -> Result<String> {
     let mut reg = Handlebars::new();
+    // reg.set_strict_mode(true);
 
     reg.register_helper("paragraph", Box::new(BlockFn::Fn0(paragraph)));
     reg.register_helper("document", Box::new(BlockFn::Fn0(document)));
     reg.register_helper("inline_number", Box::new(InlineFn::Fn2(inline_number)));
 
-    println!(
-        "{}",
-        reg.render_template(
-            "{{#document}}{{#paragraph}}{{bbbbb}}{{a}}{{foo}}bb{{/paragraph}}{{foo}}\n{{baz}}{{inline_number 1000 a}}{{/document}}",
-            &json!({"bar": 1, "a": 2})
-        )?
-    );
+    let ret = reg.render_template(template, &json!({"bar": 1, "a": 2}))?;
 
-    Ok(())
+    Ok(ret)
+}
+
+pub fn stringify_ast(
+    document: &Document,
+    _template_context: &dyn TemplateContext,
+) -> Result<String> {
+    let mut reg = Handlebars::new();
+    // reg.set_strict_mode(true);
+
+    // reg.register_helper("paragraph", Box::new(BlockFn::Fn0(paragraph)));
+    // reg.register_helper("document", Box::new(BlockFn::Fn0(document)));
+    // reg.register_helper("inline_number", Box::new(InlineFn::Fn2(inline_number)));
+
+    // let ret = reg.render_template(document, &json!({"bar": 1, "a": 2}))?;
+    let ret = "TODO".to_string();
+
+    Ok(ret)
 }
 
 #[derive(Clone, Copy)]
-enum InlineFn {
+pub enum InlineFn {
     Fn0(fn() -> Result<String>),
     Fn1(fn(&JsonValue) -> Result<String>),
     Fn2(fn(&JsonValue, &JsonValue) -> Result<String>),
@@ -36,7 +57,7 @@ enum InlineFn {
 }
 
 #[derive(Clone, Copy)]
-enum BlockFn {
+pub enum BlockFn {
     Fn0(fn(&mut PdsContext, &Template) -> Result<String>),
     Fn1(fn(&mut PdsContext, &Template, &JsonValue) -> Result<String>),
     Fn2(fn(&mut PdsContext, &Template, &JsonValue, &JsonValue) -> Result<String>),
@@ -66,11 +87,11 @@ enum BlockFn {
 
 impl From<&fn() -> Result<String>> for InlineFn {
     fn from(value: &fn() -> Result<String>) -> Self {
-        InlineFn::Fn0(value.clone())
+        InlineFn::Fn0(*value)
     }
 }
 
-struct PdsContext<'reg: 'rc, 'rc, 'a> {
+pub struct PdsContext<'reg: 'rc, 'rc, 'a> {
     template: Option<&'reg Template>,
     handlebars: &'reg Handlebars<'reg>,
     ctx: &'rc Context,
@@ -205,26 +226,42 @@ impl HelperDef for BlockFn {
     }
 }
 
-fn paragraph(ctx: &mut PdsContext, template: &Template) -> Result<String> {
+fn paragraph(ctx: &mut PdsContext, _template: &Template) -> Result<String> {
     let item = ctx
         .template
         .unwrap()
-        .renders(ctx.handlebars, ctx.ctx, &mut ctx.rc)
+        .renders(ctx.handlebars, ctx.ctx, ctx.rc)
         .unwrap();
     Ok(format!("<p>{item}</p>"))
 }
 
-fn document(ctx: &mut PdsContext, template: &Template) -> Result<String> {
+fn document(ctx: &mut PdsContext, _template: &Template) -> Result<String> {
     let item = ctx
         .template
         .unwrap()
-        .renders(ctx.handlebars, ctx.ctx, &mut ctx.rc)
+        .renders(ctx.handlebars, ctx.ctx, ctx.rc)
         .unwrap();
     Ok(format!("<doc>{item}</doc>"))
 }
 
-fn inline_number(p: &JsonValue, formatter: &JsonValue) -> Result<String> {
+fn inline_number(p: &JsonValue, _formatter: &JsonValue) -> Result<String> {
     p.as_i64()
         .map(|p| format!("{}", p))
         .ok_or(anyhow!("not a number"))
+}
+
+#[derive(Debug, Clone, Default)]
+struct DefaultContext {}
+impl TemplateContext for DefaultContext {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test() {
+        let result = stringify("{{#document}}{{#paragraph}}{{bbbbb}}{{a}}{{foo}}bb{{/paragraph}}{{foo}}\n{{baz}}{{inline_number 1000 a}}{{/document}}", &DefaultContext::default());
+        dbg!(result);
+        assert!(false)
+    }
 }
