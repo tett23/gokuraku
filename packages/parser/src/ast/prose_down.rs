@@ -1,15 +1,32 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Document(pub Vec<Block>);
 
-#[derive(Serialize, Deserialize)]
+impl Document {
+    pub fn iter(&self) -> impl Iterator<Item = &Block> {
+        self.0.iter()
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Block {
     PdsScript(String),
     Paragraph(Vec<Inline>),
     EmptyLine,
     ThemanticBreak,
+}
+
+impl Block {
+    pub fn iter(&self) -> impl Iterator<Item = &Inline> {
+        match self {
+            Self::PdsScript(_) => std::iter::empty(),
+            Self::Paragraph(value) => std::iter::empty(),
+            Self::ThemanticBreak => std::iter::empty(),
+            Self::EmptyLine => std::iter::empty(),
+        }
+    }
 }
 
 impl Debug for Block {
@@ -27,11 +44,21 @@ impl Debug for Block {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Inline {
     Text(String),
     Number(String),
     Expr(String),
+}
+
+impl Inline {
+    pub fn iter(&self) -> impl Iterator<Item = &Inline> {
+        match self {
+            Self::Text(_) => std::iter::empty(),
+            Self::Number(_) => std::iter::empty(),
+            Self::Expr(_) => std::iter::empty(),
+        }
+    }
 }
 
 impl Debug for Inline {

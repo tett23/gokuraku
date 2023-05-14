@@ -1,6 +1,7 @@
 mod prose_down;
 
 pub use self::prose_down::*;
+pub use self::prose_down::{Block, Document, Inline};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display};
 
