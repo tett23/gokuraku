@@ -1,13 +1,11 @@
-use crate::ast::{ContextStack, Node, Pds0Ast, Pds0Literal, Pds0Node, Pds0Parent};
+use crate::ast::{Node, Pds0Ast, Pds0Literal, Pds0Node, Pds0Parent};
+use crate::ContextStack;
 use anyhow::{anyhow, Result};
 use handlebars::JsonValue;
 use parser::ast::{Block, Document, Inline};
 use std::collections::BTreeMap;
 
-pub fn stringify_ast<'a, 'b>(
-    ctx: &mut ContextStack<'a, 'b, String>,
-    document: Document,
-) -> Result<String> {
+pub fn stringify_ast(ctx: &mut ContextStack<String>, document: Document) -> Result<String> {
     let mut reg = handlebars::Handlebars::new();
     // reg.set_strict_mode(true);
 
@@ -17,43 +15,10 @@ pub fn stringify_ast<'a, 'b>(
 
     // let ret = reg.render_template(document, &json!({"bar": 1, "a": 2}))?;
     let ast = Box::new(Pds0Ast::from(document)) as Box<dyn Node>;
-    let ret = block(ctx, ast.as_ref())?;
+    let ret = ctx.apply(ast)?;
 
     Ok(ret)
 }
-
-fn block<'a, 'b>(ctx: &'a mut ContextStack<'a, 'b, String>, node: &'b dyn Node) -> Result<String> {
-    let f = ctx
-        .lookup(node.name())
-        .ok_or(anyhow!("block not found: {}", node.name()))?;
-    // .map(|f| f(ctx, node).unwrap())
-
-    let a = f(ctx, node);
-
-    a
-}
-
-// fn inline(ctx: &mut ContextStack<String>, node: &dyn Node) -> Result<String> {
-//     ctx.lookup(node.name())
-//         .ok_or(anyhow!("inline not found: {}", node.name()))?(ctx, node)
-// }
-
-macro_rules! pds_parent {
-    ($name:ident, {}, []) => {
-        Pds0Parent {
-            name: stringify!($name).to_string(),
-            data: std::collections::BTreeMap::new(),
-            children: vec![],
-        }
-    };
-    () => {};
-}
-
-// impl From<Document> for Pds0Ast {
-//     fn from(document: Document) -> Self {
-//         Pds0Ast::Parent(pds_parent!(document, {}, []))
-//     }
-// }
 
 impl From<Document> for Pds0Ast {
     fn from(value: Document) -> Self {
@@ -126,15 +91,14 @@ impl From<Inline> for Pds0Ast {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::ContextLayer;
     use parser::prose_down_parse;
 
     #[test]
     fn test() {
         let mut ctx = ContextStack::default();
 
-        let ast = prose_down_parse("Hello, world!\n").unwrap();
-        let result = stringify_ast(&mut ctx, &ast);
+        let ast = prose_down_parse("Hello, world!\nbb\n").unwrap();
+        let result = stringify_ast(&mut ctx, ast);
         dbg!(result);
         assert!(false)
     }

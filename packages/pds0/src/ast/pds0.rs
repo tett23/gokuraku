@@ -1,4 +1,4 @@
-use super::{Literal, Node, NodeType, Parent};
+use super::{Node, NodeType};
 use handlebars::JsonValue;
 use std::collections::BTreeMap;
 
@@ -32,6 +32,22 @@ impl Node for Pds0Ast {
             Pds0Ast::Literal(literal) => NodeType::Literal,
         }
     }
+
+    fn iter(&self) -> Box<dyn Iterator<Item = Box<dyn Node>>> {
+        match self {
+            Pds0Ast::Node(node) => node.iter(),
+            Pds0Ast::Parent(parent) => parent.iter(),
+            Pds0Ast::Literal(literal) => literal.iter(),
+        }
+    }
+
+    fn value(&self) -> Option<&JsonValue> {
+        match self {
+            Pds0Ast::Node(node) => node.value(),
+            Pds0Ast::Parent(parent) => parent.value(),
+            Pds0Ast::Literal(literal) => literal.value(),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -52,6 +68,10 @@ impl Node for Pds0Node {
     fn node_type(&self) -> NodeType {
         NodeType::Terminal
     }
+
+    fn iter(&self) -> Box<dyn Iterator<Item = Box<dyn Node>>> {
+        Box::new(std::iter::empty())
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -61,28 +81,14 @@ pub(crate) struct Pds0Parent {
     pub children: Vec<Pds0Ast>,
 }
 
-impl Pds0Parent {
-    fn iter(&self) -> NodeIterator<Pds0Ast> {
-        NodeIterator {
-            index: 0,
-            nodes: self.children.as_slice(),
-        }
-    }
-}
+impl Pds0Parent {}
 
-pub(crate) struct NodeIterator<'a, T> {
-    pub(crate) index: usize,
-    pub(crate) nodes: &'a [T],
-}
+impl IntoIterator for Pds0Parent {
+    type Item = Pds0Ast;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
 
-impl<'a, T: Node> Iterator for NodeIterator<'a, T> {
-    type Item = &'a dyn Node;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let ret = self.nodes.get(self.index);
-        self.index += 1;
-
-        ret.map(|item| item as Self::Item)
+    fn into_iter(self) -> Self::IntoIter {
+        self.children.into_iter()
     }
 }
 
@@ -92,20 +98,20 @@ impl Node for Pds0Parent {
     }
 
     fn data(&self) -> &BTreeMap<String, JsonValue> {
-        &self.data()
+        &self.data
     }
 
     fn node_type(&self) -> NodeType {
         NodeType::Parent
     }
-}
 
-impl Parent for Pds0Parent {
-    fn iter(&self) -> impl Iterator<Item = &dyn Node> {
-        NodeIterator::<Pds0Ast> {
-            index: 0,
-            nodes: &self.children,
-        }
+    fn iter(&self) -> Box<dyn Iterator<Item = Box<dyn Node>>> {
+        Box::new(
+            self.children
+                .clone()
+                .into_iter()
+                .map(|item| -> Box<dyn Node> { Box::new(item) }),
+        )
     }
 }
 
@@ -122,16 +128,18 @@ impl Node for Pds0Literal {
     }
 
     fn data(&self) -> &BTreeMap<String, JsonValue> {
-        &self.data()
+        &self.data
     }
 
     fn node_type(&self) -> NodeType {
         NodeType::Literal
     }
-}
 
-impl Literal for Pds0Literal {
-    fn value(&self) -> &JsonValue {
-        &self.value
+    fn iter(&self) -> Box<dyn Iterator<Item = Box<dyn Node>>> {
+        Box::new(std::iter::empty())
+    }
+
+    fn value(&self) -> Option<&JsonValue> {
+        Some(&self.value)
     }
 }

@@ -1,11 +1,16 @@
 // #![feature(tuple_trait)]
 // #![feature(fn_traits)]
+#![feature(core_intrinsics)]
+#![feature(pointer_byte_offsets)]
+#![feature(sized_type_properties)]
 #![feature(async_fn_in_trait)]
 #![feature(return_position_impl_trait_in_trait)]
 
 mod ast;
+mod context;
 mod stringify_ast;
 
+use self::context::*;
 use anyhow::{anyhow, Result};
 use handlebars::{
     Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, RenderContext,
