@@ -1,5 +1,10 @@
+e = _{ !&EOI }
+ws = _{ " " | "\t"}
+br = _{ "\n" | "\r\n" | "\r" }
+
 keywords = { "eff" | "handle" | "trait" | "impl" | "where" | "data" | "fix" | "const" | "nominal" | "structual" | "forall" | "exists" }
 lineComment = { ws* ~ "//" ~ (!br ~ ANY)* ~ (&EOI | br) }
+
 
 // idents
 lowerIdent = _{ !(&keywords) ~ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }

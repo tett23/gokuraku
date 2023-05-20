@@ -5,8 +5,8 @@ use pest::Parser;
 use pest_derive::Parser;
 
 #[derive(Parser)]
-#[grammar = "core.pest"]
-#[grammar = "prose_down_script/syntax.pest"]
+// #[grammar = "core.pest"]
+// #[grammar = "prose_down_script/syntax.pest"]
 #[grammar = "prose_down/syntax.pest"]
 pub struct ProseParser;
 

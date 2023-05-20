@@ -55,7 +55,7 @@ fn unary_or_none(pair: Pair<Rule>) -> Option<Pair<Rule>> {
 }
 
 #[derive(Parser)]
-#[grammar = "core.pest"]
+// #[grammar = "core.pest"]
 #[grammar = "prose_down_script/syntax.pest"]
 pub struct PdsParser;
 

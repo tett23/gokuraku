@@ -8,14 +8,14 @@
 
 mod ast;
 mod context;
-// mod renderer;
+mod renderer;
 mod stringify_ast;
 
 use self::context::*;
 use anyhow::{anyhow, Result};
 use handlebars::{
-    Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, RenderContext,
-    Renderable, Template,
+    handlebars_helper, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output,
+    RenderContext, Renderable, Template,
 };
 use parser::ast::{Block, Document, Inline};
 use serde_json::json;
@@ -25,13 +25,24 @@ pub trait TemplateContext {}
 pub fn stringify(template: &str, _template_context: &dyn TemplateContext) -> Result<String> {
     let mut reg = Handlebars::new();
     // reg.set_strict_mode(true);
-    let a = paragraph0()();
+    let a = paragraph0();
     let a = paragraph1()(1);
     let a = paragraph2()(1)(2);
-    let a = paragraph3()(1)(2)(3);
+    let a = paragraph3()(1)("".to_string())("");
+    // let a: Box<
+    //     dyn Fn() -> Box<
+    //         dyn Fn(
+    //             i64,
+    //         ) -> Box<
+    //             dyn Fn(String) -> Box<dyn Fn(&str) -> std::result::Result<String, anyhow::Error>>,
+    //         >,
+    //     >,
+    // > = Box::new(paragraph3);
     // let a = paragraph3(1)(2)(3);
+    let a = move || move |a: usize| move |b: usize| move |c: usize| -> usize { a + b + c };
 
     reg.register_helper("paragraph", Box::new(BlockFn::Fn0(paragraph)));
+    // reg.register_helper("paragraph", to_helper(paragraph0));
     reg.register_helper("document", Box::new(BlockFn::Fn0(document)));
     reg.register_helper("inline_number", Box::new(InlineFn::Fn2(inline_number)));
 
@@ -40,61 +51,59 @@ pub fn stringify(template: &str, _template_context: &dyn TemplateContext) -> Res
     Ok(ret)
 }
 
-macro_rules! fff {
-    (fn $name:ident() -> $ret:ty{$expr:expr}) => {
-        fn $name() -> Box<dyn Fn() -> $ret> {
-            fff2!($expr,)
+macro_rules! curry {
+    (fn $name:ident() -> $ret:ty { $expr:expr }) => {
+        fn $name() -> captured_types!($ret) {
+            move_closure!($expr)
         }
     };
-    (fn $name:ident($arg1:ident : $arg1_ty:ty) -> $ret:ty {$expr:expr} ) => {
-        // fn $name() -> Box<dyn Fn($arg1_ty) -> $ret> {
-        fn $name() -> fff3!($ret, $arg1_ty) {
-            fff2!($expr, ($arg1, $arg1_ty),)
+    (fn $name:ident($arg:ident : $ty:ty) -> $ret:ty { $expr:expr } ) => {
+        fn $name() -> captured_types!($ret, $ty) {
+            move_closure!($expr, ($arg, $ty))
         }
     };
-    (fn $name:ident($arg1:ident : $arg1_ty:ty $(,$args:ident : $tys:ty)+) -> $ret:ty {$expr:expr} ) => {
-        fn $name() -> fff3!($ret, $arg1_ty, $($tys)+)
+    (fn $name:ident($arg:ident : $ty:ty $(,$args:ident : $tys:ty)+) -> $ret:ty { $expr:expr } ) => {
+        fn $name() -> captured_types!($ret, $ty $(,$tys)+)
         {
-            fff2!(
+            move_closure!(
                 $expr,
-                ($arg1, $arg1_ty),
-                $(($args, $tys),)+
+                ($arg, $ty)
+                $(,($args, $tys))+
             )
         }
     };
 }
 
-macro_rules! fff3 {
+macro_rules! captured_types {
     ($ret:ty) => {
         $ret
     };
     ($ret:ty, $ty:ty) => {
-        Box<dyn Fn($ty) -> fff3!($ret)>
+        Box<dyn Fn($ty) -> captured_types!($ret)>
     };
-    ($ret:ty, $ty:ty, $($tys:ty)+) => {
-        Box<dyn Fn($ty) -> fff3!($ret $(,$tys)+)>
-    };
-}
-
-macro_rules! fff2 {
-    ($expr:expr, ) => {
-        // $expr
-        Box::new(move || { $expr })
-    };
-    ($expr:expr, ($arg:ident, $ty:ty),) => {
-        Box::new(move |$arg: $ty| { fff2!($expr,)() })
-    };
-    ($expr:expr, ($arg:ident, $ty:ty), $(($args:ident, $tys:ty),)+) => {
-        Box::new(move |$arg: $ty| fff2!(fff2!($expr, $(($args, $ty),)+)($arg), ($arg, $ty),))
+    ($ret:ty, $ty:ty $(,$tys:ty)+) => {
+        Box<dyn Fn($ty) -> captured_types!($ret $(,$tys)+)>
     };
 }
 
-fff!(
+macro_rules! move_closure {
+    ($expr:expr) => {
+        $expr
+    };
+    ($expr:expr, ($arg:ident, $ty:ty)) => {
+        Box::new(move |$arg: $ty| { move_closure!($expr) })
+    };
+    ($expr:expr, ($arg:ident, $ty:ty) $(,($args:ident, $tys:ty))+) => {
+        Box::new(move |$arg: $ty| { move_closure!($expr $(,($args, $tys))+) })
+    };
+}
+
+curry!(
     fn paragraph0() -> Result<String> {
         Ok("paragraph".to_string())
     }
 );
-fff!(
+curry!(
     fn paragraph1(a: i64) -> Result<String> {
         {
             let a = 1;
@@ -103,13 +112,13 @@ fff!(
         }
     }
 );
-fff!(
+curry!(
     fn paragraph2(a: i64, b: i64) -> Result<String> {
         Ok("paragraph".to_string())
     }
 );
-fff!(
-    fn paragraph3(a: i64, b: i64, c: i64) -> Result<String> {
+curry!(
+    fn paragraph3(a: i64, b: String, c: &str) -> Result<String> {
         Ok(format!("paragraph {} {} {}", a, b, c))
     }
 );
