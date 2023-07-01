@@ -15,6 +15,6 @@ parser = { path = "../parser" }
 gokuraku_config = { path = "../config" }
 build_adapter = { path = "../build-adapter" }
 build_adapter_txt = { path = "../build-adapter-txt" }
-clap = { version = "4.1.8", features = ["derive", "env"] }
+clap = { version = "4.3.10", features = ["derive", "env"] }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
