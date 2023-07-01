@@ -4,12 +4,18 @@
 #![feature(pointer_byte_offsets)]
 #![feature(sized_type_properties)]
 #![feature(async_fn_in_trait)]
+#![feature(fn_traits)]
+#![feature(type_name_of_val)]
+#![feature(impl_trait_in_fn_trait_return)]
+#![feature(type_alias_impl_trait)]
 #![feature(return_position_impl_trait_in_trait)]
 
 mod ast;
 mod context;
 mod renderer;
 mod stringify_ast;
+
+use std::sync::Arc;
 
 use self::context::*;
 use anyhow::{anyhow, Result};
@@ -25,6 +31,7 @@ pub trait TemplateContext {}
 pub fn stringify(template: &str, _template_context: &dyn TemplateContext) -> Result<String> {
     let mut reg = Handlebars::new();
     // reg.set_strict_mode(true);
+    let a = paragraph1;
     let a = paragraph0();
     let a = paragraph1()(1);
     let a = paragraph2()(1)(2);
@@ -39,11 +46,12 @@ pub fn stringify(template: &str, _template_context: &dyn TemplateContext) -> Res
     //     >,
     // > = Box::new(paragraph3);
     // let a = paragraph3(1)(2)(3);
-    let a = move || move |a: usize| move |b: usize| move |c: usize| -> usize { a + b + c };
+    // let a = move || move |a: usize| move |b: usize| move |c: usize| -> usize { a + b + c };
+    let a = add()(1)(2);
 
+    reg.register_helper("document", Box::new(BlockFn::Fn0(document)));
     reg.register_helper("paragraph", Box::new(BlockFn::Fn0(paragraph)));
     // reg.register_helper("paragraph", to_helper(paragraph0));
-    reg.register_helper("document", Box::new(BlockFn::Fn0(document)));
     reg.register_helper("inline_number", Box::new(InlineFn::Fn2(inline_number)));
 
     let ret = reg.render_template(template, &json!({"bar": 1, "a": 2}))?;
@@ -79,10 +87,10 @@ macro_rules! captured_types {
         $ret
     };
     ($ret:ty, $ty:ty) => {
-        Box<dyn Fn($ty) -> captured_types!($ret)>
+        impl Fn($ty) -> captured_types!($ret)
     };
     ($ret:ty, $ty:ty $(,$tys:ty)+) => {
-        Box<dyn Fn($ty) -> captured_types!($ret $(,$tys)+)>
+        impl Fn($ty) -> captured_types!($ret $(,$tys)+)
     };
 }
 
@@ -91,12 +99,18 @@ macro_rules! move_closure {
         $expr
     };
     ($expr:expr, ($arg:ident, $ty:ty)) => {
-        Box::new(move |$arg: $ty| { move_closure!($expr) })
+        move |$arg: $ty| { move_closure!($expr) }
     };
     ($expr:expr, ($arg:ident, $ty:ty) $(,($args:ident, $tys:ty))+) => {
-        Box::new(move |$arg: $ty| { move_closure!($expr $(,($args, $tys))+) })
+        move |$arg: $ty| { move_closure!($expr $(,($args, $tys))+) }
     };
 }
+
+curry!(
+    fn add(a: i64, b: i64) -> i64 {
+        a + b
+    }
+);
 
 curry!(
     fn paragraph0() -> Result<String> {
