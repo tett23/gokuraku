@@ -1,0 +1,45 @@
+ws = _{ " " | "\t" }
+s = _{ ms* }
+ms = _{ (" " | "\t" | NEWLINE) }
+br = _{ NEWLINE }
+sbr = _{ (NEWLINE | ws) }
+
+symbol = { ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
+instSymbol = { "@" ~ ASCII_ALPHA_LOWER ~ ASCII_ALPHANUMERIC* }
+typeSymbol = { ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
+
+ty = { typeSymbol | unit }
+
+literal = { intLiteral | unit }
+  intLiteral = { NUMBER+ }
+  unit = { "(" ~ s ~ ")" }
+
+function = { fnKeyword ~ s ~ symbol ~ s ~ signature ~ scope ~ (&EOI | sbr*) }
+  signature = { s ~ args ~ returnTy ~ s}
+  fnKeyword = _{ s ~ "fn" ~ s }
+  args = { s ~ "(" ~  arg* ~ ")" ~ s }
+    arg = { s ~ symbol ~ s ~ ":" ~ s ~ ty ~ s ~ ","? ~ s }
+  returnTy = _{ s ~ ":" ~ s ~ ty ~ s }
+scope = { s ~ "{" ~ s ~ expr ~ s ~ "}" ~ s }
+expr = _{ fnCall | instCall | literal | symbolRef }
+  symbolRef = { s ~ symbol ~ s }
+  fnCall = { s ~ (symbolRef | scope) ~ s ~ call ~ s }
+  instCall = { s ~ instSymbol ~ s ~ call ~ s }
+  call = { s ~ "(" ~ callArgs ~ ")" ~ s }
+  callArgs = _{ callArg* }
+    callArg = _{ s ~ expr ~ s ~ ","? ~ s }
+
+externImport = { s ~ "extern" ~ ms ~ "import" ~ ms ~ externModuleItemName ~ s ~ externModuleItem ~ (&EOI | sbr*)}
+  externModuleItemName = { s ~ externName ~ "::" ~ externName ~ s }
+  externName = { idchar+ }
+  externSymbol = { externSymbolPrefix ~ externName+ }
+    externSymbolPrefix = _{ "$" }
+    idchar = _{ ASCII_ALPHANUMERIC | "!" | "#" | "$" | "%" | "&" | "'" | "*" | "+" | "-" | "." | "/" | (":" ~ &"::") | "<" | "=" | ">" | "?" | "@" | "\\" | "^" | "_" | "\"" | "|" | "~" }
+  externModuleItem = { s ~ externFn ~ s }
+    externFn = { "(" ~ s ~ "func" ~ ms ~ externSymbol? ~ externTypeuse ~ ")" }
+    externTypeuse = { s ~ (externTypeIndex | externParam) ~ s }
+    externTypeIndex = { NUMBER+ }
+    externParam = { "(" ~ s ~ "param" ~ s ~ ((externSymbol ~ ms ~ externType) | externType+) ~  s ~ ")" }
+    externType = { "i32" | "i64" | "f32" | "f64" | "v128" | "anyfunc" }
+
+pirt = _{ SOI ~ sbr* ~ (externImport | function)* ~ &EOI }

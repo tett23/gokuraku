@@ -31,6 +31,7 @@ fn tokenize_pds(pair: Pair<Rule>) -> Pds {
 }
 
 fn tokenize_expr(pair: Pair<Rule>) -> Expr {
+    pair
     match pair.as_rule() {
         Rule::expr => match pair.into_inner().next() {
             Some(pair) => match pair.as_rule() {

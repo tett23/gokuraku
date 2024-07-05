@@ -1,0 +1,11 @@
+[package]
+name = "bytecode-text"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+pest = { workspace = true }
+pest_derive = { workspace = true }
+bytecode = { path = "../bytecode" }

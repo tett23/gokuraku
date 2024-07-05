@@ -1,0 +1,15 @@
+[package]
+name = "bytecode"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "pirt"
+path = "src/bin/pirt.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+pest = { workspace = true }
+pest_derive = { workspace = true }
+wasmtime = "13.0.0"
