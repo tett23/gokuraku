@@ -12,20 +12,20 @@
   "contributes": {
     "languages": [
       {
-        "id": "pds",
+        "id": "prosedown",
         "aliases": [
           "prosedown",
           "pds"
         ],
         "extensions": [
-          "pds"
+          ".pds"
         ],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
-        "language": "pds",
+        "language": "prosedown",
         "scopeName": "source.prosedown",
         "path": "./syntaxes/pds.tmLanguage.json"
       }
