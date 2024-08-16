@@ -1,0 +1,34 @@
+{
+  "name": "vscode-prosedown",
+  "displayName": "vscode-prosedown",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.92.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "pds",
+        "aliases": [
+          "prosedown",
+          "pds"
+        ],
+        "extensions": [
+          "pds"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "pds",
+        "scopeName": "source.prosedown",
+        "path": "./syntaxes/pds.tmLanguage.json"
+      }
+    ]
+  }
+}

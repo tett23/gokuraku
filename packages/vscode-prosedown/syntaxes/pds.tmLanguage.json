@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "prosedown",
+  "patterns": [
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#strings"
+    }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.pds",
+          "match": "\\b(trait|where|if|while|for|return)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.pds",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.pds",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "comments": {
+      "name": "comment.line.pds",
+      "match": "//.*$"
+    }
+  },
+  "scopeName": "source.prosedown"
+}
