@@ -14,7 +14,7 @@
       "patterns": [
         {
           "name": "keyword.control.pds",
-          "match": "\\b(trait|where|if|while|for|return)\\b"
+          "match": "\\b(trait|where|if|while|for|return|do|eff)\\b"
         }
       ]
     },
